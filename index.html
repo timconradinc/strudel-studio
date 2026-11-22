@@ -190,6 +190,13 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 .lib-chips .chip{cursor:pointer;background:var(--bg)}
 .cheat td:first-child{font-family:var(--mono);color:#ffc08a;white-space:nowrap;width:1%;padding-right:12px}
 
+.saves-panel{position:absolute;top:calc(100% + 6px);left:0;z-index:40;width:360px;max-height:70vh;overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:10px;box-shadow:0 12px 40px #0009}
+.saves-new{display:flex;gap:6px;margin-bottom:6px}.saves-new .mini-in{padding:6px 10px;font-size:13px}
+.save-row{display:flex;align-items:center;gap:6px;padding:6px;border-radius:8px;border:1px solid transparent}
+.save-row:hover{background:var(--panel2);border-color:var(--line)}
+.save-row .nm{flex:1;min-width:0;cursor:pointer}.save-row .nm b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.save-row .nm small{font-family:var(--mono);font-size:10px;color:var(--dim)}
+.save-row .tbtn{height:26px;min-width:26px;padding:0 6px}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(80px);background:#24242c;border:1px solid var(--line2);padding:9px 14px;border-radius:10px;transition:transform .2s;z-index:50;font-size:12px}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .empty{color:var(--dim);text-align:center;padding:30px;border:1px dashed var(--line);border-radius:12px}
@@ -211,6 +218,17 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
     <div style="display:flex;gap:6px">
       <select id="preset" class="ui"></select>
       <button id="randomize" class="btn" title="Roll a new groove in the current style (R)">🎲 Randomize</button>
+    </div>
+  </div>
+  <div class="field" style="position:relative"><label>My grooves</label>
+    <button id="savesBtn" class="btn" title="Save this groove or load a saved one">💾 Saved <span id="savesCount" class="hint"></span></button>
+    <div id="savesPanel" class="saves-panel" hidden>
+      <div class="saves-new">
+        <input id="saveName" class="mini-in" maxlength="40" placeholder="Name this groove…">
+        <button id="saveNew" class="btn primary">Save</button>
+      </div>
+      <div id="savesHint" class="hint"></div>
+      <div id="savesList"></div>
     </div>
   </div>
   <div class="spacer"></div>
@@ -786,10 +804,15 @@ function presetList(){
 // sounds removed because their files can't be fetched by web pages -> working replacements (for saved grooves)
 const RETIRED={steinway:'piano',kawai:'piano',kalimba:'gm_kalimba',ocarina:'gm_pan_flute',psaltery_pluck:'harp',shaker_large:'sh',shaker_small:'sh',snare_modern:'sd',tom_mallet:'lt'};
 let state;
+function normalizeState(s,freshIds){
+  s.tracks.forEach(t=>{t.fx=Object.assign(baseFx(),t.fx);t.mods=Object.assign(baseMods(),t.mods);
+    if(freshIds)t.id=uid++;else uid=Math.max(uid,t.id+1);
+    for(const k of['wave','sound'])if(RETIRED[t[k]])t[k]=RETIRED[t[k]];});
+  return s;
+}
 function loadState(){
   try{const s=JSON.parse(localStorage.getItem('strudel-studio-v1'));
-    if(s&&Array.isArray(s.tracks)){s.tracks.forEach(t=>{t.fx=Object.assign(baseFx(),t.fx);t.mods=Object.assign(baseMods(),t.mods);uid=Math.max(uid,t.id+1);
-      for(const k of['wave','sound'])if(RETIRED[t[k]])t[k]=RETIRED[t[k]];});return s;}}catch(e){}
+    if(s&&Array.isArray(s.tracks))return normalizeState(s);}catch(e){}
   return presetList()['House groove']();
 }
 function save(){try{localStorage.setItem('strudel-studio-v1',JSON.stringify(state))}catch(e){}}
@@ -1436,6 +1459,63 @@ presetEl.append(h('option',{value:''},'Load preset…'));
 Object.keys(presetList()).forEach(k=>presetEl.append(h('option',{value:k},k)));
 function syncPresetSel(){presetEl.value=state.style&&STYLES[state.style]?state.style:'';}
 function applyNewState(s,msg){state=s;customCode=false;document.getElementById('banner').classList.remove('show');changed(true);syncPresetSel();toast(msg);}
+
+/* ---------- My grooves: up to 15 named saves, including hand-edited code ---------- */
+const SAVES_KEY='strudel-studio-saves',MAX_SAVES=15;
+function getSaves(){try{const a=JSON.parse(localStorage.getItem(SAVES_KEY));return Array.isArray(a)?a:[];}catch(e){return[];}}
+function putSaves(a){try{localStorage.setItem(SAVES_KEY,JSON.stringify(a));return true;}catch(e){toast('Could not save — browser storage is full');return false;}}
+function snapshot(name){return{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,savedAt:Date.now(),state:JSON.parse(JSON.stringify(state)),code:customCode?codeEl.value:null};}
+function defaultSaveName(){const st=state.style||'Groove';const n=getSaves().filter(x=>x.name.startsWith(st)).length+1;return `${st} ${n}`;}
+function saveNew(){
+  const saves=getSaves();if(saves.length>=MAX_SAVES){toast(`All ${MAX_SAVES} slots are used — overwrite or delete one`);return;}
+  const name=(document.getElementById('saveName').value.trim()||defaultSaveName()).slice(0,40);
+  saves.unshift(snapshot(name));if(putSaves(saves)){document.getElementById('saveName').value='';renderSaves();toast(`Saved “${name}”`);}
+}
+function overwriteSave(id){const saves=getSaves();const i=saves.findIndex(x=>x.id===id);if(i<0)return;const snap=snapshot(saves[i].name);snap.id=id;saves.splice(i,1);saves.unshift(snap);if(putSaves(saves)){renderSaves();toast(`Updated “${snap.name}”`);}}
+function deleteSave(id){
+  const row=document.querySelector(`.save-row[data-id="${id}"]`);
+  if(row&&!row.classList.contains('confirm')){row.classList.add('confirm');row.querySelector('.del').textContent='sure?';setTimeout(()=>{if(row.isConnected){row.classList.remove('confirm');row.querySelector('.del').textContent='✕';}},2500);return;}
+  const saves=getSaves().filter(x=>x.id!==id);putSaves(saves);renderSaves();toast('Deleted');
+}
+function renameSave(id,el){
+  const saves=getSaves();const sv=saves.find(x=>x.id===id);if(!sv)return;
+  const inp=h('input',{class:'mini-in',value:sv.name,maxlength:40,style:'padding:4px 8px;font-size:13px'});
+  const done=()=>{const v=inp.value.trim();if(v&&v!==sv.name){sv.name=v.slice(0,40);putSaves(saves);}renderSaves();};
+  inp.onkeydown=e=>{if(e.key==='Enter')done();else if(e.key==='Escape')renderSaves();e.stopPropagation();};inp.onblur=done;
+  el.replaceWith(inp);inp.focus();inp.select();
+}
+function loadSave(id){
+  const sv=getSaves().find(x=>x.id===id);if(!sv)return;
+  state=normalizeState(JSON.parse(JSON.stringify(sv.state)),true);
+  customCode=!!sv.code;
+  document.getElementById('banner').classList.toggle('show',customCode);
+  changed(true);syncPresetSel();
+  if(customCode){codeEl.value=sv.code;paintCode();updateShareLink(sv.code);if(playing)runCode(false);}
+  toast(`Loaded “${sv.name}”`);
+}
+function renderSaves(){
+  const saves=getSaves(),list=document.getElementById('savesList');
+  document.getElementById('savesCount').textContent=`${saves.length}/${MAX_SAVES}`;
+  const full=saves.length>=MAX_SAVES;
+  document.getElementById('saveNew').disabled=full;document.getElementById('saveName').placeholder=full?'All slots used':defaultSaveName();
+  document.getElementById('savesHint').textContent=full?`All ${MAX_SAVES} slots used — overwrite (⤓) or delete (✕) one to save another.`:saves.length?'Click a name to load it.':'Nothing saved yet. Saves keep every change, including hand-edited code.';
+  list.innerHTML='';
+  for(const sv of saves){
+    const d=new Date(sv.savedAt);const nm=h('b',{},sv.name);
+    const meta=`${sv.state.style||'custom'} · ${sv.state.bpm} bpm · ${sv.state.tracks.length} tracks${sv.code?' · edited code':''} · ${d.toLocaleDateString(undefined,{month:'short',day:'numeric'})} ${d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}`;
+    list.append(h('div',{class:'save-row','data-id':sv.id},
+      h('div',{class:'nm',title:'Load this groove',onclick:()=>loadSave(sv.id)},nm,h('small',{},meta)),
+      h('button',{class:'tbtn',title:'Rename',onclick:()=>renameSave(sv.id,nm)},'✎'),
+      h('button',{class:'tbtn',title:'Overwrite with what you have now',onclick:()=>overwriteSave(sv.id)},'⤓'),
+      h('button',{class:'tbtn del',title:'Delete',onclick:()=>deleteSave(sv.id)},'✕')));
+  }
+}
+const savesPanel=document.getElementById('savesPanel');
+document.getElementById('savesBtn').onclick=e=>{e.stopPropagation();savesPanel.hidden=!savesPanel.hidden;if(!savesPanel.hidden){renderSaves();document.getElementById('saveName').focus();}};
+document.addEventListener('click',e=>{if(!savesPanel.hidden&&!e.composedPath().includes(savesPanel))savesPanel.hidden=true;});
+document.getElementById('saveNew').onclick=saveNew;
+document.getElementById('saveName').onkeydown=e=>{if(e.key==='Enter')saveNew();e.stopPropagation();};
+renderSaves();
 presetEl.onchange=()=>{const k=presetEl.value;if(!k)return;applyNewState(presetList()[k](),'Loaded “'+k+'”');};
 function randomize(){
   const name=state.style&&STYLES[state.style]?state.style:randomStyleName();
