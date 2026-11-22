@@ -201,6 +201,10 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 .sec{display:flex;flex-direction:column;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px 9px;min-width:118px;cursor:pointer;position:relative}
 .sec:hover{border-color:var(--line2)}
 .sec.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.sec{border-left:5px solid var(--sc,var(--line2))}
+.sec.kin:not(.sel){border-color:var(--sc);border-left-width:5px;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--sc) 50%,transparent)}
+.sec .rel{font-family:var(--mono);font-size:10px;color:var(--sc,var(--dim));white-space:nowrap}
+.sec .rel.edited{color:var(--dim)}
 .sec.playing::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;border-radius:10px 10px 0 0;background:var(--ok)}
 .sec .top{display:flex;align-items:center;gap:6px}
 .sec .nm{font-weight:700;font-size:13px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
@@ -848,8 +852,16 @@ const RETIRED={steinway:'piano',kawai:'piano',kalimba:'gm_kalimba',ocarina:'gm_p
 let state;
 // A song is a list of sections; state.tracks always points at the selected section's tracks.
 const SECTION_NAMES=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
+const SEC_COLORS=['#ff8a3d','#4fb3ff','#c6f432','#ff9de2','#3dd6c5','#ffd23f','#a78bfa','#ff5d73'];
+function nextSecColor(secs){const used=secs.map(x=>x.color);return SEC_COLORS.find(c=>!used.includes(c))||SEC_COLORS[secs.length%SEC_COLORS.length];}
+function copyName(name,secs){const base=String(name).replace(/\d+$/,'');const used=new Set(secs.map(x=>x.name));let i=2;while(used.has(base+i))i++;return base+i;}
+// a section's musical content, ignoring track ids and UI-only flags
+const secSig=sec=>JSON.stringify(sec.tracks.map(({id,fxOpen,_bad,...t})=>t))+'|'+JSON.stringify(sec.prog||null);
+// how a section relates to the one it came from: {src, same}
+function secRelation(sec,secs){const src=sec.from&&secs.find(x=>x.id===sec.from);if(!src)return null;return{src,same:sec.kind==='copy'&&secSig(sec)===secSig(src)};}
 function ensureSections(s){
   if(!Array.isArray(s.sections)||!s.sections.length)s.sections=[{id:'s'+Date.now().toString(36),name:'A',repeat:4,prog:s.prog,tracks:s.tracks||[]}];
+  s.sections.forEach((x,i)=>{if(!x.color)x.color=SEC_COLORS[i%SEC_COLORS.length];});
   s.cur=Math.min(Math.max(0,s.cur|0),s.sections.length-1);
   s.tracks=s.sections[s.cur].tracks;s.prog=s.sections[s.cur].prog||s.prog;
   return s;
@@ -947,8 +959,14 @@ function genCode(){
     return lines.join('\n');
   }
   // whole song: each section is a stack, played in order with arrange([bars, section], ...)
-  secs.forEach((sec,i)=>{lines.push(`// ${sec.name} — plays ${sec.repeat}×`,`const ${secVar(sec,i)} = ${sectionStack(sec.tracks)}`,'');});
-  lines.push(`arrange(\n${secs.map((sec,i)=>`  [${sec.repeat}, ${secVar(sec,i)}]`).join(',\n')}\n)${swing}`);
+  const vars=secs.map((sec,i)=>{const rel=secRelation(sec,secs);return rel&&rel.same?null:secVar(sec,i);});
+  secs.forEach((sec,i)=>{
+    const rel=secRelation(sec,secs);
+    if(rel&&rel.same){vars[i]=vars[secs.indexOf(rel.src)];lines.push(`// ${sec.name} — same as ${rel.src.name} — plays ${sec.repeat}×`,'');return;}
+    const note=rel?(sec.kind==='copy'?` (copy of ${rel.src.name}, edited)`:` (new melodies from ${rel.src.name})`):'';
+    lines.push(`// ${sec.name}${note} — plays ${sec.repeat}×`,`const ${vars[i]} = ${sectionStack(sec.tracks)}`,'');
+  });
+  lines.push(`arrange(\n${secs.map((sec,i)=>`  [${sec.repeat}, ${vars[i]}]`).join(',\n')}\n)${swing}`);
   return lines.join('\n');
 }
 
@@ -1317,7 +1335,7 @@ function addSection(){
   const S=STYLES[state.style],progs=(S?.progs||PROGS).filter(pr=>pr.join()!==ctx.prog.join());
   const newProg=Math.random()<.5&&progs.length?pick(progs):null; // sometimes new chords, always new melodies
   const used=new Set(state.sections.map(x=>x.name));const name=SECTION_NAMES.find(n=>!used.has(n))||('S'+(state.sections.length+1));
-  const sec={id:'s'+Date.now().toString(36),name,repeat:cur.repeat||4,prog:newProg||ctx.prog,tracks:varySection(cur.tracks,ctx,newProg)};
+  const sec={id:'s'+Date.now().toString(36),name,repeat:cur.repeat||4,prog:newProg||ctx.prog,tracks:varySection(cur.tracks,ctx,newProg),from:cur.id,kind:'variation',color:nextSecColor(state.sections)};
   state.sections.splice(state.cur+1,0,sec);state.cur++;state.tracks=sec.tracks;state.prog=sec.prog;
   changed(true);toast(`Added section ${name} — same sounds, new ${newProg?'chords and ':''}melodies`);
 }
@@ -1331,8 +1349,13 @@ function renderSections(){
       inp.onkeydown=ev=>{ev.stopPropagation();if(ev.key==='Enter')done();if(ev.key==='Escape')renderSections();};inp.onblur=done;inp.onclick=ev=>ev.stopPropagation();
       nm.replaceWith(inp);inp.focus();inp.select();};
     const stop=f=>e=>{e.stopPropagation();f();};
-    const box=h('div',{class:'sec'+(i===state.cur?' sel':''),'data-i':i,title:'Click to edit this section',onclick:()=>{if(i!==state.cur)selectSection(i);}},
+    const rel=secRelation(sec,secs);
+    const selSec=secs[state.cur];const family=x=>x.kind==='copy'&&x.from?x.from:x.id;
+    const kin=i!==state.cur&&family(sec)===family(selSec);
+    const relText=!rel?'':sec.kind==='copy'?(rel.same?`= ${rel.src.name}`:`copy of ${rel.src.name} · edited`):`new melodies from ${rel.src.name}`;
+    const box=h('div',{class:'sec'+(i===state.cur?' sel':'')+(kin?' kin':''),'data-i':i,style:`--sc:${sec.color}`,title:'Click to edit this section',onclick:()=>{if(i!==state.cur)selectSection(i);}},
       h('div',{class:'top'},nm,h('span',{class:'bar'})),
+      relText?h('span',{class:'rel'+(rel&&sec.kind==='copy'&&!rel.same?' edited':''),title:rel.same?'Identical to '+rel.src.name+' — edit it to make it different':''},relText):null,
       h('div',{class:'rep',title:'How many bars this section plays before the next one'},
         h('button',{class:'mini',onclick:stop(()=>{sec.repeat=Math.max(1,sec.repeat-1);changed(true);})},'−'),
         h('b',{},'×'+sec.repeat),
@@ -1341,8 +1364,8 @@ function renderSections(){
       h('div',{class:'acts'},
         h('button',{class:'mini',title:'Move earlier',disabled:i===0,onclick:stop(()=>{syncSection();[secs[i-1],secs[i]]=[secs[i],secs[i-1]];if(state.cur===i)state.cur--;else if(state.cur===i-1)state.cur++;changed(true);})},'◀'),
         h('button',{class:'mini',title:'Move later',disabled:i===secs.length-1,onclick:stop(()=>{syncSection();[secs[i+1],secs[i]]=[secs[i],secs[i+1]];if(state.cur===i)state.cur++;else if(state.cur===i+1)state.cur--;changed(true);})},'▶'),
-        h('button',{class:'mini',title:'Duplicate exactly',onclick:stop(()=>{syncSection();const c=JSON.parse(JSON.stringify(sec));c.id='s'+Date.now().toString(36);c.tracks.forEach(t=>t.id=uid++);const used=new Set(secs.map(x=>x.name));c.name=SECTION_NAMES.find(n=>!used.has(n))||c.name+'2';secs.splice(i+1,0,c);state.cur=i+1;state.tracks=c.tracks;state.prog=c.prog;changed(true);})},'⧉'),
-        h('button',{class:'mini',title:'Delete section',disabled:secs.length===1,onclick:stop(()=>{syncSection();secs.splice(i,1);state.cur=Math.min(state.cur>i?state.cur-1:state.cur,secs.length-1);state.tracks=secs[state.cur].tracks;state.prog=secs[state.cur].prog;changed(true);})},'✕')));
+        h('button',{class:'mini',title:'Duplicate exactly (stays linked to the original until you change it)',onclick:stop(()=>{syncSection();const root=(sec.kind==='copy'&&secs.find(x=>x.id===sec.from))||sec;const c=JSON.parse(JSON.stringify(sec));c.id='s'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);c.tracks.forEach(t=>t.id=uid++);c.from=root.id;c.kind='copy';c.color=root.color;c.name=copyName(root.name,secs);secs.splice(i+1,0,c);state.cur=i+1;state.tracks=c.tracks;state.prog=c.prog;changed(true);toast(`Duplicated ${root.name} → ${c.name}`);})},'⧉'),
+        h('button',{class:'mini',title:'Delete section',disabled:secs.length===1,onclick:stop(()=>{syncSection();secs.forEach(x=>{if(x.from===sec.id){x.from=null;x.kind=null;}});secs.splice(i,1);state.cur=Math.min(state.cur>i?state.cur-1:state.cur,secs.length-1);state.tracks=secs[state.cur].tracks;state.prog=secs[state.cur].prog;changed(true);})},'✕')));
     el.append(box);
   });
   el.append(h('button',{class:'sec-add',title:'Same instruments and drums, new melodies',onclick:addSection},h('b',{},'+ New section'),h('small',{},'same sounds · new melodies')));
