@@ -1346,7 +1346,7 @@ function addSection(){
 // Drag a section chip to reorder the song (pointer events: mouse, pen and touch)
 function moveSection(from,to){
   syncSection();const secs=state.sections;const curSec=secs[state.cur];
-  const [m]=secs.splice(from,1);if(to>from)to--;secs.splice(to,0,m);
+  const [m]=secs.splice(from,1);secs.splice(to,0,m);
   state.cur=secs.indexOf(curSec);changed(true);
 }
 function sectionDropIndex(x,y,chips){
@@ -1359,13 +1359,13 @@ function startSectionDrag(e,box,i){
   if(e.button>0||e.target.closest('button,input'))return;
   const x0=e.clientX,y0=e.clientY;let dragging=false,target=i,mark=null;
   const wrap=document.getElementById('sections');
-  const chips=()=>[...wrap.querySelectorAll('.sec')];
+  const chips=()=>[...wrap.querySelectorAll('.sec')].filter(c=>c!==box); // the other chips (not the one being dragged)
   const move=ev=>{
     const dx=ev.clientX-x0,dy=ev.clientY-y0;
     if(!dragging){if(Math.hypot(dx,dy)<6)return;dragging=true;box.classList.add('dragging');try{box.setPointerCapture(ev.pointerId);}catch(_){}
       mark=h('div',{class:'drop-mark'});wrap.append(mark);}
     box.style.transform=`translate(${dx}px,${dy}px)`;
-    const others=chips();box.style.visibility='hidden';const idx=sectionDropIndex(ev.clientX,ev.clientY,others);box.style.visibility='';
+    const others=chips();const idx=sectionDropIndex(ev.clientX,ev.clientY,others);
     target=idx;
     const wr=wrap.getBoundingClientRect();const ref=others[Math.min(idx,others.length-1)].getBoundingClientRect();
     const left=idx<others.length?ref.left-6:ref.right+2;
@@ -1376,7 +1376,7 @@ function startSectionDrag(e,box,i){
     if(!dragging)return;
     box.__dragged=true;setTimeout(()=>{box.__dragged=false;},0);
     mark?.remove();box.style.transform='';box.classList.remove('dragging');
-    if(target!==i&&target!==i+1){const nm=state.sections[i].name;moveSection(i,target);toast(`Moved ${nm}`);}
+    if(target!==i){const nm=state.sections[i].name;moveSection(i,target);toast(`Moved ${nm}`);}
     else renderSections();
   };
   window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);
