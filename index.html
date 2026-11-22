@@ -197,7 +197,11 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 .save-row .nm{flex:1;min-width:0;cursor:pointer}.save-row .nm b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .save-row .nm small{font-family:var(--mono);font-size:10px;color:var(--dim)}
 .save-row .tbtn{height:26px;min-width:26px;padding:0 6px}
-.sections{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;padding:2px 0 4px}
+.sections{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;padding:2px 0 4px;position:relative}
+.sec{cursor:grab;touch-action:none;user-select:none}
+.sec.dragging{cursor:grabbing;opacity:.9;z-index:30;box-shadow:0 10px 30px #000a;transition:none}
+.sec.drag-src-gap{opacity:.35}
+.drop-mark{position:absolute;width:4px;border-radius:2px;background:var(--accent);box-shadow:0 0 0 3px #ff8a3d33;pointer-events:none;z-index:31}
 .sec{display:flex;flex-direction:column;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px 9px;min-width:118px;cursor:pointer;position:relative}
 .sec:hover{border-color:var(--line2)}
 .sec.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
@@ -1339,6 +1343,44 @@ function addSection(){
   state.sections.splice(state.cur+1,0,sec);state.cur++;state.tracks=sec.tracks;state.prog=sec.prog;
   changed(true);toast(`Added section ${name} — same sounds, new ${newProg?'chords and ':''}melodies`);
 }
+// Drag a section chip to reorder the song (pointer events: mouse, pen and touch)
+function moveSection(from,to){
+  syncSection();const secs=state.sections;const curSec=secs[state.cur];
+  const [m]=secs.splice(from,1);if(to>from)to--;secs.splice(to,0,m);
+  state.cur=secs.indexOf(curSec);changed(true);
+}
+function sectionDropIndex(x,y,chips){
+  for(let j=0;j<chips.length;j++){const r=chips[j].getBoundingClientRect();
+    if(y<r.top)return j;                                   // pointer is on an earlier row
+    if(y<=r.bottom&&x<r.left+r.width/2)return j;}          // left half of a chip in this row
+  return chips.length;
+}
+function startSectionDrag(e,box,i){
+  if(e.button>0||e.target.closest('button,input'))return;
+  const x0=e.clientX,y0=e.clientY;let dragging=false,target=i,mark=null;
+  const wrap=document.getElementById('sections');
+  const chips=()=>[...wrap.querySelectorAll('.sec')];
+  const move=ev=>{
+    const dx=ev.clientX-x0,dy=ev.clientY-y0;
+    if(!dragging){if(Math.hypot(dx,dy)<6)return;dragging=true;box.classList.add('dragging');try{box.setPointerCapture(ev.pointerId);}catch(_){}
+      mark=h('div',{class:'drop-mark'});wrap.append(mark);}
+    box.style.transform=`translate(${dx}px,${dy}px)`;
+    const others=chips();box.style.visibility='hidden';const idx=sectionDropIndex(ev.clientX,ev.clientY,others);box.style.visibility='';
+    target=idx;
+    const wr=wrap.getBoundingClientRect();const ref=others[Math.min(idx,others.length-1)].getBoundingClientRect();
+    const left=idx<others.length?ref.left-6:ref.right+2;
+    Object.assign(mark.style,{left:(left-wr.left)+'px',top:(ref.top-wr.top)+'px',height:ref.height+'px'});
+  };
+  const up=()=>{
+    window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up);
+    if(!dragging)return;
+    box.__dragged=true;setTimeout(()=>{box.__dragged=false;},0);
+    mark?.remove();box.style.transform='';box.classList.remove('dragging');
+    if(target!==i&&target!==i+1){const nm=state.sections[i].name;moveSection(i,target);toast(`Moved ${nm}`);}
+    else renderSections();
+  };
+  window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);
+}
 function renderSections(){
   const el=document.getElementById('sections');el.innerHTML='';
   const secs=state.sections;if(!secs)return;
@@ -1353,7 +1395,7 @@ function renderSections(){
     const selSec=secs[state.cur];const family=x=>x.kind==='copy'&&x.from?x.from:x.id;
     const kin=i!==state.cur&&family(sec)===family(selSec);
     const relText=!rel?'':sec.kind==='copy'?(rel.same?`= ${rel.src.name}`:`copy of ${rel.src.name} · edited`):`new melodies from ${rel.src.name}`;
-    const box=h('div',{class:'sec'+(i===state.cur?' sel':'')+(kin?' kin':''),'data-i':i,style:`--sc:${sec.color}`,title:'Click to edit this section',onclick:()=>{if(i!==state.cur)selectSection(i);}},
+    const box=h('div',{class:'sec'+(i===state.cur?' sel':'')+(kin?' kin':''),'data-i':i,style:`--sc:${sec.color}`,title:'Click to edit · drag to reorder',onclick:()=>{if(box.__dragged)return;if(i!==state.cur)selectSection(i);}},
       h('div',{class:'top'},nm,h('span',{class:'bar'})),
       relText?h('span',{class:'rel'+(rel&&sec.kind==='copy'&&!rel.same?' edited':''),title:rel.same?'Identical to '+rel.src.name+' — edit it to make it different':''},relText):null,
       h('div',{class:'rep',title:'How many bars this section plays before the next one'},
@@ -1366,6 +1408,7 @@ function renderSections(){
         h('button',{class:'mini',title:'Move later',disabled:i===secs.length-1,onclick:stop(()=>{syncSection();[secs[i+1],secs[i]]=[secs[i],secs[i+1]];if(state.cur===i)state.cur++;else if(state.cur===i+1)state.cur--;changed(true);})},'▶'),
         h('button',{class:'mini',title:'Duplicate exactly (stays linked to the original until you change it)',onclick:stop(()=>{syncSection();const root=(sec.kind==='copy'&&secs.find(x=>x.id===sec.from))||sec;const c=JSON.parse(JSON.stringify(sec));c.id='s'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);c.tracks.forEach(t=>t.id=uid++);c.from=root.id;c.kind='copy';c.color=root.color;c.name=copyName(root.name,secs);secs.splice(i+1,0,c);state.cur=i+1;state.tracks=c.tracks;state.prog=c.prog;changed(true);toast(`Duplicated ${root.name} → ${c.name}`);})},'⧉'),
         h('button',{class:'mini',title:'Delete section',disabled:secs.length===1,onclick:stop(()=>{syncSection();secs.forEach(x=>{if(x.from===sec.id){x.from=null;x.kind=null;}});secs.splice(i,1);state.cur=Math.min(state.cur>i?state.cur-1:state.cur,secs.length-1);state.tracks=secs[state.cur].tracks;state.prog=secs[state.cur].prog;changed(true);})},'✕')));
+    box.onpointerdown=e=>startSectionDrag(e,box,i);
     el.append(box);
   });
   el.append(h('button',{class:'sec-add',title:'Same instruments and drums, new melodies',onclick:addSection},h('b',{},'+ New section'),h('small',{},'same sounds · new melodies')));
