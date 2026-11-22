@@ -815,6 +815,28 @@ function varySection(srcTracks,ctx,newProg){
     return t;
   });
 }
+// Re-roll one track's content (pattern / notes / mini-notation); sound, kit and FX stay.
+const ANY_DRUM_TPL=['x...x...x...x...','x..x..x...x.x...','..x...x...x...x.','x.x.x.x.x.x.x.x.','-+-+-+-+-+-+-+-+','x.....x.x.......','....x.......x..-','..x..x....x..x..','x..x.x..x..x.x..'];
+function rerollTrack(t){
+  const S=STYLES[state.style],ctx=currentCtx();const before=JSON.stringify([t.hits,t.notes,t.mini]);
+  for(let tries=0;tries<8;tries++){
+    if(t.type==='drum'){
+      const spec=(S?.drums||[]).find(d=>d.s===t.sound);
+      const tpls=[].concat(spec?spec.p:[],GENERIC_DRUMS[t.sound]||[],tries>=3||chance(.3)||!spec&&!GENERIC_DRUMS[t.sound]?pick(ANY_DRUM_TPL):[]).map(varyTpl);
+      const tpl=pick(tpls).slice(0,t.steps);
+      const h=roll(tpl.padEnd(t.steps,'.'));t.hits=pad(h);
+    }else if(t.type==='synth'){
+      const role=inferRole(t);
+      const spec=(S?.parts||[]).find(p=>p.name===t.name)||(S?.parts||[]).find(p=>p.role===role)||GENERIC_PARTS[role==='power'?'chords':role]||GENERIC_PARTS.lead;
+      t.notes=genPartTrack({...spec,role,steps:t.steps,waves:[t.wave]},ctx).notes;
+    }else{
+      const kinds=Object.keys(PATTERN_KINDS).filter(k=>{const sp=PATTERN_KINDS[k](ctx);return (sp.mode||'s')===t.mode&&!(sp.role==='bells'&&t.mode!=='note');});
+      const kind=kinds.find(k=>t.name.toLowerCase().startsWith(PATTERN_KINDS[k](ctx).name.toLowerCase()))||pick(kinds.length?kinds:Object.keys(PATTERN_KINDS));
+      const fresh=genPartTrack(PATTERN_KINDS[kind](ctx),ctx);t.mini=fresh.mini;t._bad=false;
+    }
+    if(JSON.stringify([t.hits,t.notes,t.mini])!==before)break;
+  }
+}
 function randomStyleName(){const k=Object.keys(STYLES);return k[Math.floor(Math.random()*k.length)];}
 
 // Hand-made versions of the original presets; the rest come from their style at a fixed seed.
@@ -1458,6 +1480,7 @@ function renderTrack(t){
   head.append(h('span',{class:'spacer',style:'flex:1'}));
   head.append(h('button',{class:'tbtn'+(t.muted?' on':''),title:'Mute',onclick:()=>{t.muted=!t.muted;changed(true);}},'M'));
   head.append(h('button',{class:'tbtn solo'+(t.solo?' on':''),title:'Solo',onclick:()=>{t.solo=!t.solo;changed(true);}},'S'));
+  head.append(h('button',{class:'tbtn',title:'Randomize this track (new pattern / notes; sound, kit and effects stay)',onclick:()=>{rerollTrack(t);changed(true);toast('🎲 New '+t.name.toLowerCase());}},'rnd'));
   head.append(h('button',{class:'tbtn'+(t.fxOpen?' on':''),title:'Effects & transforms',onclick:()=>{t.fxOpen=!t.fxOpen;el.classList.toggle('fxopen',t.fxOpen);save();renderTrackHeadBtn(el,t);}},'FX'));
   head.append(h('button',{class:'tbtn',title:'Duplicate',onclick:()=>{const c=JSON.parse(JSON.stringify(t));c.id=uid++;c.name+=' 2';c.color=COLORS[(COLORS.indexOf(t.color)+1)%COLORS.length];state.tracks.splice(state.tracks.indexOf(t)+1,0,c);changed(true);}},'⧉'));
   head.append(h('button',{class:'tbtn del',title:'Delete track',onclick:()=>{state.tracks=state.tracks.filter(x=>x!==t);changed(true);}},'✕'));
