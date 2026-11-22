@@ -197,6 +197,23 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 .save-row .nm{flex:1;min-width:0;cursor:pointer}.save-row .nm b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .save-row .nm small{font-family:var(--mono);font-size:10px;color:var(--dim)}
 .save-row .tbtn{height:26px;min-width:26px;padding:0 6px}
+.sections{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;padding:2px 0 4px}
+.sec{display:flex;flex-direction:column;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px 9px;min-width:118px;cursor:pointer;position:relative}
+.sec:hover{border-color:var(--line2)}
+.sec.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.sec.playing::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;border-radius:10px 10px 0 0;background:var(--ok)}
+.sec .top{display:flex;align-items:center;gap:6px}
+.sec .nm{font-weight:700;font-size:13px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+.sec .bar{font-family:var(--mono);font-size:10px;color:var(--ok)}
+.sec .rep{display:flex;align-items:center;gap:2px;font-family:var(--mono);font-size:12px}
+.sec .rep b{min-width:34px;text-align:center}
+.sec .mini{background:var(--bg);border:1px solid var(--line);border-radius:5px;color:var(--dim);font-size:11px;height:22px;min-width:22px;padding:0 5px}
+.sec .mini:hover{color:var(--text);border-color:var(--line2)}
+.sec .acts{display:flex;gap:3px}
+.sec-add{border:1px dashed var(--line2);background:transparent;border-radius:10px;padding:7px 12px;color:var(--dim);text-align:left;min-width:150px}
+.sec-add:hover{color:var(--text);border-color:var(--accent);background:#ff8a3d0a}
+.sec-add b{display:block;color:var(--text)}.sec-add small{font-family:var(--mono);font-size:10px}
+.sec-loop{align-self:center;font-size:11px}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(80px);background:#24242c;border:1px solid var(--line2);padding:9px 14px;border-radius:10px;transition:transform .2s;z-index:50;font-size:12px}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .empty{color:var(--dim);text-align:center;padding:30px;border:1px dashed var(--line);border-radius:12px}
@@ -239,6 +256,7 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 
 <main>
   <section id="tracksCol">
+    <div id="sections" class="sections"></div>
     <div id="tracks"></div>
     <div class="addrow">
       <button class="add" data-add="drum"><b>+ Drum track</b><small>s("bd ~ bd ~") · step sequencer</small></button>
@@ -641,10 +659,11 @@ function kitForDrum(S,main,snd){
   if(others.length&&(['sd','cp','rim'].includes(snd)||(snd!=='bd'&&chance(.55))))return pick(others); // snare/clap always contrast with the kick
   return kitHas(main,snd)?main:(options[0]||'studio');
 }
-function genStyle(name,seed){
+function genStyle(name,seed,key){
   const S=STYLES[name];const prevR=R;R=rng(seed);
   try{
     const ctx={root:pick(NOTE_NAMES),scale:pick(S.scales),prog:pick(S.progs||PROGS)};
+    if(key&&key.root&&key.scale){ctx.root=key.root;ctx.scale=key.scale;}
     const tracks=[];
     const kit=S.kit?pick(S.kit):'studio';
     for(const d of S.drums){if(d.opt&&!chance(d.opt))continue;const t=genDrumTrack(d);t.kit=kitForDrum(S,kit,t.sound);tracks.push(t);}
@@ -765,6 +784,28 @@ function newTrack(type){
   t.name=uniqueName(t.name);
   return t;
 }
+function inferRole(t){
+  if(t.role)return t.role;
+  const n=t.name.toLowerCase();
+  return /bass|sub|808|reese|rumble/.test(n)?'bass':/pad|keys|rhodes|organ|swell/.test(n)?'pad':/chord|stab|skank|pluck|guitar/.test(n)?'chords':/arp/.test(n)?'arp':'lead';
+}
+// Copy a section's tracks (same instruments, kits, effects) with new melodies.
+function varySection(srcTracks,ctx,newProg){
+  const S=STYLES[state.style];
+  return srcTracks.map(src=>{
+    const t=JSON.parse(JSON.stringify(src));t.id=uid++;
+    if(t.type!=='synth')return t;
+    const role=inferRole(t);
+    // every melodic part gets a new line (riff / rhythm / voicing / melody) over this section's chords
+    const spec=(S?.parts||[]).find(p=>p.name===t.name)||(S?.parts||[]).find(p=>p.role===role)||GENERIC_PARTS[role==='power'?'chords':role]||GENERIC_PARTS.lead;
+    const before=JSON.stringify(t.notes);
+    for(let tries=0;tries<6;tries++){
+      const fresh=genPartTrack({...spec,role,steps:t.steps,waves:[t.wave]},{...ctx,prog:newProg||ctx.prog});
+      t.notes=fresh.notes;if(JSON.stringify(t.notes)!==before)break;
+    }
+    return t;
+  });
+}
 function randomStyleName(){const k=Object.keys(STYLES);return k[Math.floor(Math.random()*k.length)];}
 
 // Hand-made versions of the original presets; the rest come from their style at a fixed seed.
@@ -805,25 +846,37 @@ function presetList(){
 // sounds removed because their files can't be fetched by web pages -> working replacements (for saved grooves)
 const RETIRED={steinway:'piano',kawai:'piano',kalimba:'gm_kalimba',ocarina:'gm_pan_flute',psaltery_pluck:'harp',shaker_large:'sh',shaker_small:'sh',snare_modern:'sd',tom_mallet:'lt'};
 let state;
+// A song is a list of sections; state.tracks always points at the selected section's tracks.
+const SECTION_NAMES=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
+function ensureSections(s){
+  if(!Array.isArray(s.sections)||!s.sections.length)s.sections=[{id:'s'+Date.now().toString(36),name:'A',repeat:4,prog:s.prog,tracks:s.tracks||[]}];
+  s.cur=Math.min(Math.max(0,s.cur|0),s.sections.length-1);
+  s.tracks=s.sections[s.cur].tracks;s.prog=s.sections[s.cur].prog||s.prog;
+  return s;
+}
+function syncSection(){const sec=state.sections?.[state.cur];if(sec){sec.tracks=state.tracks;sec.prog=state.prog;}}
+function serializeState(){syncSection();const{tracks,...rest}=state;return JSON.stringify(rest);} // tracks live in sections
 function normalizeState(s,freshIds){
-  s.tracks.forEach(t=>{t.fx=Object.assign(baseFx(),t.fx);t.mods=Object.assign(baseMods(),t.mods);
+  ensureSections(s);
+  for(const sec of s.sections)sec.tracks.forEach(t=>{t.fx=Object.assign(baseFx(),t.fx);t.mods=Object.assign(baseMods(),t.mods);
     if(freshIds)t.id=uid++;else uid=Math.max(uid,t.id+1);
     for(const k of['wave','sound'])if(RETIRED[t[k]])t[k]=RETIRED[t[k]];});
+  s.tracks=s.sections[s.cur].tracks;
   return s;
 }
 function loadState(){
   try{const s=JSON.parse(localStorage.getItem('strudel-studio-v1'));
-    if(s&&Array.isArray(s.tracks))return normalizeState(s);}catch(e){}
-  return presetList()['House groove']();
+    if(s&&(Array.isArray(s.tracks)||Array.isArray(s.sections)))return normalizeState(s);}catch(e){}
+  return ensureSections(presetList()['House groove']());
 }
-function save(){try{localStorage.setItem('strudel-studio-v1',JSON.stringify(state))}catch(e){}}
+function save(){try{localStorage.setItem('strudel-studio-v1',serializeState())}catch(e){}}
 state=loadState();
 
 /* =========================================================
    Code generation
    ========================================================= */
 const f2=v=>{const r=Math.round(v*100)/100;return String(r)};
-function activeTracks(){const solo=state.tracks.some(t=>t.solo&&!t.muted);return state.tracks.filter(t=>!t.muted&&(!solo||t.solo));}
+function activeTracks(list=state.tracks){const solo=list.some(t=>t.solo&&!t.muted);return list.filter(t=>!t.muted&&(!solo||t.solo));}
 
 function trackExpr(t){
   let e='';
@@ -876,14 +929,26 @@ function groupTokens(tok,steps){
   const out=[];for(let i=0;i<tok.length;i+=g)out.push(tok.slice(i,i+g).join(' '));
   return out.join('  ');
 }
-function genCode(){
-  const lines=[`// made with strudel/studio`,`setcpm(${state.bpm}/4)`,''];
+function sectionStack(tracks){
   const parts=[];
-  for(const t of activeTracks()){const e=trackExpr(t);if(e)parts.push(`  // ${t.name.replace(/\n/g,' ')}\n  ${e}`);}
-  if(!parts.length){lines.push('silence');return lines.join('\n');}
-  let body=`stack(\n${parts.join(',\n\n')}\n)`;
-  if(state.swing>0)body+=`.swingBy(${f2(state.swing)}, 8)`;
-  lines.push(body);
+  for(const t of activeTracks(tracks)){const e=trackExpr(t);if(e)parts.push(`  // ${t.name.replace(/\n/g,' ')}\n  ${e}`);}
+  return parts.length?`stack(\n${parts.join(',\n\n')}\n)`:'silence';
+}
+const secVar=(sec,i)=>'s'+(i+1)+'_'+(String(sec.name).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')||'part');
+function genCode(){
+  syncSection();
+  const lines=[`// made with strudel/studio`,`setcpm(${state.bpm}/4)`,''];
+  const swing=state.swing>0?`.swingBy(${f2(state.swing)}, 8)`:'';
+  const secs=state.sections||[{name:'A',repeat:1,tracks:state.tracks}];
+  if(secs.length===1||state.loopSection){
+    const body=sectionStack(state.tracks);
+    if(secs.length>1)lines.push(`// looping section ${secs[state.cur].name} only`);
+    lines.push(body==='silence'?'silence':body+swing);
+    return lines.join('\n');
+  }
+  // whole song: each section is a stack, played in order with arrange([bars, section], ...)
+  secs.forEach((sec,i)=>{lines.push(`// ${sec.name} — plays ${sec.repeat}×`,`const ${secVar(sec,i)} = ${sectionStack(sec.tracks)}`,'');});
+  lines.push(`arrange(\n${secs.map((sec,i)=>`  [${sec.repeat}, ${secVar(sec,i)}]`).join(',\n')}\n)${swing}`);
   return lines.join('\n');
 }
 
@@ -1203,9 +1268,22 @@ function currentCycle(){
 function reanchor(){const c=currentCycle();if(c!=null)clockAnchor={time:performance.now(),cycle:c};}
 let lastStep={},lastCycleInt={};
 function clearPlayheads(){document.querySelectorAll('.ph,.colph').forEach(el=>el.classList.remove('ph','colph'));document.querySelectorAll('.phline').forEach(el=>el.style.display='none');lastStep={};}
+function playingSection(c){
+  const secs=state.sections;if(!secs||secs.length===1||state.loopSection)return{i:state.cur,bar:Math.floor(c)%(secs?.[state.cur]?.repeat||1),of:secs?.[state.cur]?.repeat||1};
+  const total=secs.reduce((a,x)=>a+x.repeat,0);let pos=((Math.floor(c)%total)+total)%total;
+  for(let i=0;i<secs.length;i++){if(pos<secs[i].repeat)return{i,bar:pos,of:secs[i].repeat};pos-=secs[i].repeat;}
+  return{i:0,bar:0,of:1};
+}
+let lastSecMark='';
 function frame(){
   const c=currentCycle();
-  if(c!=null){
+  const mark=c==null||customCode?'':JSON.stringify(playingSection(c));
+  if(mark!==lastSecMark){lastSecMark=mark;
+    document.querySelectorAll('.sec').forEach(el=>{el.classList.remove('playing');const b=el.querySelector('.bar');if(b)b.textContent='';});
+    if(mark){const ps=JSON.parse(mark);const el=document.querySelector(`.sec[data-i="${ps.i}"]`);if(el){el.classList.add('playing');el.querySelector('.bar').textContent=`▶ ${ps.bar+1}/${ps.of}`;}}}
+  const showSteps=c!=null&&(customCode||playingSection(c).i===state.cur);
+  if(c!=null&&!showSteps&&Object.keys(lastStep).length){clearPlayheads();}
+  if(showSteps){
     for(const t of state.tracks){
       const el=document.querySelector(`.track[data-id="${t.id}"]`);if(!el)continue;
       let pos=c*t.mods.rate;
@@ -1232,7 +1310,46 @@ requestAnimationFrame(frame);
 const tracksEl=document.getElementById('tracks');
 function h(tag,attrs={},...kids){const el=document.createElement(tag);for(const[k,v]of Object.entries(attrs)){if(k==='class')el.className=v;else if(k==='style')el.style.cssText=v;else if(k.startsWith('on'))el[k]=v;else if(v!==false&&v!=null)el.setAttribute(k,v===true?'':v);}for(const k of kids.flat()){if(k==null)continue;el.append(k.nodeType?k:document.createTextNode(k));}return el;}
 
+function selectSection(i){syncSection();state.cur=i;state.tracks=state.sections[i].tracks;state.prog=state.sections[i].prog||state.prog;changed(true);}
+function addSection(){
+  syncSection();
+  const cur=state.sections[state.cur],ctx=currentCtx();
+  const S=STYLES[state.style],progs=(S?.progs||PROGS).filter(pr=>pr.join()!==ctx.prog.join());
+  const newProg=Math.random()<.5&&progs.length?pick(progs):null; // sometimes new chords, always new melodies
+  const used=new Set(state.sections.map(x=>x.name));const name=SECTION_NAMES.find(n=>!used.has(n))||('S'+(state.sections.length+1));
+  const sec={id:'s'+Date.now().toString(36),name,repeat:cur.repeat||4,prog:newProg||ctx.prog,tracks:varySection(cur.tracks,ctx,newProg)};
+  state.sections.splice(state.cur+1,0,sec);state.cur++;state.tracks=sec.tracks;state.prog=sec.prog;
+  changed(true);toast(`Added section ${name} — same sounds, new ${newProg?'chords and ':''}melodies`);
+}
+function renderSections(){
+  const el=document.getElementById('sections');el.innerHTML='';
+  const secs=state.sections;if(!secs)return;
+  secs.forEach((sec,i)=>{
+    const nm=h('span',{class:'nm',title:'Double-click to rename'},sec.name);
+    nm.ondblclick=e=>{e.stopPropagation();const inp=h('input',{class:'small-in',value:sec.name,maxlength:16,style:'width:90px'});
+      const done=()=>{const v=inp.value.trim();if(v)sec.name=v.slice(0,16);changed(true);};
+      inp.onkeydown=ev=>{ev.stopPropagation();if(ev.key==='Enter')done();if(ev.key==='Escape')renderSections();};inp.onblur=done;inp.onclick=ev=>ev.stopPropagation();
+      nm.replaceWith(inp);inp.focus();inp.select();};
+    const stop=f=>e=>{e.stopPropagation();f();};
+    const box=h('div',{class:'sec'+(i===state.cur?' sel':''),'data-i':i,title:'Click to edit this section',onclick:()=>{if(i!==state.cur)selectSection(i);}},
+      h('div',{class:'top'},nm,h('span',{class:'bar'})),
+      h('div',{class:'rep',title:'How many bars this section plays before the next one'},
+        h('button',{class:'mini',onclick:stop(()=>{sec.repeat=Math.max(1,sec.repeat-1);changed(true);})},'−'),
+        h('b',{},'×'+sec.repeat),
+        h('button',{class:'mini',onclick:stop(()=>{sec.repeat=Math.min(64,sec.repeat+1);changed(true);})},'+'),
+        h('span',{class:'hint',style:'margin-left:4px'},sec.repeat===1?'bar':'bars')),
+      h('div',{class:'acts'},
+        h('button',{class:'mini',title:'Move earlier',disabled:i===0,onclick:stop(()=>{syncSection();[secs[i-1],secs[i]]=[secs[i],secs[i-1]];if(state.cur===i)state.cur--;else if(state.cur===i-1)state.cur++;changed(true);})},'◀'),
+        h('button',{class:'mini',title:'Move later',disabled:i===secs.length-1,onclick:stop(()=>{syncSection();[secs[i+1],secs[i]]=[secs[i],secs[i+1]];if(state.cur===i)state.cur++;else if(state.cur===i+1)state.cur--;changed(true);})},'▶'),
+        h('button',{class:'mini',title:'Duplicate exactly',onclick:stop(()=>{syncSection();const c=JSON.parse(JSON.stringify(sec));c.id='s'+Date.now().toString(36);c.tracks.forEach(t=>t.id=uid++);const used=new Set(secs.map(x=>x.name));c.name=SECTION_NAMES.find(n=>!used.has(n))||c.name+'2';secs.splice(i+1,0,c);state.cur=i+1;state.tracks=c.tracks;state.prog=c.prog;changed(true);})},'⧉'),
+        h('button',{class:'mini',title:'Delete section',disabled:secs.length===1,onclick:stop(()=>{syncSection();secs.splice(i,1);state.cur=Math.min(state.cur>i?state.cur-1:state.cur,secs.length-1);state.tracks=secs[state.cur].tracks;state.prog=secs[state.cur].prog;changed(true);})},'✕')));
+    el.append(box);
+  });
+  el.append(h('button',{class:'sec-add',title:'Same instruments and drums, new melodies',onclick:addSection},h('b',{},'+ New section'),h('small',{},'same sounds · new melodies')));
+  if(secs.length>1)el.append(h('button',{class:'tog sec-loop'+(state.loopSection?' on':''),title:'Play only the section you are editing',onclick:()=>{state.loopSection=!state.loopSection;changed(true);}},state.loopSection?'🔁 looping '+secs[state.cur].name:'🔁 loop this section'));
+}
 function render(){
+  renderSections();
   tracksEl.innerHTML='';
   if(!state.tracks.length)tracksEl.append(h('div',{class:'empty'},'No tracks yet — add one below.'));
   state.tracks.forEach((t,i)=>{
@@ -1459,13 +1576,13 @@ const presetEl=document.getElementById('preset');
 presetEl.append(h('option',{value:''},'Load preset…'));
 Object.keys(presetList()).forEach(k=>presetEl.append(h('option',{value:k},k)));
 function syncPresetSel(){presetEl.value=state.style&&STYLES[state.style]?state.style:'';}
-function applyNewState(s,msg){state=s;customCode=false;document.getElementById('banner').classList.remove('show');changed(true);syncPresetSel();toast(msg);}
+function applyNewState(s,msg){state=ensureSections(s);customCode=false;document.getElementById('banner').classList.remove('show');changed(true);syncPresetSel();toast(msg);}
 
 /* ---------- My grooves: up to 15 named saves, including hand-edited code ---------- */
 const SAVES_KEY='strudel-studio-saves',MAX_SAVES=15;
 function getSaves(){try{const a=JSON.parse(localStorage.getItem(SAVES_KEY));return Array.isArray(a)?a:[];}catch(e){return[];}}
 function putSaves(a){try{localStorage.setItem(SAVES_KEY,JSON.stringify(a));return true;}catch(e){toast('Could not save — browser storage is full');return false;}}
-function snapshot(name){return{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,savedAt:Date.now(),state:JSON.parse(JSON.stringify(state)),code:customCode?codeEl.value:null};}
+function snapshot(name){return{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,savedAt:Date.now(),state:JSON.parse(serializeState()),code:customCode?codeEl.value:null};}
 // friendly, hand-picked words for suggested names
 const NAME_ADJ=['Amber','Breezy','Bright','Cosmic','Cozy','Crystal','Dancing','Dreamy','Electric','Floating','Fuzzy','Gentle','Golden','Happy','Hazy','Humble','Lucky','Lunar','Mellow','Midnight','Misty','Neon','Velvet','Quiet','Rolling','Rosy','Shiny','Silver','Sleepy','Smooth','Solar','Sparkly','Starry','Sunny','Swift','Tidal','Twilight','Warm','Wandering','Whistling'];
 const NAME_NOUN=['Badger','Balloon','Banjo','Beacon','Biscuit','Breeze','Cactus','Canyon','Comet','Compass','Cloud','Coral','Daisy','Dolphin','Ember','Falcon','Fern','Firefly','Garden','Harbor','Island','Kite','Lagoon','Lantern','Maple','Meadow','Mountain','Nebula','Orchard','Otter','Pebble','Penguin','Pine','Planet','Pocket','Rainbow','River','Robot','Sailboat','Sparrow','Teapot','Tiger','Trolley','Tulip','Turtle','Volcano','Walrus','Willow'];
@@ -1516,7 +1633,7 @@ function renderSaves(){
   list.innerHTML='';
   for(const sv of saves){
     const d=new Date(sv.savedAt);const nm=h('b',{},sv.name);
-    const meta=`${sv.state.style||'custom'} · ${sv.state.bpm} bpm · ${sv.state.tracks.length} tracks${sv.code?' · edited code':''} · ${d.toLocaleDateString(undefined,{month:'short',day:'numeric'})} ${d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}`;
+    const meta=`${sv.state.style||'custom'} · ${sv.state.bpm} bpm · ${sv.state.sections?sv.state.sections.length+' section'+(sv.state.sections.length>1?'s':''):(sv.state.tracks||[]).length+' tracks'}${sv.code?' · edited code':''} · ${d.toLocaleDateString(undefined,{month:'short',day:'numeric'})} ${d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}`;
     list.append(h('div',{class:'save-row','data-id':sv.id},
       h('div',{class:'nm',title:'Load this groove',onclick:()=>loadSave(sv.id)},nm,h('small',{},meta)),
       h('button',{class:'tbtn',title:'Rename',onclick:()=>renameSave(sv.id,nm)},'✎'),
@@ -1534,6 +1651,10 @@ renderSaves();
 presetEl.onchange=()=>{const k=presetEl.value;if(!k)return;applyNewState(presetList()[k](),'Loaded “'+k+'”');};
 function randomize(){
   const name=state.style&&STYLES[state.style]?state.style:randomStyleName();
+  if(state.sections&&state.sections.length>1){ // re-roll just this section, in the song's key and tempo
+    const k=currentCtx();const g=genStyle(name,(Math.random()*2**32)>>>0,{root:k.root,scale:k.scale});
+    state.tracks=g.tracks;state.prog=g.prog;syncSection();changed(true);toast(`🎲 New ${name} groove for section ${state.sections[state.cur].name}`);return;
+  }
   applyNewState(genStyle(name,(Math.random()*2**32)>>>0),'🎲 New '+name+' groove');
 }
 document.getElementById('randomize').onclick=randomize;
