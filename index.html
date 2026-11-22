@@ -199,6 +199,7 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 .save-row .tbtn{height:26px;min-width:26px;padding:0 6px}
 .sections{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;padding:2px 0 4px;position:relative}
 .sec{cursor:grab;touch-action:none;user-select:none}
+.sec-add.dragging{cursor:grabbing;opacity:.9;z-index:30;box-shadow:0 10px 30px #000a}
 .sec.dragging{cursor:grabbing;opacity:.9;z-index:30;box-shadow:0 10px 30px #000a;transition:none}
 .sec.drag-src-gap{opacity:.35}
 .drop-mark{position:absolute;width:4px;border-radius:2px;background:var(--accent);box-shadow:0 0 0 3px #ff8a3d33;pointer-events:none;z-index:31}
@@ -218,11 +219,12 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 .sec .mini{background:var(--bg);border:1px solid var(--line);border-radius:5px;color:var(--dim);font-size:11px;height:22px;min-width:22px;padding:0 5px}
 .sec .mini:hover{color:var(--text);border-color:var(--line2)}
 .sec .acts{display:flex;gap:3px}
-.sec-add{border:1px dashed var(--line2);background:transparent;border-radius:10px;padding:7px 12px;color:var(--dim);text-align:left;min-width:150px}
+.sec-add{cursor:grab;touch-action:none;user-select:none;border:1px dashed var(--line2);background:transparent;border-radius:10px;padding:7px 12px;color:var(--dim);text-align:left;min-width:150px}
 .sec-add:hover{color:var(--text);border-color:var(--accent);background:#ff8a3d0a}
 .sec-add b{display:block;color:var(--text)}.sec-add small{font-family:var(--mono);font-size:10px}
 .sec-loop{align-self:center;font-size:11px}
-.sec-clear{margin-left:auto}.sec-clear.confirm{color:#fff;background:var(--err);border-color:var(--err)}
+.sec-clear{margin-left:auto}
+.song-order{flex-basis:100%;order:99;font-family:var(--mono);font-size:11px;color:var(--dim);padding:2px 2px 0}.song-order b{color:var(--text);font-weight:600}.sec-clear.confirm{color:#fff;background:var(--err);border-color:var(--err)}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(80px);background:#24242c;border:1px solid var(--line2);padding:9px 14px;border-radius:10px;transition:transform .2s;z-index:50;font-size:12px}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .empty{color:var(--dim);text-align:center;padding:30px;border:1px dashed var(--line);border-radius:12px}
@@ -881,14 +883,25 @@ let state;
 const SECTION_NAMES=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
 const SEC_COLORS=['#ff8a3d','#4fb3ff','#c6f432','#ff9de2','#3dd6c5','#ffd23f','#a78bfa','#ff5d73'];
 function nextSecColor(secs){const used=secs.map(x=>x.color);return SEC_COLORS.find(c=>!used.includes(c))||SEC_COLORS[secs.length%SEC_COLORS.length];}
-function copyName(name,secs){const base=String(name).replace(/\d+$/,'');const used=new Set(secs.map(x=>x.name));let i=2;while(used.has(base+i))i++;return base+i;}
 // a section's musical content, ignoring track ids and UI-only flags
 const secSig=sec=>JSON.stringify(sec.tracks.map(({id,fxOpen,_bad,...t})=>t))+'|'+JSON.stringify(sec.prog||null);
-// how a section relates to the one it came from: {src, same}
-function secRelation(sec,secs){const src=sec.from&&secs.find(x=>x.id===sec.from);if(!src)return null;return{src,same:sec.kind==='copy'&&secSig(sec)===secSig(src)};}
+// Section names show lineage: copies share a name (B-B-B); when one is edited it becomes Bm,
+// a copy edited differently Bm1, Bm2... A section keeps its version name while you keep editing it,
+// goes back to B if it matches the original again. Names typed by the user are kept.
+function secLabels(secs){return secs.map(sec=>sec.renamed?sec.name:(sec.fam||sec.name||'?')+(sec.ver||''));}
+function updateVersion(sec){
+  if(!sec||!sec.fam)return;
+  const sig=secSig(sec);
+  if(sig===sec.famSig){sec.ver=null;return;}
+  const fam=state.sections.filter(x=>x!==sec&&x.fam===sec.fam);
+  const twin=fam.find(x=>x.ver&&secSig(x)===sig);if(twin){sec.ver=twin.ver;return;}   // same as an existing version
+  if(sec.ver&&!fam.some(x=>x.ver===sec.ver))return;                                    // still the only one with this name
+  const used=new Set(fam.map(x=>x.ver));let v='m',k=1;while(used.has(v))v='m'+k++;sec.ver=v; // split off: next free version
+}
+const isModified=(sec)=>!sec.renamed&&!!sec.ver;
 function ensureSections(s){
   if(!Array.isArray(s.sections)||!s.sections.length)s.sections=[{id:'s'+Date.now().toString(36),name:'A',repeat:4,prog:s.prog,tracks:s.tracks||[]}];
-  s.sections.forEach((x,i)=>{if(!x.color)x.color=SEC_COLORS[i%SEC_COLORS.length];});
+  s.sections.forEach((x,i)=>{if(!x.color)x.color=SEC_COLORS[i%SEC_COLORS.length];if(!x.fam){x.fam=String(x.name||'A');x.famSig=null;x.ver=null;}if(x.famSig==null)x.famSig=secSig(x);});
   s.cur=Math.min(Math.max(0,s.cur|0),s.sections.length-1);
   s.tracks=s.sections[s.cur].tracks;s.prog=s.sections[s.cur].prog||s.prog;
   return s;
@@ -981,19 +994,20 @@ function genCode(){
   const secs=state.sections||[{name:'A',repeat:1,tracks:state.tracks}];
   if(secs.length===1||state.loopSection){
     const body=sectionStack(state.tracks);
-    if(secs.length>1)lines.push(`// looping section ${secs[state.cur].name} only`);
+    if(secs.length>1)lines.push(`// looping section ${secLabels(secs)[state.cur]} only`);
     lines.push(body==='silence'?'silence':body+swing);
     return lines.join('\n');
   }
   // whole song: each section is a stack, played in order with arrange([bars, section], ...)
-  const vars=secs.map((sec,i)=>{const rel=secRelation(sec,secs);return rel&&rel.same?null:secVar(sec,i);});
+  const labels=secLabels(secs),bySig=new Map(),vars=[];
   secs.forEach((sec,i)=>{
-    const rel=secRelation(sec,secs);
-    if(rel&&rel.same){vars[i]=vars[secs.indexOf(rel.src)];lines.push(`// ${sec.name} — same as ${rel.src.name} — plays ${sec.repeat}×`,'');return;}
-    const note=rel?(sec.kind==='copy'?` (copy of ${rel.src.name}, edited)`:` (new melodies from ${rel.src.name})`):'';
-    lines.push(`// ${sec.name}${note} — plays ${sec.repeat}×`,`const ${vars[i]} = ${sectionStack(sec.tracks)}`,'');
+    const sig=secSig(sec);if(bySig.has(sig)){vars[i]=bySig.get(sig);return;} // identical sections share one block
+    let v='s_'+(labels[i].toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')||'part');while([...bySig.values()].includes(v))v+='_';
+    bySig.set(sig,v);vars[i]=v;
+    lines.push(`// ${labels[i]}${isModified(sec)?` (modified from ${sec.fam})`:''}`,`const ${v} = ${sectionStack(sec.tracks)}`,'');
   });
-  lines.push(`arrange(\n${secs.map((sec,i)=>`  [${sec.repeat}, ${vars[i]}]`).join(',\n')}\n)${swing}`);
+  lines.push(`// song: ${labels.join('-')}`);
+  lines.push(`arrange(\n${secs.map((sec,i)=>`  [${sec.repeat}, ${vars[i]}]${i<secs.length-1?',':' '}  // ${labels[i]}`).join('\n')}\n)${swing}`);
   return lines.join('\n');
 }
 
@@ -1295,6 +1309,7 @@ document.getElementById('play').onclick=()=>playing?stop():runCode(true);
 
 let evalTimer=null;
 function changed(structural){
+  if(state.sections){syncSection();updateVersion(state.sections[state.cur]);}
   if(structural)render();else if(state.sections&&state.sections.length>1&&!document.querySelector('#sections input'))renderSections(); // keep '= A' / 'edited' labels current
   if(!customCode){codeEl.value=genCode();paintCode();updateShareLink(codeEl.value);}
   save();
@@ -1356,14 +1371,16 @@ const tracksEl=document.getElementById('tracks');
 function h(tag,attrs={},...kids){const el=document.createElement(tag);for(const[k,v]of Object.entries(attrs)){if(k==='class')el.className=v;else if(k==='style')el.style.cssText=v;else if(k.startsWith('on'))el[k]=v;else if(v!==false&&v!=null)el.setAttribute(k,v===true?'':v);}for(const k of kids.flat()){if(k==null)continue;el.append(k.nodeType?k:document.createTextNode(k));}return el;}
 
 function selectSection(i){syncSection();state.cur=i;state.tracks=state.sections[i].tracks;state.prog=state.sections[i].prog||state.prog;changed(true);}
-function addSection(){
+function addSection(at){
   syncSection();
   const cur=state.sections[state.cur],ctx=currentCtx();
   const S=STYLES[state.style],progs=(S?.progs||PROGS).filter(pr=>pr.join()!==ctx.prog.join());
   const newProg=Math.random()<.5&&progs.length?pick(progs):null; // sometimes new chords, always new melodies
-  const used=new Set(state.sections.map(x=>x.name));const name=SECTION_NAMES.find(n=>!used.has(n))||('S'+(state.sections.length+1));
-  const sec={id:'s'+Date.now().toString(36),name,repeat:cur.repeat||4,prog:newProg||ctx.prog,tracks:varySection(cur.tracks,ctx,newProg),from:cur.id,kind:'variation',color:nextSecColor(state.sections)};
-  state.sections.splice(state.cur+1,0,sec);state.cur++;state.tracks=sec.tracks;state.prog=sec.prog;
+  const used=new Set(state.sections.map(x=>x.fam));const name=SECTION_NAMES.find(n=>!used.has(n))||('S'+(state.sections.length+1));
+  const sec={id:'s'+Date.now().toString(36),name,fam:name,repeat:cur.repeat||4,prog:newProg||ctx.prog,tracks:varySection(cur.tracks,ctx,newProg),color:nextSecColor(state.sections)};
+  sec.famSig=secSig(sec);
+  const pos=at==null?state.cur+1:Math.max(0,Math.min(at,state.sections.length));
+  state.sections.splice(pos,0,sec);state.cur=pos;state.tracks=sec.tracks;state.prog=sec.prog;
   changed(true);toast(`Added section ${name} — same sounds, new ${newProg?'chords and ':''}melodies`);
 }
 // Drag a section chip to reorder the song (pointer events: mouse, pen and touch)
@@ -1378,8 +1395,8 @@ function sectionDropIndex(x,y,chips){
     if(y<=r.bottom&&x<r.left+r.width/2)return j;}          // left half of a chip in this row
   return chips.length;
 }
-function startSectionDrag(e,box,i){
-  if(e.button>0||e.target.closest('button,input'))return;
+function startSectionDrag(e,box,i,onDrop){
+  if(e.button>0||(!onDrop&&e.target.closest('button,input')))return;
   const x0=e.clientX,y0=e.clientY;let dragging=false,target=i,mark=null;
   const wrap=document.getElementById('sections');
   const chips=()=>[...wrap.querySelectorAll('.sec')].filter(c=>c!==box); // the other chips (not the one being dragged)
@@ -1399,7 +1416,8 @@ function startSectionDrag(e,box,i){
     if(!dragging)return;
     box.__dragged=true;setTimeout(()=>{box.__dragged=false;},0);
     mark?.remove();box.style.transform='';box.classList.remove('dragging');
-    if(target!==i){const nm=state.sections[i].name;moveSection(i,target);toast(`Moved ${nm}`);}
+    if(onDrop)onDrop(target);
+    else if(target!==i){const nm=secLabels(state.sections)[i];moveSection(i,target);toast(`Moved ${nm}`);}
     else renderSections();
   };
   window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);
@@ -1407,20 +1425,20 @@ function startSectionDrag(e,box,i){
 function renderSections(){
   const el=document.getElementById('sections');el.innerHTML='';
   const secs=state.sections;if(!secs)return;
+  const labels=secLabels(secs);
   secs.forEach((sec,i)=>{
-    const nm=h('span',{class:'nm',title:'Double-click to rename'},sec.name);
-    nm.ondblclick=e=>{e.stopPropagation();const inp=h('input',{class:'small-in',value:sec.name,maxlength:16,style:'width:90px'});
-      const done=()=>{const v=inp.value.trim();if(v)sec.name=v.slice(0,16);changed(true);};
+    const nm=h('span',{class:'nm',title:'Double-click to rename'},labels[i]);
+    nm.ondblclick=e=>{e.stopPropagation();const inp=h('input',{class:'small-in',value:labels[i],maxlength:16,style:'width:90px'});
+      const done=()=>{const v=inp.value.trim();if(v&&v!==labels[i]){sec.name=v.slice(0,16);sec.renamed=true;}else if(!v)sec.renamed=false;changed(true);};
       inp.onkeydown=ev=>{ev.stopPropagation();if(ev.key==='Enter')done();if(ev.key==='Escape')renderSections();};inp.onblur=done;inp.onclick=ev=>ev.stopPropagation();
       nm.replaceWith(inp);inp.focus();inp.select();};
     const stop=f=>e=>{e.stopPropagation();f();};
-    const rel=secRelation(sec,secs);
-    const selSec=secs[state.cur];const family=x=>x.kind==='copy'&&x.from?x.from:x.id;
-    const kin=i!==state.cur&&family(sec)===family(selSec);
-    const relText=!rel?'':sec.kind==='copy'?(rel.same?`= ${rel.src.name}`:`copy of ${rel.src.name} · edited`):`new melodies from ${rel.src.name}`;
+    const kin=i!==state.cur&&sec.fam===secs[state.cur].fam;
+    const twins=labels.filter(l=>l===labels[i]).length;
+    const relText=isModified(sec)?`modified from ${sec.fam}`:twins>1?`${twins}× in song`:'';
     const box=h('div',{class:'sec'+(i===state.cur?' sel':'')+(kin?' kin':''),'data-i':i,style:`--sc:${sec.color}`,title:'Click to edit · drag to reorder',onclick:()=>{if(box.__dragged)return;if(i!==state.cur)selectSection(i);}},
       h('div',{class:'top'},nm,h('span',{class:'bar'})),
-      relText?h('span',{class:'rel'+(rel&&sec.kind==='copy'&&!rel.same?' edited':''),title:rel.same?'Identical to '+rel.src.name+' — edit it to make it different':''},relText):null,
+      relText?h('span',{class:'rel'+(isModified(sec)?' edited':''),title:isModified(sec)?`Changed from the original ${sec.fam}`:`Identical copies share the name ${labels[i]} — edit one and it becomes ${sec.fam}m`},relText):null,
       h('div',{class:'rep',title:'How many bars this section plays before the next one'},
         h('button',{class:'mini',onclick:stop(()=>{sec.repeat=Math.max(1,sec.repeat-1);changed(true);})},'−'),
         h('b',{},'×'+sec.repeat),
@@ -1429,13 +1447,15 @@ function renderSections(){
       h('div',{class:'acts'},
         h('button',{class:'mini',title:'Move earlier',disabled:i===0,onclick:stop(()=>{syncSection();[secs[i-1],secs[i]]=[secs[i],secs[i-1]];if(state.cur===i)state.cur--;else if(state.cur===i-1)state.cur++;changed(true);})},'◀'),
         h('button',{class:'mini',title:'Move later',disabled:i===secs.length-1,onclick:stop(()=>{syncSection();[secs[i+1],secs[i]]=[secs[i],secs[i+1]];if(state.cur===i)state.cur++;else if(state.cur===i+1)state.cur--;changed(true);})},'▶'),
-        h('button',{class:'mini',title:'Duplicate exactly (stays linked to the original until you change it)',onclick:stop(()=>{syncSection();const root=(sec.kind==='copy'&&secs.find(x=>x.id===sec.from))||sec;const c=JSON.parse(JSON.stringify(sec));c.id='s'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);c.tracks.forEach(t=>t.id=uid++);c.from=root.id;c.kind='copy';c.color=root.color;c.name=copyName(root.name,secs);secs.splice(i+1,0,c);state.cur=i+1;state.tracks=c.tracks;state.prog=c.prog;changed(true);toast(`Duplicated ${root.name} → ${c.name}`);})},'⧉'),
-        h('button',{class:'mini',title:'Delete section',disabled:secs.length===1,onclick:stop(()=>{syncSection();secs.forEach(x=>{if(x.from===sec.id){x.from=null;x.kind=null;}});secs.splice(i,1);state.cur=Math.min(state.cur>i?state.cur-1:state.cur,secs.length-1);state.tracks=secs[state.cur].tracks;state.prog=secs[state.cur].prog;changed(true);})},'✕')));
+        h('button',{class:'mini',title:'Duplicate exactly (same name until you change it)',onclick:stop(()=>{syncSection();const c=JSON.parse(JSON.stringify(sec));c.id='s'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);c.tracks.forEach(t=>t.id=uid++);secs.splice(i+1,0,c);state.cur=i+1;state.tracks=c.tracks;state.prog=c.prog;changed(true);toast(`Duplicated ${labels[i]}`);})},'⧉'),
+        h('button',{class:'mini',title:'Delete section',disabled:secs.length===1,onclick:stop(()=>{syncSection();secs.splice(i,1);state.cur=Math.min(state.cur>i?state.cur-1:state.cur,secs.length-1);state.tracks=secs[state.cur].tracks;state.prog=secs[state.cur].prog;changed(true);})},'✕')));
     box.onpointerdown=e=>startSectionDrag(e,box,i);
     el.append(box);
-    if(i===state.cur)el.append(h('button',{class:'sec-add',title:`Adds a section right after ${sec.name}: same instruments and drums, new melodies`,onclick:addSection},h('b',{},secs.length>1?`+ New section after ${sec.name}`:'+ New section'),h('small',{},'same sounds · new melodies')));
+    if(i===state.cur){const add=h('button',{class:'sec-add',title:`Click: add a section right after ${labels[i]} · drag: drop it anywhere in the song. Same instruments and drums, new melodies`,onclick:()=>{if(!add.__dragged)addSection();}},h('b',{},secs.length>1?`+ New section after ${labels[i]}`:'+ New section'),h('small',{},secs.length>1?'or drag it into place':'same sounds · new melodies'));
+      add.onpointerdown=e=>startSectionDrag(e,add,-1,at=>addSection(at));el.append(add);}
   });
-  if(secs.length>1)el.append(h('button',{class:'tog sec-loop'+(state.loopSection?' on':''),title:'Play only the section you are editing',onclick:()=>{state.loopSection=!state.loopSection;changed(true);}},state.loopSection?'🔁 looping '+secs[state.cur].name:'🔁 loop this section'));
+  if(secs.length>1)el.append(h('button',{class:'tog sec-loop'+(state.loopSection?' on':''),title:'Play only the section you are editing',onclick:()=>{state.loopSection=!state.loopSection;changed(true);}},state.loopSection?'🔁 looping '+labels[state.cur]:'🔁 loop this section'));
+  if(secs.length>1)el.append(h('div',{class:'song-order',title:'The order the song plays in'},'Song: ',h('b',{},labels.join('-'))));
   el.append(h('button',{class:'tog sec-loop sec-clear',title:'Start over: remove every section and track',onclick:e=>clearSong(e.currentTarget)},'🗑 Clear song'));
 }
 function render(){
@@ -1742,7 +1762,7 @@ renderSaves();
 // A preset replaces only the section being edited; the rest of the song stays.
 function applyPreset(k){
   syncSection();
-  const multi=state.sections.length>1,sec=state.sections[state.cur];
+  const multi=state.sections.length>1,secName=secLabels(state.sections)[state.cur];
   let p;
   if(multi){
     const ctx=currentCtx();
@@ -1754,7 +1774,7 @@ function applyPreset(k){
   syncSection();
   customCode=false;document.getElementById('banner').classList.remove('show');
   changed(true);syncPresetSel();
-  toast(multi?`Loaded “${k}” into section ${sec.name} — other sections kept`:`Loaded “${k}”`);
+  toast(multi?`Loaded “${k}” into section ${secName} — other sections kept`:`Loaded “${k}”`);
 }
 presetEl.onchange=()=>{const k=presetEl.value;if(!k)return;applyPreset(k);};
 function clearSong(btn){
@@ -1765,7 +1785,7 @@ function randomize(){
   const name=state.style&&STYLES[state.style]?state.style:randomStyleName();
   if(state.sections&&state.sections.length>1){ // re-roll just this section, in the song's key and tempo
     const k=currentCtx();const g=genStyle(name,(Math.random()*2**32)>>>0,{root:k.root,scale:k.scale});
-    state.tracks=g.tracks;state.prog=g.prog;syncSection();changed(true);toast(`🎲 New ${name} groove for section ${state.sections[state.cur].name}`);return;
+    state.tracks=g.tracks;state.prog=g.prog;syncSection();changed(true);toast(`🎲 New ${name} groove for section ${secLabels(state.sections)[state.cur]}`);return;
   }
   applyNewState(genStyle(name,(Math.random()*2**32)>>>0),'🎲 New '+name+' groove');
 }
