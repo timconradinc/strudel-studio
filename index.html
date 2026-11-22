@@ -884,7 +884,7 @@ const SECTION_NAMES=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'
 const SEC_COLORS=['#ff8a3d','#4fb3ff','#c6f432','#ff9de2','#3dd6c5','#ffd23f','#a78bfa','#ff5d73'];
 function nextSecColor(secs){const used=secs.map(x=>x.color);return SEC_COLORS.find(c=>!used.includes(c))||SEC_COLORS[secs.length%SEC_COLORS.length];}
 // a section's musical content, ignoring track ids and UI-only flags
-const secSig=sec=>JSON.stringify(sec.tracks.map(({id,fxOpen,_bad,...t})=>t))+'|'+JSON.stringify(sec.prog||null);
+const secSig=sec=>JSON.stringify(sec.tracks.map(({id,fxOpen,_bad,color,...t})=>t))+'|'+JSON.stringify(sec.prog||null); // colours are cosmetic
 // Section names show lineage: copies share a name (B-B-B); when one is edited it becomes Bm,
 // a copy edited differently Bm1, Bm2... A section keeps its version name while you keep editing it,
 // goes back to B if it matches the original again. Names typed by the user are kept.
@@ -903,7 +903,7 @@ function freshOriginal(sec){if(!state.sections.some(x=>x!==sec&&x.fam===sec.fam)
 const isModified=(sec)=>!sec.renamed&&!!sec.ver;
 function ensureSections(s){
   if(!Array.isArray(s.sections)||!s.sections.length)s.sections=[{id:'s'+Date.now().toString(36),name:'A',repeat:4,prog:s.prog,tracks:s.tracks||[]}];
-  s.sections.forEach((x,i)=>{if(!x.color)x.color=SEC_COLORS[i%SEC_COLORS.length];if(!x.fam){x.fam=String(x.name||'A');x.famSig=null;x.ver=null;}if(x.famSig==null)x.famSig=secSig(x);});
+  s.sections.forEach((x,i)=>{if(!x.color)x.color=SEC_COLORS[i%SEC_COLORS.length];if(!x.fam){x.fam=String(x.name||'A');x.famSig=null;x.ver=null;}if(x.famSig==null||(!x.ver&&x.famSig.includes('"color"')))x.famSig=secSig(x);});
   s.cur=Math.min(Math.max(0,s.cur|0),s.sections.length-1);
   s.tracks=s.sections[s.cur].tracks;s.prog=s.sections[s.cur].prog||s.prog;
   return s;
@@ -1442,7 +1442,7 @@ function startSectionDrag(e,box,i,onDrop){
   window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);
 }
 function renderSections(){
-  const el=document.getElementById('sections');el.innerHTML='';
+  const el=document.getElementById('sections');el.innerHTML='';lastSecMark=''; // redraw the 'playing' marker on the new chips
   const secs=state.sections;if(!secs)return;
   const labels=secLabels(secs);
   secs.forEach((sec,i)=>{
