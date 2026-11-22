@@ -738,10 +738,13 @@ function presetList(){
   return out;
 }
 
+// sounds removed because their files can't be fetched by web pages -> working replacements (for saved grooves)
+const RETIRED={steinway:'piano',kawai:'piano',kalimba:'gm_kalimba',ocarina:'gm_pan_flute',psaltery_pluck:'harp',shaker_large:'sh',shaker_small:'sh',snare_modern:'sd',tom_mallet:'lt'};
 let state;
 function loadState(){
   try{const s=JSON.parse(localStorage.getItem('strudel-studio-v1'));
-    if(s&&Array.isArray(s.tracks)){s.tracks.forEach(t=>{t.fx=Object.assign(baseFx(),t.fx);t.mods=Object.assign(baseMods(),t.mods);uid=Math.max(uid,t.id+1)});return s;}}catch(e){}
+    if(s&&Array.isArray(s.tracks)){s.tracks.forEach(t=>{t.fx=Object.assign(baseFx(),t.fx);t.mods=Object.assign(baseMods(),t.mods);uid=Math.max(uid,t.id+1);
+      for(const k of['wave','sound'])if(RETIRED[t[k]])t[k]=RETIRED[t[k]];});return s;}}catch(e){}
   return presetList()['House groove']();
 }
 function save(){try{localStorage.setItem('strudel-studio-v1',JSON.stringify(state))}catch(e){}}
