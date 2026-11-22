@@ -2,33 +2,124 @@
   "_about": "Strudel Studio settings. Edit these values to change the app's defaults; the app reads this file when it starts. Generated with Claude Opus 5.5.",
   "attribution": "Claude Opus 5.5",
   "defaultPreset": "House groove",
-  "firstStepHint": "Press play, then click a step to change the beat.",
   "maxSaves": 15,
   "undoDepth": 40,
-  "codePanel": { "width": 440, "minWidth": 280, "maxWidth": 900, "collapsed": false, "wrap": true },
+  "codePanel": {
+    "width": 440,
+    "minWidth": 280,
+    "maxWidth": 900,
+    "collapsed": false,
+    "wrap": true
+  },
   "controls": {
-    "volume":  { "min": 0,    "max": 1.5,   "default": 1 },
-    "pitch":   { "min": -12,  "max": 12,    "default": 0,     "unit": "semitones" },
-    "tone":    { "min": 150,  "max": 20000, "default": 20000, "unit": "Hz low-pass" },
-    "decay":   { "min": 0.03, "max": 2,     "default": 0,     "unit": "seconds (0 = natural)" },
-    "attack":  { "min": 0,    "max": 2,     "default": 0 },
-    "release": { "min": 0.01, "max": 3,     "default": 0.1 }
+    "volume": {
+      "min": 0,
+      "max": 1.5,
+      "default": 1
+    },
+    "pitch": {
+      "min": -12,
+      "max": 12,
+      "default": 0,
+      "unit": "semitones"
+    },
+    "tone": {
+      "min": 150,
+      "max": 20000,
+      "default": 20000,
+      "unit": "Hz low-pass"
+    },
+    "decay": {
+      "min": 0.03,
+      "max": 2,
+      "default": 0,
+      "unit": "seconds (0 = natural)"
+    },
+    "attack": {
+      "min": 0,
+      "max": 2,
+      "default": 0
+    },
+    "release": {
+      "min": 0.01,
+      "max": 3,
+      "default": 0.1
+    }
   },
   "pads": {
     "phoneMaxWidth": 700,
-    "layouts": { "phone": { "cols": 3, "rows": 5 }, "desktop": { "cols": 4, "rows": 4 } },
-    "colors": { "drums": "#f2b417", "keys": "#14e0ff", "bass": "#ff6b5a", "lead": "#a46bff" },
+    "layouts": {
+      "phone": {
+        "cols": 3,
+        "rows": 5
+      },
+      "desktop": {
+        "cols": 4,
+        "rows": 4
+      }
+    },
+    "colors": {
+      "drums": "#f2b417",
+      "keys": "#14e0ff",
+      "bass": "#ff6b5a",
+      "lead": "#a46bff"
+    },
     "symbolColor": "#17171b",
     "quantize": 16,
     "sounds": [
-      { "sound": "bd" }, { "sound": "sd" }, { "sound": "cp" }, { "sound": "hh" },
-      { "sound": "oh" }, { "sound": "lt" }, { "sound": "ht" }, { "sound": "cr" },
-      { "sound": "rim" }, { "sound": "sh" }, { "sound": "cb" },
-      { "sound": "gm_electric_bass_finger", "degree": 0 },
-      { "sound": "gm_epiano1", "degree": 0, "chord": true },
-      { "sound": "sawtooth", "degree": 4 },
-      { "sound": "square", "degree": 7 },
-      { "sound": "conga" }
+      {
+        "sound": "bd"
+      },
+      {
+        "sound": "sd"
+      },
+      {
+        "sound": "cp"
+      },
+      {
+        "sound": "hh"
+      },
+      {
+        "sound": "oh"
+      },
+      {
+        "sound": "lt"
+      },
+      {
+        "sound": "ht"
+      },
+      {
+        "sound": "cr"
+      },
+      {
+        "sound": "rim"
+      },
+      {
+        "sound": "sh"
+      },
+      {
+        "sound": "cb"
+      },
+      {
+        "sound": "gm_electric_bass_finger",
+        "degree": 0
+      },
+      {
+        "sound": "gm_epiano1",
+        "degree": 0,
+        "chord": true
+      },
+      {
+        "sound": "sawtooth",
+        "degree": 4
+      },
+      {
+        "sound": "square",
+        "degree": 7
+      },
+      {
+        "sound": "conga"
+      }
     ]
   }
 }

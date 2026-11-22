@@ -9,7 +9,7 @@ Live: https://timconradinc.github.io/strudel-studio/
 App defaults live in [`settings.json`](settings.json), which the app reads when it starts (the same defaults are built into `index.html` as a fallback). It covers:
 
 - `attribution`: the model credited in generated code
-- `defaultPreset`, `firstStepHint`, `maxSaves`, `undoDepth`
+- `defaultPreset`, `maxSaves`, `undoDepth`
 - `codePanel`: width, limits, collapsed, line wrapping
 - `controls`: ranges and defaults for volume, pitch, tone, decay, attack, release
 - `pads`: phone/desktop grid sizes, colours per instrument type, symbol colour, default pad sounds
