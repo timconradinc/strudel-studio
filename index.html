@@ -1458,7 +1458,7 @@ function renderSections(){
   });
   if(secs.length>1)el.append(h('button',{class:'tog sec-loop'+(state.loopSection?' on':''),title:'Play only the section you are editing',onclick:()=>{state.loopSection=!state.loopSection;changed(true);}},state.loopSection?'🔁 looping '+labels[state.cur]:'🔁 loop this section'));
   if(secs.length>1)el.append(h('div',{class:'song-order',title:'The order the song plays in'},'Song: ',h('b',{},labels.join('-'))));
-  el.append(h('button',{class:'tog sec-loop sec-clear',title:'Start over: remove every section and track',onclick:e=>clearSong(e.currentTarget)},'🗑 Clear song'));
+  el.append(h('button',{class:'tog sec-loop sec-clear',title:'Start over: one new randomized section in this style',onclick:e=>clearSong(e.currentTarget)},'🗑 Clear song'));
 }
 function render(){
   renderSections();
@@ -1781,7 +1781,9 @@ function applyPreset(k){
 presetEl.onchange=()=>{const k=presetEl.value;if(!k)return;applyPreset(k);};
 function clearSong(btn){
   if(!btn.classList.contains('confirm')){btn.classList.add('confirm');btn.textContent='🗑 Click again to clear';setTimeout(()=>{if(btn.isConnected){btn.classList.remove('confirm');btn.textContent='🗑 Clear song';}},3000);return;}
-  applyNewState(presetList()['Blank'](),'Song cleared — one empty section');
+  // start over with one fresh, randomized section in the current style
+  const name=state.style&&STYLES[state.style]?state.style:randomStyleName();
+  applyNewState(genStyle(name,(Math.random()*2**32)>>>0),`Song cleared — new ${name} groove`);
 }
 function randomize(){
   const name=state.style&&STYLES[state.style]?state.style:randomStyleName();
