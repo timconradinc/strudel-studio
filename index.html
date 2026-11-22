@@ -341,7 +341,7 @@ function scaleNote(root,scale,deg,oct){const iv=SCALES[scale];const s=NOTE_NAMES
 const PROGS=[[0,0,0,0],[0,0,5,5],[0,5,3,4],[0,3,4,0],[0,5,2,6],[0,3,0,4],[0,6,5,6],[0,2,3,4],[0,4,5,3],[0,0,3,3]];
 
 const STYLES={
-  'House groove':{kit:['tr909','tr909','linndrum'],bpm:[120,126],swing:[0,.05],scales:['minor','dorian'],drums:[
+  'House groove':{palette:['gm_piano', 'gm_epiano1', 'gm_drawbar_organ', 'gm_string_ensemble_1', 'gm_synth_bass_1'],kit:['tr909','tr909','linndrum'],bpm:[120,126],swing:[0,.05],scales:['minor','dorian'],drums:[
       {s:'bd',p:'x...x...x...x...'},
       {s:'cp',p:['....x.......x...','....x.......x..-']},
       {s:'hh',p:['..x...x...x...x.','-.x.-.x.-.x.-.xo'],fx:{gain:[.6,.85]}},
@@ -359,7 +359,7 @@ const STYLES={
     parts:[
       {role:'bass',name:'Rumble',mode:['root'],p:['.ooo.ooo.ooo.ooo','.x.x.x.x.x.x.x.x'],oct:[1,2],waves:['sawtooth'],fx:{lpf:[300,600],lfo:true,lfoRate:[4,16],lpq:[6,12],shape:[.2,.4],release:.06}},
       {role:'lead',name:'Acid line',p:'o+o+o+o+o+o+o+o+',oct:3,waves:['square','sawtooth'],fx:{lpf:[1200,3500],lfo:true,lfoRate:[2,8],lpq:[12,18],delay:[.2,.4],release:.1,gain:.6}}]},
-  'Classic rock':{kit:['acoustic'],bpm:[112,140],swing:[0,0],scales:['major','mixolydian','minor'],progs:[[0,3,4,0],[0,6,3,3],[0,4,5,3],[0,0,3,4],[0,3,0,4],[0,6,3,0]],drums:[
+  'Classic rock':{palette:['gm_overdriven_guitar', 'gm_distortion_guitar', 'gm_electric_guitar_clean', 'gm_electric_guitar_muted', 'gm_electric_bass_pick', 'gm_electric_bass_finger', 'gm_rock_organ', 'gm_drawbar_organ', 'gm_piano', 'gm_string_ensemble_1'],kit:['acoustic'],bpm:[112,140],swing:[0,0],scales:['major','mixolydian','minor'],progs:[[0,3,4,0],[0,6,3,3],[0,4,5,3],[0,0,3,4],[0,3,0,4],[0,6,3,0]],drums:[
       {s:'bd',p:['x.....x.x.......','x.......x.x.....','x.....x.x.....-.']},
       {s:'sd',p:['....x.......x...','....x.......x..-']},
       {s:'hh',p:['x.x.x.x.x.x.x.x.','xoxoxoxoxoxoxoxo'],fx:{gain:[.45,.6]}},
@@ -370,7 +370,7 @@ const STYLES={
       {role:'bass',name:'Bass',mode:['root','root','fifth','oct'],p:['x.x.x.x.x.x.x.x.','x..x..x.x..x..x.','x.xxx.x.x.xxx.x.'],oct:2,waves:['gm_electric_bass_pick','gm_electric_bass_finger'],fx:{release:.1,gain:.9}},
       {role:'lead',name:'Lead guitar',p:'-.+.o.+.-.+.o+o.',oct:4,waves:['gm_overdriven_guitar','gm_distortion_guitar'],opt:.6,fx:{delay:[.15,.3],room:.35,release:.25,gain:.6}},
       {role:'pad',name:'Organ',oct:3,waves:['gm_rock_organ','gm_drawbar_organ'],opt:.35,fx:{release:.3,room:.3,gain:.35}}]},
-  'Boom bap':{kit:['acoustic','mpc60'],bpm:[84,94],swing:[.1,.18],scales:['dorian','minor'],drums:[
+  'Boom bap':{palette:['gm_epiano1', 'gm_piano', 'gm_vibraphone', 'gm_string_ensemble_1', 'gm_acoustic_bass', 'gm_muted_trumpet', 'gm_flute', 'gm_electric_guitar_jazz'],kit:['acoustic','mpc60'],bpm:[84,94],swing:[.1,.18],scales:['dorian','minor'],drums:[
       {s:'bd',p:['x.....x...x.....','x..-..x.-.x..-..','x.....x.-.x...-.']},
       {s:'sd',p:['....x.......x..-','....x.-.....x...']},
       {s:'hh',p:['x.x.x.x.x.x.x.x.','x+x.x+x.x+x.x+x.'],fx:{gain:[.55,.75]}},
@@ -378,7 +378,7 @@ const STYLES={
     parts:[
       {role:'pad',name:'Keys',p:'x.......x.......',oct:3,waves:['gm_epiano1','gm_piano','gm_vibraphone'],sev:.6,fx:{room:[.4,.7],lpf:[1800,3000],release:[.3,.6],attack:.01}},
       {role:'bass',name:'Bass',mode:['root','walk'],p:['x.....o...o.....','x.....x...o..-..'],oct:2,waves:['gm_acoustic_bass','gm_electric_bass_finger'],fx:{release:.25,gain:.9}}]},
-  'Trap':{kit:['tr808'],bpm:[136,150],swing:[0,0],scales:['minor','harmonic:minor','phrygian'],progs:[[0,0,5,5],[0,0,3,4],[0,5,0,6]],drums:[
+  'Trap':{palette:['gm_piano', 'gm_kalimba', 'gm_vibraphone', 'gm_pizzicato_strings', 'gm_choir_aahs', 'gm_flute', 'gm_synth_bass_1', 'gm_orchestral_harp'],kit:['tr808'],bpm:[136,150],swing:[0,0],scales:['minor','harmonic:minor','phrygian'],progs:[[0,0,5,5],[0,0,3,4],[0,5,0,6]],drums:[
       {s:'bd',p:['x.....-+..o...-.','x......x..x.....','x..-....-.o....-']},
       {s:'cp',p:'........x.......',fx:{room:[.2,.4]}},
       {s:'oh',p:'..............-.',opt:.5,fx:{gain:.5}}],
@@ -386,7 +386,7 @@ const STYLES={
       {role:'hats',name:'Hat rolls',gain:[.5,.7]},
       {role:'bass',name:'808',mode:['root','fifth'],p:['x.....-+..o.....','x......x..x...-.'],oct:[1,2],waves:['sine'],fx:{release:[.6,1],shape:[.3,.5],gain:.9}},
       {role:'lead',name:'Bell lead',p:'o.-.+.-.o.-.+.-.',oct:4,waves:['gm_piano','gm_kalimba','gm_vibraphone','gm_pizzicato_strings','triangle'],fx:{room:[.4,.7],delay:[.3,.5],fm:[0,3],release:.3,gain:.45}}]},
-  'Drum & bass':{kit:['acoustic','tr909'],bpm:[170,176],swing:[0,0],scales:['minor','dorian'],drums:[
+  'Drum & bass':{palette:['gm_string_ensemble_1', 'gm_pad_warm', 'gm_piano', 'gm_choir_aahs', 'gm_synth_bass_1'],kit:['acoustic','tr909'],bpm:[170,176],swing:[0,0],scales:['minor','dorian'],drums:[
       {s:'bd',p:['x.........x.....','x.........o..-..','x.-.......x.....']},
       {s:'sd',p:['....x..-....x...','....x.......x..-']},
       {s:'hh',p:['x+x+x+x+x+x+x+x+','xoxoxoxoxoxoxoxo'],fx:{gain:.55}},
@@ -394,7 +394,7 @@ const STYLES={
     parts:[
       {role:'bass',name:'Reese',mode:['root'],p:['x.......o.......','x.....o...x.....'],oct:[1,2],waves:['supersaw','sawtooth'],fx:{lpf:[400,900],lfo:true,lfoRate:[2,8],lpq:[4,10],release:[.4,.8],gain:.8}},
       {role:'pad',name:'Pad',oct:4,waves:['gm_string_ensemble_1','gm_pad_warm','supersaw'],sev:.5,fx:{attack:[.2,.5],release:[1,2],room:[.6,.9],lpf:[1500,3000],gain:.4}}]},
-  'Lo-fi chill':{kit:['acoustic','mpc60'],bpm:[70,85],swing:[.15,.22],scales:['dorian','major','minor'],progs:[[0,3,1,4],[0,5,1,4],[1,4,0,0],[0,3,2,5]],drums:[
+  'Lo-fi chill':{palette:['gm_epiano1', 'gm_piano', 'gm_vibraphone', 'gm_electric_guitar_jazz', 'gm_flute', 'gm_acoustic_bass', 'gm_electric_bass_finger', 'gm_string_ensemble_1'],kit:['acoustic','mpc60'],bpm:[70,85],swing:[.15,.22],scales:['dorian','major','minor'],progs:[[0,3,1,4],[0,5,1,4],[1,4,0,0],[0,3,2,5]],drums:[
       {s:'bd',p:['x......-..x.....','x.....-...x..-..']},
       {s:'sd',p:'....x.......x...',fx:{room:.3}},
       {s:'hh',p:['x+x+x+x+x+x+x+x+','x.x.x.x.x.x.x.x.'],fx:{gain:.45,crush:[6,9]}},
@@ -403,7 +403,7 @@ const STYLES={
       {role:'pad',name:'Rhodes',oct:3,waves:['gm_epiano1','gm_piano'],sev:1,fx:{room:[.5,.8],lpf:[1200,2000],attack:.02,release:[.6,1],crush:[0,8],gain:.6}},
       {role:'lead',name:'Melody',p:'o.-.+.-.-.+.-...',oct:4,waves:['gm_vibraphone','gm_electric_guitar_jazz','gm_flute','sine'],fx:{delay:[.3,.6],room:.5,release:.3,gain:.45}},
       {role:'bass',name:'Bass',mode:['root','walk'],p:'x.....-...x.....',oct:2,waves:['gm_acoustic_bass','gm_electric_bass_finger'],fx:{release:.4,gain:.8}}]},
-  'Synthwave':{kit:['linndrum','tr707'],bpm:[96,110],swing:[0,0],scales:['minor','dorian'],progs:[[0,5,2,6],[0,5,3,4],[0,3,5,4]],drums:[
+  'Synthwave':{palette:['gm_synth_strings_1', 'gm_synth_brass_1', 'gm_lead_2_sawtooth', 'gm_pad_warm', 'gm_synth_bass_1'],kit:['linndrum','tr707'],bpm:[96,110],swing:[0,0],scales:['minor','dorian'],progs:[[0,5,2,6],[0,5,3,4],[0,3,5,4]],drums:[
       {s:'bd',p:'x...x...x...x...'},
       {s:'sd',p:'....x.......x...',fx:{room:[.3,.5]}},
       {s:'hh',p:'x.x.x.x.x.x.x.x.',fx:{gain:.5}},
@@ -412,7 +412,7 @@ const STYLES={
       {role:'bass',name:'Bass',mode:['root','oct'],p:'x.x.x.x.x.x.x.x.',oct:2,waves:['sawtooth','pulse'],fx:{lpf:[700,1400],release:.1,gain:.8}},
       {role:'arp',name:'Arp',p:'xxxxxxxxxxxxxxxx',oct:4,waves:['square','sawtooth','pulse'],fx:{delay:[.3,.5],lpf:[2000,4000],release:.08,gain:.4}},
       {role:'pad',name:'Pad',oct:3,waves:['supersaw','gm_synth_strings_1'],fx:{attack:[.2,.4],release:[1,1.6],room:[.6,.9],lpf:[1500,2500],gain:.45}}]},
-  'Reggaeton':{kit:['tr808'],bpm:[90,98],swing:[0,0],scales:['minor','harmonic:minor'],progs:[[0,5,2,6],[0,3,4,0],[0,5,3,4]],drums:[
+  'Reggaeton':{palette:['gm_marimba', 'gm_acoustic_guitar_nylon', 'gm_steel_drums', 'gm_synth_bass_1', 'gm_piano', 'gm_string_ensemble_1'],kit:['tr808'],bpm:[90,98],swing:[0,0],scales:['minor','harmonic:minor'],progs:[[0,5,2,6],[0,3,4,0],[0,5,3,4]],drums:[
       {s:'bd',p:'x...x...x...x...'},
       {s:'sd',p:['...x..x....x..x.','...x..x....x..-.']},
       {s:'hh',p:'x.x.x.x.x.x.x.x.',fx:{gain:.45}},
@@ -420,7 +420,7 @@ const STYLES={
     parts:[
       {role:'bass',name:'Bass',mode:['root'],p:'x...x...x...x...',oct:2,waves:['gm_synth_bass_1','sine'],fx:{release:.3,gain:.9}},
       {role:'chords',name:'Pluck',p:['..o...o...o...o.','o..o..o.o..o..o.'],oct:4,waves:['gm_marimba','gm_acoustic_guitar_nylon','gm_steel_drums','triangle'],fx:{release:.15,room:.4,delay:[.1,.3],gain:.5}}]},
-  'Afrobeat':{kit:['acoustic'],bpm:[100,112],swing:[.03,.08],scales:['dorian','mixolydian','major:pentatonic'],drums:[
+  'Afrobeat':{palette:['gm_electric_guitar_clean', 'gm_electric_guitar_muted', 'gm_brass_section', 'gm_trumpet', 'gm_alto_sax', 'gm_tenor_sax', 'gm_electric_bass_finger', 'gm_marimba', 'gm_drawbar_organ'],kit:['acoustic'],bpm:[100,112],swing:[.03,.08],scales:['dorian','mixolydian','major:pentatonic'],drums:[
       {s:'bd',p:['x.....x...x.....','x..-..x...x..-..']},
       {s:'rim',p:['x..x..x...x.x...','x..x...x..x.x...'],fx:{gain:.6}},
       {s:'sh',p:'xoxoxoxoxoxoxoxo',fx:{gain:.4}},
@@ -430,7 +430,7 @@ const STYLES={
       {role:'bass',name:'Bass',mode:['walk','fifth'],p:['x..o..x.o.x..o..','x.o..o..x.o..o..'],oct:2,waves:['gm_electric_bass_finger','gm_electric_bass_pick'],fx:{lpf:[900,1600],release:.12,gain:.85}},
       {role:'chords',name:'Guitar',p:['o.+.o.+.o.+.o.+.','.o.o.o.o.o.o.o.o'],oct:4,waves:['gm_electric_guitar_clean','gm_electric_guitar_muted'],fx:{release:.06,lpf:[2000,3500],pan:[.3,.7],gain:.4}},
       {role:'lead',name:'Horns',p:'o.-.-.o.-...o.-.',oct:4,waves:['gm_brass_section','gm_trumpet','gm_alto_sax','gm_tenor_sax'],opt:.6,fx:{lpf:[1500,2500],room:.4,release:.15,gain:.4}}]},
-  'Disco funk':{kit:['acoustic','linndrum'],bpm:[112,120],swing:[0,.06],scales:['dorian','mixolydian','major'],drums:[
+  'Disco funk':{palette:['gm_string_ensemble_1', 'gm_brass_section', 'gm_electric_guitar_muted', 'gm_slap_bass_1', 'gm_electric_bass_finger', 'gm_epiano1', 'gm_clavinet'],kit:['acoustic','linndrum'],bpm:[112,120],swing:[0,.06],scales:['dorian','mixolydian','major'],drums:[
       {s:'bd',p:'x...x...x...x...'},
       {s:'sd',p:['....x.......x...','....x..-....x...']},
       {s:'oh',p:'..x...x...x...x.',fx:{gain:.55}},
@@ -439,7 +439,7 @@ const STYLES={
     parts:[
       {role:'bass',name:'Octave bass',mode:['oct'],p:['x.ox.ox.x.ox.ox.','xox.xox.xox.xox.'],oct:2,waves:['gm_slap_bass_1','gm_electric_bass_finger'],fx:{lpf:[900,1500],release:.08,gain:.85}},
       {role:'chords',name:'Stabs',p:['o..o..+.o..o..+.','.o.+.o...o.+.o..'],oct:4,waves:['gm_string_ensemble_1','gm_brass_section','gm_electric_guitar_muted','gm_epiano1'],sev:.5,fx:{lpf:[2500,4500],release:.08,room:.3,gain:.45}}]},
-  'UK garage':{kit:['tr909','tr808'],bpm:[130,134],swing:[.12,.2],scales:['minor','dorian'],drums:[
+  'UK garage':{palette:['gm_drawbar_organ', 'gm_percussive_organ', 'gm_piano', 'gm_string_ensemble_1', 'gm_synth_bass_1'],kit:['tr909','tr808'],bpm:[130,134],swing:[.12,.2],scales:['minor','dorian'],drums:[
       {s:'bd',p:['x.....+...x..-..','x.........x.....','x......x..-.....']},
       {s:'sd',p:'....x.......x...'},
       {s:'hh',p:'..x...x...x...x.',fx:{gain:.6}},
@@ -448,19 +448,19 @@ const STYLES={
     parts:[
       {role:'bass',name:'Sub',mode:['root','fifth'],p:['x..+..o...x..+..','x.....o.+.x.....'],oct:2,waves:['sine'],fx:{release:.3,gain:.9}},
       {role:'chords',name:'Organ',p:['...o..+....o..+.','..o..o.....o..o.'],oct:4,waves:['gm_drawbar_organ','gm_percussive_organ','square'],sev:.7,fx:{release:.12,room:.4,lpf:[2000,3500],gain:.45}}]},
-  'Dub':{kit:['acoustic'],bpm:[70,80],swing:[.05,.12],scales:['minor','major'],progs:[[0,0,3,3],[0,3,0,4],[0,0,5,4]],drums:[
+  'Dub':{palette:['gm_rock_organ', 'gm_electric_guitar_clean', 'gm_electric_bass_finger', 'gm_harmonica', 'gm_muted_trumpet', 'gm_percussive_organ'],kit:['acoustic'],bpm:[70,80],swing:[.05,.12],scales:['minor','major'],progs:[[0,0,3,3],[0,3,0,4],[0,0,5,4]],drums:[
       {s:'bd',p:['........x.......','x.......x.......']},
       {s:'rim',p:'....x.......x...',fx:{delay:[.5,.7],room:.5}},
       {s:'hh',p:'x.+.x.+.x.+.x.+.',fx:{gain:.4}}],
     parts:[
       {role:'bass',name:'Bass',mode:['walk','root'],p:['x..o..x.o...x...','x...o.x...x.o...'],oct:2,waves:['gm_electric_bass_finger','gm_acoustic_bass','sine'],fx:{release:.3,lpf:800,gain:.95}},
       {role:'chords',name:'Skank',p:'..x...x...x...x.',oct:4,waves:['gm_rock_organ','gm_electric_guitar_clean','gm_percussive_organ'],fx:{release:.06,delay:[.4,.6],room:[.4,.6],gain:.4}}]},
-  'Ambient drift':{kit:['studio'],bpm:[60,76],swing:[0,0],scales:['lydian','major','dorian','major:pentatonic'],progs:[[0,0,3,3],[0,0,5,5],[0,4,3,0]],drums:[
+  'Ambient drift':{palette:['gm_string_ensemble_1', 'gm_choir_aahs', 'gm_pad_halo', 'gm_pad_warm', 'gm_orchestral_harp', 'gm_tubular_bells', 'gm_vibraphone'],kit:['studio'],bpm:[60,76],swing:[0,0],scales:['lydian','major','dorian','major:pentatonic'],progs:[[0,0,3,3],[0,0,5,5],[0,4,3,0]],drums:[
       {s:'sh',p:'..+...+.+..+..+.',mods:{degrade:.4},fx:{gain:.45,pan:[.2,.8],room:.4}}],
     parts:[
       {role:'pad',name:'Pad',oct:3,waves:['gm_string_ensemble_1','gm_choir_aahs','gm_pad_halo','supersaw'],sev:.7,mods:{rate:.5},fx:{lpf:[1200,2200],lfo:true,lfoRate:[8,16],attack:[.4,.8],release:[1.2,2],room:[.8,.95],gain:.6}},
       {role:'bells',name:'Bells',gain:[.4,.55]}]},
-  'Breakbeat':{kit:['acoustic','mpc60'],bpm:[125,135],swing:[0,.08],scales:['minor','dorian'],drums:[
+  'Breakbeat':{palette:['gm_electric_guitar_clean', 'gm_rock_organ', 'gm_piano', 'gm_electric_bass_finger', 'gm_string_ensemble_1'],kit:['acoustic','mpc60'],bpm:[125,135],swing:[0,.08],scales:['minor','dorian'],drums:[
       {s:'bd',p:['x.........x.-...','x.x.......x.....','x.........-.x...']},
       {s:'sd',p:['....x..-.x..x...','....x.......x..+','....x..x.-..x...']},
       {s:'hh',p:'x+x+x+x+x+x+x+x+',fx:{gain:.5}},
@@ -476,7 +476,7 @@ const STYLES={
       {role:'bass',name:'Bass',mode:['oct'],p:'xxxxxxxxxxxxxxxx',oct:2,waves:['square','triangle'],fx:{release:.05,gain:.6}},
       {role:'lead',name:'Lead',p:'oooo+o+ooooo+o+o',oct:4,waves:['pulse','square'],fx:{release:.06,gain:.45}},
       {role:'arp',name:'Arp',p:'x+x+x+x+x+x+x+x+',oct:5,waves:['square'],opt:.6,fx:{release:.04,gain:.25,delay:.2}}]},
-  'Polyrhythm 4:3':{kit:['studio','tr808'],bpm:[100,118],swing:[0,0],scales:['minor:pentatonic','major:pentatonic','dorian'],progs:[[0,0,0,0],[0,0,3,3]],drums:[
+  'Polyrhythm 4:3':{palette:['gm_marimba', 'gm_kalimba', 'gm_vibraphone', 'gm_steel_drums'],kit:['studio','tr808'],bpm:[100,118],swing:[0,0],scales:['minor:pentatonic','major:pentatonic','dorian'],progs:[[0,0,0,0],[0,0,3,3]],drums:[
       {s:'bd',p:'x...x...x...x...'},
       {s:'rim',p:['x..x..x..x..','x..x..o..x.+','x.+x..x.+x..']}],
     parts:[
@@ -502,7 +502,7 @@ function genPartTrack(p,ctx){
   }
   if(p.role==='bells'){
     const n=ri(4,6),notes=Array.from({length:n},()=>scaleNote(root,scale,ri(0,6),5));
-    return mkPattern({name:p.name,mode:'note',mini:`<${notes.join(' ')}>*${pick([2,4,4,8])}?`,sound:pick(['sine','triangle']),mods:Object.assign(baseMods(),{jux:true}),fx:resolveFx({delay:[.4,.7],room:[.7,.9],gain:p.gain||.5,fm:[0,3],release:.6})});
+    return mkPattern({name:p.name,mode:'note',mini:`<${notes.join(' ')}>*${pick([2,4,4,8])}?`,sound:ctx.real?pick(['gm_vibraphone','gm_tubular_bells','gm_kalimba','gm_marimba']):pick(['sine','triangle']),mods:Object.assign(baseMods(),{jux:true}),fx:resolveFx({delay:[.4,.7],room:[.7,.9],gain:p.gain||.5,fm:[0,3],release:.6})});
   }
   if(p.role==='mini')return mkPattern({name:p.name,mode:p.mode||'s',sound:p.sound||'triangle',mini:p.gen(ctx),fx,mods});
   const steps=p.steps||16;
@@ -542,7 +542,7 @@ function genStyle(name,seed){
     const tracks=[];
     const kit=S.kit?pick(S.kit):'studio';
     for(const d of S.drums){if(d.opt&&!chance(d.opt))continue;tracks.push(Object.assign(genDrumTrack(d),{kit}));}
-    for(const p of S.parts){if(p.opt&&!chance(p.opt))continue;tracks.push(genPartTrack(p,ctx));}
+    for(const p of S.parts){if(p.opt&&!chance(p.opt))continue;const t=genPartTrack(p,{...ctx,real:false});if(t.type==='pattern'&&t.mode==='s')t.kit=kit;tracks.push(t);}
     return{bpm:ri(S.bpm[0],S.bpm[1]),swing:Math.round(rnd(S.swing[0],S.swing[1])*100)/100,style:name,key:{root:ctx.root,scale:ctx.scale},prog:ctx.prog,tracks};
   }finally{R=prevR;}
 }
@@ -579,10 +579,10 @@ const PATTERN_KINDS={
     const ds=['rim','cb','lt','ht','cp','sh'];const a=pick(ds),b=pick(ds.filter(x=>x!==a));
     return `${a}(${ri(3,5)},8,${ri(0,3)}), ${b}(${pick([5,7,9])},16,${ri(0,4)})`;}}),
   'Shaker groove':()=>({role:'mini',name:'Shaker',fx:{gain:[.3,.45],pan:[.3,.7]},gen:()=>pick(['sh*8?','[~ sh]*4','sh(7,16)','sh*16?','[sh sh?]*4','<sh*8 sh(5,8)>'])}),
-  'Riff':()=>({role:'mini',name:'Riff',mode:'note',get sound(){return pick(['square','gm_electric_guitar_muted','gm_marimba','gm_clavinet','gm_electric_bass_pick'])},fx:{release:[.08,.2],lpf:[1500,3500],delay:[.1,.3],gain:.4},gen:ctx=>{
+  'Riff':ctx=>({role:'mini',name:'Riff',mode:'note',sound:ctx.real?pick(ctx.palette?.length?ctx.palette:['gm_electric_guitar_muted','gm_clavinet','gm_marimba']):pick(['square','sawtooth','pulse']),fx:{release:[.08,.2],lpf:[1500,3500],delay:[.1,.3],gain:.4},gen:ctx=>{
     const n=pick([4,6,8]),deg=()=>pick([0,0,2,4,1,3,5,7]);
     return Array.from({length:n},()=>chance(.2)?'~':scaleNote(ctx.root,ctx.scale,deg(),3)).join(' ')+(chance(.4)?'?':'');}}),
-  'Chord swell':()=>({role:'mini',name:'Chord swell',mode:'note',get sound(){return pick(['supersaw','gm_string_ensemble_1','gm_choir_aahs','gm_brass_section'])},fx:{attack:[.3,.6],release:[1,1.6],room:[.6,.85],lpf:[1500,2500],gain:.35},gen:ctx=>{
+  'Chord swell':ctx=>({role:'mini',name:'Chord swell',mode:'note',sound:ctx.real?pick((ctx.palette||[]).filter(w=>/string|choir|brass|organ|pad|epiano|piano/.test(w)).concat(['gm_string_ensemble_1'])):pick(['supersaw','gm_synth_strings_1']),fx:{attack:[.3,.6],release:[1,1.6],room:[.6,.85],lpf:[1500,2500],gain:.35},gen:ctx=>{
     const ch=[...new Set(ctx.prog)].map(r=>'['+[r,r+2,r+4].map(d=>scaleNote(ctx.root,ctx.scale,d,3)).join(',')+']');
     return `<${ch.join(' ')}>`;}}),
   'Tom fill':()=>({role:'mini',name:'Tom fill',fx:{room:[.1,.3],gain:.75},gen:()=>pick(['<~ ~ ~ [lt ht lt lt]>','<~ ~ ~ [~ ht ht lt]>','<~ [~ ~ ~ lt] ~ [ht ht lt lt]>'])})
@@ -605,7 +605,10 @@ function currentCtx(){
     }
   }
   if(!prog)prog=pick(S?.progs||PROGS);
-  return{root,scale,prog};
+  const real=state.tracks.some(t=>(t.wave||t.sound||'').startsWith('gm_'))||!!S?.parts?.some(p=>(p.waves||[]).some(w=>w.startsWith('gm_')));
+  const kits=state.tracks.filter(x=>x.type==='drum'&&x.kit).map(x=>x.kit);
+  const kit=kits.length?kits.sort((a,b)=>kits.filter(k=>k===b).length-kits.filter(k=>k===a).length)[0]:(S?.kit?.[0]||'studio');
+  return{root,scale,prog,real,kit,palette:S?.palette};
 }
 function uniqueName(n){const names=new Set(state.tracks.map(t=>t.name));if(!names.has(n))return n;let i=2;while(names.has(`${n} ${i}`))i++;return `${n} ${i}`;}
 function newTrack(type){
@@ -622,13 +625,17 @@ function newTrack(type){
       t=genDrumTrack({s:snd,p:GENERIC_DRUMS[snd].map(varyTpl),fx:DRUM_FX[snd]});
     }
     // use the kit the other drums use (or the style's), if that kit has this sound
-    const kits=state.tracks.filter(x=>x.type==='drum'&&x.kit).map(x=>x.kit);
-    const kit=kits.length?kits.sort((a,b)=>kits.filter(k=>k===b).length-kits.filter(k=>k===a).length)[0]:(S?.kit?.[0]||'studio');
-    t.kit=KITS[kit]?.has&&!KITS[kit].has.includes(t.sound)?'studio':kit;
+    t.kit=KITS[ctx.kit]?.has&&!KITS[ctx.kit].has.includes(t.sound)?'studio':ctx.kit;
   }else if(type==='synth'){
     const names=new Set(state.tracks.map(x=>x.name));
     const styleParts=(S?.parts||[]).filter(p=>!['hats','bells','mini'].includes(p.role)&&!names.has(p.name));
-    const spec=styleParts.length&&chance(.6)?pick(styleParts):GENERIC_PARTS[pick(['lead','arp','pad','chords','bass'])];
+    let spec=styleParts.length&&chance(.6)?pick(styleParts):GENERIC_PARTS[pick(['lead','arp','pad','chords','bass'])];
+    if(ctx.real&&!styleParts.includes(spec)){
+      // stay in the style's instrument palette (fall back to any real instrument the part type allows)
+      const pal=S?.palette||[],gm=spec.waves.filter(w=>w.startsWith('gm_'));
+      const fit=gm.filter(w=>pal.includes(w));
+      spec={...spec,waves:fit.length?fit:pal.length?pal:gm,fx:{...spec.fx,lpf:20000}};
+    }
     t=genPartTrack(spec,ctx);
   }else{
     const names=new Set(state.tracks.map(x=>x.name));
@@ -637,6 +644,7 @@ function newTrack(type){
     if(styleOnes.length&&chance(.6))spec=pick(styleOnes);
     else{const kinds=Object.keys(PATTERN_KINDS).filter(k=>k!==lastPatternKind);lastPatternKind=pick(kinds);spec=PATTERN_KINDS[lastPatternKind](ctx);}
     t=genPartTrack(spec,ctx);
+    if(t.mode==='s')t.kit=ctx.kit;
   }
   t.name=uniqueName(t.name);
   return t;
@@ -710,6 +718,7 @@ function trackExpr(t){
     const m=(t.mini||'').replace(/"/g,"'").trim();
     if(!m||t._bad)return null;
     e=t.mode==='note'?`note("${m}").s("${t.sound}")`:`s("${m}")`;
+    if(t.mode==='s'&&KITS[t.kit]?.bank){const used=[...new Set(m.match(/[a-z]+/g)||[])];if(used.length&&used.every(d=>KITS[t.kit].has.includes(d)))e+=`.bank("${KITS[t.kit].bank}")`;}
   }
   const M=t.mods,F=t.fx;
   if(M.rate>1)e+=`.fast(${M.rate})`; else if(M.rate<1)e+=`.slow(${f2(1/M.rate)})`;
@@ -1047,6 +1056,7 @@ function renderTrack(t){
       h('button',{class:t.mode==='s'?'on':'',title:'s("…") — the pattern names sounds',onclick:()=>{t.mode='s';changed(true);}},'s(…)'),
       h('button',{class:t.mode==='note'?'on':'',title:'note("…") — the pattern names notes',onclick:()=>{t.mode='note';changed(true);}},'note(…)')));
     if(t.mode==='note')head.append(sel(soundOptions(),t.sound,v=>{t.sound=v;changed();},'Instrument / oscillator'));
+    else head.append(sel(Object.entries(KITS).map(([k,v])=>[k,v.label]),t.kit||'studio',v=>{t.kit=v;changed();},'Drum kit (used when it has every sound in the pattern)'));
   }
   head.append(h('span',{class:'spacer',style:'flex:1'}));
   head.append(h('button',{class:'tbtn'+(t.muted?' on':''),title:'Mute',onclick:()=>{t.muted=!t.muted;changed(true);}},'M'));
