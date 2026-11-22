@@ -1021,7 +1021,8 @@ function presetList(){
 const RETIRED={steinway:'piano',kawai:'piano',kalimba:'gm_kalimba',ocarina:'gm_pan_flute',psaltery_pluck:'harp',shaker_large:'sh',shaker_small:'sh',snare_modern:'sd',tom_mallet:'lt'};
 let state;
 // A song is a list of sections; state.tracks always points at the selected section's tracks.
-const SECTION_NAMES=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
+// sections are numbered 1, 2, 3… (letters read like chord names in music)
+const nextSectionNumber=secs=>{const used=new Set(secs.map(x=>String(x.fam)));let n=1;while(used.has(String(n)))n++;return String(n);};
 const SEC_COLORS=['#ff8a3d','#4fb3ff','#c6f432','#ff9de2','#3dd6c5','#ffd23f','#a78bfa','#ff5d73'];
 function nextSecColor(secs){const used=secs.map(x=>x.color);return SEC_COLORS.find(c=>!used.includes(c))||SEC_COLORS[secs.length%SEC_COLORS.length];}
 // a section's musical content, ignoring track ids and UI-only flags
@@ -1043,8 +1044,8 @@ function updateVersion(sec){
 function freshOriginal(sec){if(!state.sections.some(x=>x!==sec&&x.fam===sec.fam)){sec.famSig=secSig(sec);sec.ver=null;}}
 const isModified=(sec)=>!sec.renamed&&!!sec.ver;
 function ensureSections(s){
-  if(!Array.isArray(s.sections)||!s.sections.length)s.sections=[{id:'s'+Date.now().toString(36),name:'A',repeat:4,prog:s.prog,tracks:s.tracks||[]}];
-  s.sections.forEach((x,i)=>{if(!x.color)x.color=SEC_COLORS[i%SEC_COLORS.length];if(!x.fam){x.fam=String(x.name||'A');x.famSig=null;x.ver=null;}if(x.famSig==null||(!x.ver&&x.famSig.includes('"color"')))x.famSig=secSig(x);});
+  if(!Array.isArray(s.sections)||!s.sections.length)s.sections=[{id:'s'+Date.now().toString(36),name:'1',repeat:4,prog:s.prog,tracks:s.tracks||[]}];
+  s.sections.forEach((x,i)=>{if(!x.color)x.color=SEC_COLORS[i%SEC_COLORS.length];if(!x.fam){x.fam=String(x.name||'1');x.famSig=null;x.ver=null;}if(/^[A-P]$/.test(x.fam)){x.fam=String(x.fam.charCodeAt(0)-64);if(!x.renamed)x.name=x.fam;}if(x.famSig==null||(!x.ver&&x.famSig.includes('"color"')))x.famSig=secSig(x);});
   s.cur=Math.min(Math.max(0,s.cur|0),s.sections.length-1);
   s.tracks=s.sections[s.cur].tracks;s.prog=s.sections[s.cur].prog||s.prog;
   return s;
@@ -1137,7 +1138,7 @@ function genCode(){
   syncSection();
   const lines=[`// made with strudel/studio · generated with ${SETTINGS.attribution||'Claude Opus 5.5'}`,`setcpm(${state.bpm}/4)`,''];
   const swing=state.swing>0?`.swingBy(${f2(state.swing)}, 8)`:'';
-  const secs=state.sections||[{name:'A',repeat:1,tracks:state.tracks}];
+  const secs=state.sections||[{name:'1',repeat:1,tracks:state.tracks}];
   if(secs.length===1||state.loopSection){
     const body=sectionStack(state.tracks);
     if(secs.length>1)lines.push(`// looping section ${secLabels(secs)[state.cur]} only`);
@@ -1564,7 +1565,7 @@ function addSection(at){
   const cur=state.sections[state.cur],ctx=currentCtx();
   const S=STYLES[state.style],progs=(S?.progs||PROGS).filter(pr=>pr.join()!==ctx.prog.join());
   const newProg=Math.random()<.5&&progs.length?pick(progs):null; // sometimes new chords, always new melodies
-  const used=new Set(state.sections.map(x=>x.fam));const name=SECTION_NAMES.find(n=>!used.has(n))||('S'+(state.sections.length+1));
+  const name=nextSectionNumber(state.sections);
   const sec={id:'s'+Date.now().toString(36),name,fam:name,repeat:cur.repeat||4,prog:newProg||ctx.prog,tracks:varySection(cur.tracks,ctx,newProg),color:nextSecColor(state.sections)};
   sec.famSig=secSig(sec);
   const pos=at==null?state.cur+1:Math.max(0,Math.min(at,state.sections.length));
@@ -1742,7 +1743,7 @@ function basicsStrip(t){
     strip.prepend(h('div',{class:'bctl wave',title:'Waveform'},h('span',{class:'bl'},'Wave'),h('span',{class:'seg'},...OSC.map(w=>h('button',{class:cur===w?'on':'',title:w,onclick:()=>{if(t.type==='synth')t.wave=w;else t.sound=w;changed(true);}},{sine:'∿ sin',triangle:'△ tri',sawtooth:'⩘ saw',square:'⊓ sqr'}[w])))));
     add('attack','Attack',()=>F.attack,v=>F.attack=v,0,{fmt:v=>v<0.005?'instant':f2(v)+' s',title:'Instant ↔ gradual start'});
     add('release','Release',()=>F.release,v=>F.release=v,0.1,{fmt:v=>f2(v)+' s',title:'Quick cutoff ↔ long fade'});
-  }else add('decay','Decay',()=>F.release,v=>F.release=v,0.1,{min:0.01,max:3,fmt:v=>f2(v)+' s',title:'Short ↔ long ring after each note'});
+  }else add('decay','Decay',()=>F.release,v=>F.release=v,0.1,{min:0.01,max:3,fmt:v=>Math.round(v*1000)+' ms',title:'Short ↔ long ring after each note'});
   return strip;
 }
 /* ---------- sound picker: search + one-hit preview ---------- */
