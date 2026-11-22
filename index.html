@@ -66,7 +66,7 @@ header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px
 .hslider output{font-family:var(--mono);min-width:30px;text-align:right;color:var(--dim)}
 select.ui{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 8px;outline:none}
 .spacer{flex:1}
-.logo{order:0}#play{order:1}header>.field,header>.spacer,header>.status,header>#openStrudel,header>.hdr-rest{order:3}
+.logo{order:0}#play{order:1}#playStart{order:1}header>.field,header>.spacer,header>.status,header>#openStrudel,header>.hdr-rest{order:3}
 .btn{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 12px;display:inline-flex;gap:6px;align-items:center;text-decoration:none;color:var(--text);white-space:nowrap}
 .btn:hover{border-color:var(--line2);background:var(--panel2)}
 .btn.primary{background:#ff8a3d1a;border-color:#ff8a3d66;color:#ffc59c}
@@ -253,8 +253,11 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 .sec-loop{align-self:center;font-size:11px;--c:var(--accent)}
 .sec-tools{flex-basis:100%;display:flex;flex-direction:row;flex-wrap:wrap;gap:6px;align-items:center}
 @media (max-width:700px){.sec-tools{margin-left:0;width:100%;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:6px;padding-bottom:2px}.sec-tools .sec-loop{flex:0 0 auto;white-space:nowrap;font-size:12px;padding:6px 9px}}.sec-tools .sec-loop{text-align:left}.sec-tools .sec-del:not(:disabled):hover{color:var(--err);border-color:var(--err)}.sec-tools .sec-loop:disabled{opacity:.4;cursor:not-allowed}
-.song-order{flex-basis:100%;order:99;font-family:var(--mono);font-size:11px;color:var(--dim);padding:2px 2px 0}.song-order b{color:var(--text);font-weight:600}.sec-clear.confirm{color:#fff;background:var(--err);border-color:var(--err)}
-.fab{display:none}
+.so-part{border-radius:5px;padding:1px 3px;transition:background .15s}.so-part.now{background:color-mix(in srgb,var(--pc) 28%,transparent);color:var(--text)}.so-part.now b{color:var(--pc)}
+.so-sec.now{color:#111;background:var(--ok);border-radius:3px;padding:0 3px;font-weight:700}
+.song-order{flex-basis:100%;line-height:1.7;order:99;font-family:var(--mono);font-size:11px;color:var(--dim);padding:2px 2px 0}.song-order b{color:var(--text);font-weight:600}.sec-clear.confirm{color:#fff;background:var(--err);border-color:var(--err)}
+.fab{display:none}.fab-start{display:none}
+.play-start{width:36px;height:36px;border-radius:50%;border:1px solid var(--line2);background:var(--panel2);color:var(--text);display:grid;place-items:center;cursor:pointer;padding:0;margin-left:-6px}.play-start:hover{border-color:var(--accent);color:var(--accent)}.play-start svg{width:16px;height:16px}
 @media (max-width:700px){
   header{position:static;padding:10px 12px;gap:10px 12px}
   .field label{font-size:9px}
@@ -266,6 +269,7 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
   .sec .mini{height:28px;min-width:28px}
   .tbtn{height:32px;min-width:32px}
   .saves-panel{position:fixed;left:8px;right:8px;top:60px;width:auto;max-height:75vh}
+  .fab-start{display:grid;place-items:center;position:fixed;right:28px;bottom:86px;z-index:60;width:40px;height:40px;border-radius:50%;border:1px solid var(--line2);background:var(--panel2);color:var(--text);box-shadow:0 4px 14px #000a}.fab-start svg{width:16px;height:16px}
   .fab{display:grid;place-items:center;position:fixed;right:16px;bottom:16px;z-index:60;width:60px;height:60px;border-radius:50%;border:none;background:var(--accent);color:#170c03;box-shadow:0 6px 20px #000a}
   .fab.on{background:var(--ok)}
   .fab svg{width:24px;height:24px}
@@ -364,6 +368,7 @@ header .field>div{flex-wrap:wrap;align-items:center}
   <button id="play" title="Play / stop (Space)" aria-label="Play">
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
   </button>
+  <button id="playStart" class="play-start" title="Play from the beginning" aria-label="Play from the beginning"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="5" width="2.6" height="14" rx="1"/><path d="M8 12l11-7v14z"/></svg></button>
   <div class="field"><label>Tempo (BPM)</label>
     <div class="num"><button data-bpm="-10" title="−10 BPM" class="big">−10</button><button data-bpm="-1" title="−1 BPM">−</button><input id="bpm" type="number" min="30" max="300" value="120"><button data-bpm="1" title="+1 BPM">+</button><button data-bpm="10" title="+10 BPM" class="big">+10</button><button id="tap" title="Tap tempo">TAP</button></div>
   </div>
@@ -439,7 +444,7 @@ header .field>div{flex-wrap:wrap;align-items:center}
       <details class="faq-q"><summary>What do names like Bob-M2-M1 mean?</summary><p>Copies of a section share its name. When you change a copy it becomes a modified version: Bob-M1, then Bob-M2 for the next one. Change a copy of Bob-M2 and it becomes Bob-M2-M1.</p></details>
       <details class="faq-q"><summary>Randomize, Start a new groove, New song?</summary><p>🎲 Randomize rolls a new groove for the section you're editing (on a preset or example it offers to start a new song instead). ✨ Start a new groove builds a whole new song in the current style. 🆕 New song (top) picks a random genre and builds a full song with that genre's structure. 🆕 New empty song starts from nothing.</p></details>
       <details class="faq-q"><summary>How many grooves can I save?</summary><p>As many as you like. Grooves are saved in this browser, so there's no fixed limit — only your browser's storage. They don't sync to other devices.</p></details>
-      <details class="faq-q"><summary>Why does the editor jump between sections?</summary><p>With 👁 Follow on, the editor shows whichever section is playing. Turn Follow off to keep editing one section while the song plays.</p></details>
+      <details class="faq-q"><summary>Why does the editor jump between sections?</summary><p>While the song plays, the editor always shows the section that is playing, and the Song line highlights where you are. To work on one section while hearing it, use 🔁 loop this section.</p></details>
       <details class="faq-q"><summary>The metronome</summary><p>The bar above the pads shows the beat (yellow = beat 1). The small dots in each section show the beat and how many bars of that section have played; the green line under a part shows its progress. 🔈 adds a click.</p></details>
       <details class="faq-q"><summary>Can I edit the code?</summary><p>Yes — edit it and press ▶ Run code. Your hand-edited code plays until you go back to the sequencer.</p></details>
     </details>
@@ -487,6 +492,7 @@ header .field>div{flex-wrap:wrap;align-items:center}
 </main>
 <button id="showCode" class="show-code" title="Show the Strudel code">‹ code</button>
 <div id="toast" class="toast"></div>
+<button id="fabStart" class="fab-start" aria-label="Play from the beginning" title="Play from the beginning"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="5" width="2.6" height="14" rx="1"/><path d="M8 12l11-7v14z"/></svg></button>
 <button id="fab" class="fab" aria-label="Play / stop" title="Play / stop"></button>
 
 <script>
@@ -538,7 +544,7 @@ const settingsHooks=[];
 fetch('settings.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(j=>{if(!j)return;SETTINGS=deepMerge(JSON.parse(JSON.stringify(SETTINGS_DEFAULT)),j);settingsHooks.forEach(f=>{try{f();}catch(e){console.warn(e);}});}).catch(()=>{});
 // user preferences (kept separately from songs)
 const prefs=(()=>{try{return JSON.parse(localStorage.getItem('strudel-studio-prefs'))||{};}catch(e){return{};}})();
-const followOn=()=>prefs.follow!==false&&playing&&songMode();
+const followOn=()=>playing&&songMode();
 let metroBeat=-1,metroClick=!!prefs.metroClick; // metronome state (bar above the pads + small ones in the song section)
 function savePrefs(){try{localStorage.setItem('strudel-studio-prefs',JSON.stringify(prefs));}catch(e){}}
 // "prefer synths": electronic stand-ins for real instruments, by the part's job
@@ -1155,10 +1161,16 @@ function partTracks(kind,base,ctx,S){
     default:return{tracks:varySection(base,ctx,null),repeat:4};
   }
 }
-function genSong(name){
+// the fuller form most songs use: verses with a pre-chorus lift, a bridge (or solo), a last chorus
+function fullForm(form){
+  if(form.includes('Drop'))return['Intro','Build','Drop','Break','Build','Drop','Ending'];
+  const mid=form.includes('Solo')?'Solo':'Bridge';
+  return['Intro','Verse','Pre-chorus','Chorus','Verse','Pre-chorus','Chorus',mid,'Chorus','Ending'];
+}
+function genSong(name,opts={}){
   const S=STYLES[name];const base=genStyle(name,(Math.random()*2**32)>>>0);
   const ctx={root:base.key.root,scale:base.key.scale,prog:base.prog,real:false,style:name};
-  const form=S.form||DEFAULT_FORM;
+  const form=opts.full?fullForm(S.form||DEFAULT_FORM):(S.form||DEFAULT_FORM);
   const parts=[],sections=[],pid={};let num=1;
   for(const pn of form){
     if(pid[pn])continue;
@@ -1755,6 +1767,18 @@ function syncPlayBtn(){
 }
 document.getElementById('play').onclick=()=>playing?stop():runCode(true);
 document.getElementById('fab').onclick=()=>playing?stop():runCode(true);
+function playFromStart(){
+  if(!customCode&&state.sections){
+    const order=playOrder();const first=state.loopSection?state.cur:order[0].i;
+    syncSection();state.cur=first;state.tracks=state.sections[first].tracks;state.prog=state.sections[first].prog||state.prog;
+    if(playing&&songMode()){jumpTo=0;changed(true);clearTimeout(evalTimer);runCode(false);return;}
+    changed(true);
+  }
+  const was=playing;if(was)stop();
+  setTimeout(()=>runCode(true),was?150:0);
+}
+document.getElementById('playStart').onclick=playFromStart;
+document.getElementById('fabStart').onclick=playFromStart;
 
 let evalTimer=null;
 function changed(structural){
@@ -1827,10 +1851,12 @@ function frame(){
   metroTick(c);
   const mark=c==null||customCode?'':JSON.stringify(playingSection(c));
   if(mark!==lastSecMark){lastSecMark=mark;
-    if(mark&&followOn()){const ps=JSON.parse(mark);if(ps.i!==state.cur&&!document.querySelector('#sections input,#arrangement input,.picker,.dragging')){syncSection();state.cur=ps.i;state.tracks=state.sections[ps.i].tracks;state.prog=state.sections[ps.i].prog;render();lastSecMark=mark;}}
+    if(mark&&followOn()){const ps=JSON.parse(mark);if(ps.i!==state.cur&&!document.querySelector('#sections input,#arrangement input,.dragging')){syncSection();state.cur=ps.i;state.tracks=state.sections[ps.i].tracks;state.prog=state.sections[ps.i].prog;render();lastSecMark=mark;}}
     document.querySelectorAll('.sec,.arr-chip').forEach(el=>{el.classList.remove('playing');const b=el.querySelector('.bar');if(b)b.textContent='';});
     if(mark){const ps=JSON.parse(mark);const el=document.querySelector(`.sec[data-i="${ps.i}"]`);if(el){el.classList.add('playing');el.querySelector('.bar').textContent=`▶ ${ps.bar+1}/${ps.of}`;}
-      document.querySelector(`.arr-chip[data-occ="${ps.occ}"]`)?.classList.add('playing');}}
+      document.querySelector(`.arr-chip[data-occ="${ps.occ}"]`)?.classList.add('playing');}
+    document.querySelectorAll('.so-part.now,.so-sec.now').forEach(x=>x.classList.remove('now'));
+    if(mark){const ps=JSON.parse(mark);document.querySelector(`.so-part[data-occ="${ps.occ}"]`)?.classList.add('now');document.querySelector(`.so-sec[data-occ="${ps.occ}"][data-i="${ps.i}"]`)?.classList.add('now');}}
   const showSteps=c!=null&&(customCode||playingSection(c).i===state.cur);
   if(c!=null&&!showSteps&&Object.keys(lastStep).length){clearPlayheads();}
   if(showSteps){
@@ -1968,9 +1994,17 @@ function renderSections(){
     if(i===state.cur){const add=h('button',{class:'sec-add',title:`Click: add a section right after ${labels[i]} · drag: drop it anywhere in the song. Same instruments and drums, new melodies`,onclick:()=>{if(!add.__dragged)addSection();}},h('b',{},secs.length>1?`+ New section after ${labels[i]}`:'+ New section'),h('small',{},secs.length>1?'or drag it into place':'same sounds · new melodies'));
       add.onpointerdown=e=>startSectionDrag(e,add,-1,at=>addSection(at));el.append(add);}
   });
-  if(playOrder().length>1)el.append(h('button',{class:'tog sec-loop'+(prefs.follow!==false?' on':''),title:'Follow playback: show the section that is playing',onclick:()=>{prefs.follow=prefs.follow===false;savePrefs();renderSections();toast(prefs.follow!==false?'👁 Following the music — the editor shows the playing section':'Follow off — the editor stays on the section you pick');}},prefs.follow!==false?'👁 Following':'👁 Follow'));
   if(playOrder().length>1)el.append(h('button',{class:'tog sec-loop'+(state.loopSection?' on':''),title:'Play only the section you are editing',onclick:()=>{state.loopSection=!state.loopSection;changed(true);}},state.loopSection?'🔁 looping '+labels[state.cur]:'🔁 loop this section'));
-  if(playOrder().length>1)el.append(h('div',{class:'song-order',title:'The order the song plays in'},'Song: ',h('b',{},songSummary())));
+  if(playOrder().length>1){
+    const line=h('div',{class:'song-order',title:'The order the song plays in — the part and section playing now are highlighted'},'Song: ');
+    state.arrangement.forEach((pid,occ)=>{
+      const pt=state.parts.find(p=>p.id===pid);if(!pt)return;
+      const secs=state.sections.map((x,i)=>x.part===pid?i:-1).filter(i=>i>=0);
+      line.append(h('span',{class:'so-part','data-occ':occ,style:`--pc:${pt.color}`,title:partInfo(pt.name)},h('b',{},pt.name),' (',...secs.flatMap((i,j)=>[j?' ':'',h('span',{class:'so-sec','data-occ':occ,'data-i':i},labels[i])]),')'));
+      if(occ<state.arrangement.length-1)line.append(' → ');
+    });
+    el.append(line);
+  }
   el.append(h('div',{class:'sec-tools'},
     h('button',{class:'tog sec-loop',title:'A whole new song in this style — intro, verses, choruses… (you can undo)',onclick:()=>clearSong()},'✨ Start a new groove'),
     h('button',{class:'tog sec-loop',title:'A new song with one empty section (you can undo)',onclick:()=>newEmptySong()},'🆕 New empty song'),
@@ -2495,6 +2529,8 @@ function renderSaves(){
       h('button',{class:'tbtn del',title:'Delete',onclick:()=>deleteSave(sv.id)},'✕')));
   }
   const ex=document.getElementById('examplesList');ex.innerHTML='';
+  ex.append(h('div',{class:'save-row'},h('div',{class:'nm',title:'A complete song in a random style, with all the usual parts (you can undo)',onclick:()=>{savesPanel.hidden=true;completeSong();}},
+    h('b',{},'🎲 Complete song — random style'),h('small',{},'Intro · Verse · Pre-chorus · Chorus · Bridge · Ending'))));
   for(const k of Object.keys(CLASSICAL))ex.append(h('div',{class:'save-row'+(src.kind==='example'&&src.id===k?' cur':'')},
     h('div',{class:'nm',title:'Open this classical piece (replaces the song; you can undo)',onclick:()=>{savesPanel.hidden=true;loadClassical(k);}},h('b',{},k),h('small',{},'Classical'))));
   renderSongName();
@@ -2753,6 +2789,10 @@ function clearSong(){
   const name=state.style&&STYLES[state.style]?state.style:randomStyleName();
   const st=genSong(name);applyNewState(st,'');
   toast(`✨ New ${name} song “${st.name}”: ${st.arrangement.map(id=>st.parts.find(p=>p.id===id).name).join(' → ')}`,undoAction);
+}
+function completeSong(){
+  pushUndo('complete song');const g=randomStyleName();const st=genSong(g,{full:true});applyNewState(st,'');
+  toast(`🎲 Complete ${g} song “${st.name}”: ${st.arrangement.map(id=>st.parts.find(p=>p.id===id).name).join(' → ')}`,undoAction);
 }
 function newBasicSong(){
   pushUndo('new song');
