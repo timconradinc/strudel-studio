@@ -1433,8 +1433,8 @@ function renderSections(){
         h('button',{class:'mini',title:'Delete section',disabled:secs.length===1,onclick:stop(()=>{syncSection();secs.forEach(x=>{if(x.from===sec.id){x.from=null;x.kind=null;}});secs.splice(i,1);state.cur=Math.min(state.cur>i?state.cur-1:state.cur,secs.length-1);state.tracks=secs[state.cur].tracks;state.prog=secs[state.cur].prog;changed(true);})},'✕')));
     box.onpointerdown=e=>startSectionDrag(e,box,i);
     el.append(box);
+    if(i===state.cur)el.append(h('button',{class:'sec-add',title:`Adds a section right after ${sec.name}: same instruments and drums, new melodies`,onclick:addSection},h('b',{},secs.length>1?`+ New section after ${sec.name}`:'+ New section'),h('small',{},'same sounds · new melodies')));
   });
-  el.append(h('button',{class:'sec-add',title:'Same instruments and drums, new melodies',onclick:addSection},h('b',{},'+ New section'),h('small',{},'same sounds · new melodies')));
   if(secs.length>1)el.append(h('button',{class:'tog sec-loop'+(state.loopSection?' on':''),title:'Play only the section you are editing',onclick:()=>{state.loopSection=!state.loopSection;changed(true);}},state.loopSection?'🔁 looping '+secs[state.cur].name:'🔁 loop this section'));
   el.append(h('button',{class:'tog sec-loop sec-clear',title:'Start over: remove every section and track',onclick:e=>clearSong(e.currentTarget)},'🗑 Clear song'));
 }
