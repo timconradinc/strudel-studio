@@ -1843,7 +1843,8 @@ function metroTick(c){
   }
   document.querySelectorAll('.metro-beats i').forEach((el,i)=>el.classList.toggle('on',i===beat));
   const pos=document.getElementById('metroPos');
-  if(pos)pos.textContent=c==null?'–':`bar ${Math.floor(c)+1} · ${beat+1}`;
+  if(pos){let bar=Math.floor(c??0);try{if(!customCode&&state.sections){const tot=songMode()?playOrder().reduce((a,o)=>a+state.sections[o.i].repeat,0):(state.sections[state.cur].repeat||1);bar=((bar%tot)+tot)%tot;}}catch(e){}
+    pos.textContent=c==null?'–':`bar ${bar+1} · ${beat+1}`;}
   if(beat>=0&&metroClick)try{const ac=window.getAudioContext?.();if(ac){const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=beat===0?1600:1000;g.gain.setValueAtTime(.25,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.05);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+.06);}}catch(e){}
 }
 function frame(){
