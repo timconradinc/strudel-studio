@@ -1268,7 +1268,7 @@ document.getElementById('play').onclick=()=>playing?stop():runCode(true);
 
 let evalTimer=null;
 function changed(structural){
-  if(structural)render();
+  if(structural)render();else if(state.sections&&state.sections.length>1&&!document.querySelector('#sections input'))renderSections(); // keep '= A' / 'edited' labels current
   if(!customCode){codeEl.value=genCode();paintCode();updateShareLink(codeEl.value);}
   save();
   if(playing&&!customCode){clearTimeout(evalTimer);evalTimer=setTimeout(()=>runCode(false),120);}
