@@ -109,7 +109,6 @@ main{display:grid;grid-template-columns:minmax(0,1fr) var(--codew,440px);min-hei
 .cell.ph::after{content:"";position:absolute;inset:-2px;border-radius:7px;border:2px solid #fff9;pointer-events:none}
 .cell.on.ph{filter:brightness(1.35)}
 
-.grid .cell.g-end,.rgrid .cell.g-end,.leds .led.g-end{margin-right:7px}
 .leds{display:grid;gap:4px;margin-bottom:5px}
 .roll .leds{gap:3px}
 .led{height:5px;border-radius:3px;background:#2a2a33}
@@ -1923,12 +1922,14 @@ const tapOnTouch=(e,fn)=>{if(e.pointerType!=='touch')return false;touchTap={x:e.
 // steps are grouped in fours (threes for 12-step tracks); a row of lights shows the playhead
 const stepGroup=steps=>steps%4===0?4:3;
 const groupEnd=(i,steps)=>i%stepGroup(steps)===stepGroup(steps)-1&&i<steps-1;
-function ledRow(steps){const r=h('div',{class:'leds',style:`grid-template-columns:repeat(${steps},1fr)`});for(let i=0;i<steps;i++)r.append(h('span',{class:'led'+(i%stepGroup(steps)===0?' beat':'')+(groupEnd(i,steps)?' g-end':''),'data-led':i}));return r;}
+const gridCols=steps=>{const g=stepGroup(steps);return Array.from({length:steps/g},()=>`repeat(${g},minmax(0,1fr))`).join(' 6px ');};
+const colOf=(i,steps)=>i+Math.floor(i/stepGroup(steps))+1;   // skip the gap columns
+function ledRow(steps){const r=h('div',{class:'leds',style:`grid-template-columns:${gridCols(steps)}`});for(let i=0;i<steps;i++)r.append(h('span',{class:'led'+(i%stepGroup(steps)===0?' beat':''),'data-led':i,style:`grid-column:${colOf(i,steps)}`}));return r;}
 function drumGrid(t){
-  const g=h('div',{class:'grid',style:`grid-template-columns:repeat(${t.steps},1fr)`});
+  const g=h('div',{class:'grid',style:`grid-template-columns:${gridCols(t.steps)}`});
   const per=t.steps%4===0?4:3;
   for(let i=0;i<t.steps;i++){
-    const c=h('button',{class:'cell'+(i%per===0?' beat':'')+(groupEnd(i,t.steps)?' g-end':'')+(t.hits[i]?' on':''),'data-step':i,'aria-label':`step ${i+1}`});
+    const c=h('button',{class:'cell'+(i%per===0?' beat':'')+(t.hits[i]?' on':''),'data-step':i,'aria-label':`step ${i+1}`,style:`grid-column:${colOf(i,t.steps)}`});
     c.onpointerdown=e=>{hintProgress('step');if(tapOnTouch(e,()=>{t.hits[i]=!t.hits[i];c.classList.toggle('on',t.hits[i]);}))return;e.preventDefault();paint={val:!t.hits[i],t};t.hits[i]=paint.val;c.classList.toggle('on',paint.val);};
     c.onpointerenter=()=>{if(paint&&paint.t===t){t.hits[i]=paint.val;c.classList.toggle('on',paint.val);}};
     g.append(c);
@@ -1940,13 +1941,13 @@ const midiName=m=>NOTE_NAMES[m%12]+(Math.floor(m/12)-1);
 function pianoRoll(t){
   const wrap=h('div',{class:'roll'});
   const keys=h('div',{class:'keys'});
-  const g=h('div',{class:'rgrid',style:`grid-template-columns:repeat(${t.steps},1fr)`});
+  const g=h('div',{class:'rgrid',style:`grid-template-columns:${gridCols(t.steps)}`});
   const L=SCALES[t.scale].length;
   for(let r=ROWS-1;r>=0;r--){
     keys.append(h('div',{class:'key'+(r%L===0?' root':''),title:`degree ${r}`},midiName(degreeMidi(t,r))));
     for(let i=0;i<t.steps;i++){
       const on=t.notes[i].includes(r);
-      const c=h('button',{class:'cell'+(on?' on':'')+(r%L===0?' rootrow':'')+(groupEnd(i,t.steps)?' g-end':''),'data-step':i,'aria-label':`degree ${r} step ${i+1}`});
+      const c=h('button',{class:'cell'+(on?' on':'')+(r%L===0?' rootrow':''),'data-step':i,'aria-label':`degree ${r} step ${i+1}`,style:`grid-column:${colOf(i,t.steps)};grid-row:${ROWS-r}`});
       c.onpointerdown=e=>{hintProgress('step');if(tapOnTouch(e,()=>{const v=!t.notes[i].includes(r);setNote(t,i,r,v);c.classList.toggle('on',v);}))return;e.preventDefault();paint={val:!t.notes[i].includes(r),t};setNote(t,i,r,paint.val);c.classList.toggle('on',paint.val);};
       c.onpointerenter=()=>{if(paint&&paint.t===t){setNote(t,i,r,paint.val);c.classList.toggle('on',paint.val);}};
       g.append(c);
