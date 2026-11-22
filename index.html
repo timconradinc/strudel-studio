@@ -424,7 +424,7 @@ function updateShareLink(code){document.getElementById('openStrudel').href='http
 /* =========================================================
    Engine
    ========================================================= */
-let engineReady=false,audioInited=false,playing=false,replRef=null,clockAnchor=null;
+let engineReady=false,audioInited=false,playing=false,replRef=null,clockAnchor=null,engineHush=null;
 const statusEl=document.getElementById('status');
 function setStatus(kind,text){statusEl.className='status '+kind;statusEl.querySelector('span').textContent=text;}
 function showErr(msg){const b=document.getElementById('errbox');if(!msg){b.classList.remove('show');b.textContent='';return;}b.textContent=String(msg);b.classList.add('show');}
@@ -480,6 +480,7 @@ async function boot(){
       afterEval:()=>{showErr(null);}
     }));
     if(r&&r.scheduler)replRef=r;
+    if(typeof hush==='function')engineHush=hush; // the real stop, captured before any eval replaces it
     await waitFor(()=>typeof registerSound==='function'&&typeof getAudioContext==='function');
     registerKit();
     try{ if(typeof soundMap!=='undefined'){const keys=Object.keys(soundMap.get());SYNTHS=SYNTHS.filter(s=>keys.includes(s));if(!SYNTHS.length)SYNTHS=['sawtooth','square','triangle','sine'];} }catch(e){}
@@ -498,7 +499,17 @@ async function runCode(forcePlay){
     if(!playing){playing=true;clockAnchor={time:performance.now(),cycle:0};syncPlayBtn();}
   }catch(e){showErr(e?.message||e);}
 }
-function stop(){try{hush();}catch(e){}playing=false;syncPlayBtn();clearPlayheads();}
+// Don't rely on the global hush(): after the first evaluate(), Strudel's REPL
+// replaces it with a version that only clears named patterns and never stops
+// the scheduler. Stop the scheduler we got back from initStrudel() instead.
+function stop(){
+  try{
+    if(replRef&&typeof replRef.stop==='function')replRef.stop();
+    else if(replRef&&replRef.scheduler)replRef.scheduler.stop();
+    else if(engineHush)engineHush();
+  }catch(e){console.warn(e);}
+  playing=false;syncPlayBtn();clearPlayheads();
+}
 function syncPlayBtn(){
   const b=document.getElementById('play');b.classList.toggle('on',playing);
   b.innerHTML=playing?'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>':'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';
