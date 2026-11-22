@@ -251,7 +251,7 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 .sec-add:hover{color:var(--text);border-color:var(--accent);background:#ff8a3d0a}
 .sec-add b{display:block;color:var(--text)}.sec-add small{font-family:var(--mono);font-size:10px}
 .sec-loop{align-self:center;font-size:11px}
-.sec-tools{margin-left:auto;display:flex;flex-direction:column;gap:6px;align-items:stretch}
+.sec-tools{flex-basis:100%;display:flex;flex-direction:row;flex-wrap:wrap;gap:6px;align-items:center}
 @media (max-width:700px){.sec-tools{margin-left:0;width:100%;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:6px;padding-bottom:2px}.sec-tools .sec-loop{flex:0 0 auto;white-space:nowrap;font-size:12px;padding:6px 9px}}.sec-tools .sec-loop{text-align:left}.sec-tools .sec-del:not(:disabled):hover{color:var(--err);border-color:var(--err)}.sec-tools .sec-loop:disabled{opacity:.4;cursor:not-allowed}
 .song-order{flex-basis:100%;order:99;font-family:var(--mono);font-size:11px;color:var(--dim);padding:2px 2px 0}.song-order b{color:var(--text);font-weight:600}.sec-clear.confirm{color:#fff;background:var(--err);border-color:var(--err)}
 .fab{display:none}
@@ -332,6 +332,12 @@ header .field>div{flex-wrap:wrap;align-items:center}
 .arr-chip .an{font-weight:700;font-size:13px}.arr-chip .ab{font-family:var(--mono);font-size:10px;color:var(--dim)}
 .arr-chip .ax{background:none;border:none;color:var(--dim);font-size:11px;cursor:pointer;padding:0 2px}.arr-chip .ax:hover{color:var(--err)}
 .arr-arrow{color:var(--faint)}
+.arr-chip{overflow:hidden}.arr-chip .aprog{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--ok);transition:width .12s linear}
+.sec-metro{display:flex;align-items:center;gap:6px;margin:4px 0 2px}
+.sec-metro .mb{display:flex;gap:3px}.sec-metro .mb i{width:8px;height:8px;border-radius:50%;background:var(--panel2);border:1px solid var(--line)}
+.sec-metro .mb i.on{background:var(--ok);border-color:var(--ok);box-shadow:0 0 6px var(--ok)}.sec-metro .mb i.on:first-child{background:#f2b417;border-color:#f2b417;box-shadow:0 0 6px #f2b417}
+.sec-metro .mp{display:flex;gap:2px;flex-wrap:wrap;max-width:110px}.sec-metro .mp i{width:6px;height:4px;border-radius:2px;background:var(--line)}
+.sec-metro .mp i.on{background:var(--sc,var(--ok))}
 .arr-add{background:transparent;border:1px dashed var(--line2);border-radius:8px;padding:6px 10px;color:var(--dim);cursor:pointer}.arr-add:hover{color:var(--text);border-color:var(--accent)}
 .pdot{width:10px;height:10px;border-radius:3px;flex:0 0 auto;margin-left:6px}
 .part-menu{max-height:420px;overflow:auto}
@@ -475,7 +481,7 @@ const INSTRUMENTS=[
   ['gm_piano','piano',0],['gm_epiano1','electric piano',4],['gm_harpsichord','harpsichord',6],['gm_clavinet','clavinet',7],
   ['gm_vibraphone','vibraphone',11],['gm_marimba','marimba',12],['gm_xylophone','xylophone',13],['gm_tubular_bells','tubular bells',14],
   ['gm_drawbar_organ','drawbar organ',16],['gm_percussive_organ','percussive organ',17],['gm_rock_organ','rock organ',18],['gm_church_organ','church organ',19],['gm_accordion','accordion',21],['gm_harmonica','harmonica',22],
-  ['gm_acoustic_guitar_nylon','nylon guitar',24],['gm_acoustic_guitar_steel','steel guitar',25],['gm_electric_guitar_jazz','jazz guitar',26],['gm_electric_guitar_clean','clean electric guitar',27],['gm_electric_guitar_muted','muted guitar',28],['gm_overdriven_guitar','overdriven guitar',29],['gm_distortion_guitar','distortion guitar',30],
+  ['gm_acoustic_guitar_nylon','nylon guitar',24],['gm_acoustic_guitar_steel','steel guitar',25],['gm_electric_guitar_jazz','jazz guitar',26],['gm_electric_guitar_clean','clean electric guitar',27],['gm_electric_guitar_muted','muted guitar',28],['gm_overdriven_guitar','overdriven guitar',29],
   ['gm_acoustic_bass','acoustic bass',32],['gm_electric_bass_finger','finger bass',33],['gm_electric_bass_pick','pick bass',34],['gm_fretless_bass','fretless bass',35],['gm_slap_bass_1','slap bass',36],['gm_synth_bass_1','synth bass',38],['gm_synth_bass_2','synth bass 2',39],
   ['gm_violin','violin',40],['gm_cello','cello',42],['gm_pizzicato_strings','pizzicato strings',45],['gm_orchestral_harp','harp',46],['gm_timpani','timpani',47],['gm_string_ensemble_1','strings',48],['gm_synth_strings_1','synth strings',50],['gm_choir_aahs','choir',52],['gm_voice_oohs','voice oohs',53],
   ['gm_trumpet','trumpet',56],['gm_trombone','trombone',57],['gm_tuba','tuba',58],['gm_muted_trumpet','muted trumpet',59],['gm_french_horn','french horn',60],['gm_brass_section','brass section',61],['gm_synth_brass_1','synth brass',62],
@@ -509,6 +515,7 @@ const settingsHooks=[];
 fetch('settings.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(j=>{if(!j)return;SETTINGS=deepMerge(JSON.parse(JSON.stringify(SETTINGS_DEFAULT)),j);settingsHooks.forEach(f=>{try{f();}catch(e){console.warn(e);}});}).catch(()=>{});
 // user preferences (kept separately from songs)
 const prefs=(()=>{try{return JSON.parse(localStorage.getItem('strudel-studio-prefs'))||{};}catch(e){return{};}})();
+let metroBeat=-1,metroClick=!!prefs.metroClick; // metronome state (bar above the pads + small ones in the song section)
 function savePrefs(){try{localStorage.setItem('strudel-studio-prefs',JSON.stringify(prefs));}catch(e){}}
 // "prefer synths": electronic stand-ins for real instruments, by the part's job
 const isSynthish=w=>SYNTHS.includes(w)||/^gm_(synth_|lead_|pad_)/.test(w||'');
@@ -602,18 +609,18 @@ const STYLES={
     parts:[
       {role:'bass',name:'Rumble',mode:['root'],p:['.ooo.ooo.ooo.ooo','.x.x.x.x.x.x.x.x'],oct:[1,2],waves:['sawtooth','gm_synth_bass_2'],fx:{lpf:[300,600],lfo:true,lfoRate:[4,16],lpq:[6,12],shape:[.2,.4],release:.06}},
       {role:'lead',name:'Acid line',p:'o+o+o+o+o+o+o+o+',oct:3,waves:['square','sawtooth'],fx:{lpf:[1200,3500],lfo:true,lfoRate:[2,8],lpq:[12,18],delay:[.2,.4],release:.1,gain:.6}}]},
-  'Classic rock':{form:['Intro','Verse','Chorus','Verse','Chorus','Solo','Chorus','Ending'],palette:['piano','gm_overdriven_guitar', 'gm_distortion_guitar', 'gm_electric_guitar_clean', 'gm_electric_guitar_muted', 'gm_electric_bass_pick', 'gm_electric_bass_finger', 'gm_rock_organ', 'gm_drawbar_organ', 'gm_piano', 'gm_string_ensemble_1'],kit:['acoustic','uzu'],bpm:[66,84],swing:[0,0],scales:['major','mixolydian','minor'],progs:[[0,3,4,0],[0,6,3,3],[0,4,5,3],[0,0,3,4],[0,3,0,4],[0,6,3,0]],drums:[
+  'Classic rock':{form:['Intro','Verse','Chorus','Verse','Chorus','Solo','Chorus','Ending'],palette:['piano','gm_overdriven_guitar', 'gm_electric_guitar_muted', 'gm_electric_guitar_clean', 'gm_electric_guitar_muted', 'gm_electric_bass_pick', 'gm_electric_bass_finger', 'gm_rock_organ', 'gm_drawbar_organ', 'gm_piano', 'gm_string_ensemble_1'],kit:['acoustic','uzu'],bpm:[66,84],swing:[0,0],scales:['major','mixolydian','minor'],progs:[[0,3,4,0],[0,6,3,3],[0,4,5,3],[0,0,3,4],[0,3,0,4],[0,6,3,0]],drums:[
       {s:'bd',p:['x.....x.x.......','x.......x.x.....','x.....x.x.....-.']},
       {s:'sd',p:['....x.......x...','....x.......x..-']},
       {s:'hh',p:['x.x.x.x.x.x.x.x.','xoxoxoxoxoxoxoxo'],fx:{gain:[.45,.6]}},
       {s:'cr',p:'x...............',opt:.7,fx:{gain:.55}},
       {s:'lt',p:'............-+o+',opt:.4,fx:{room:.3}}],
     parts:[
-      {role:'power',name:'Rhythm guitar',p:['x..x..x.x..x..x.','x.x.x.x.x.x.x.x.','x.....x.x.....x.','xx.x.xx.xx.x.xx.'],oct:3,waves:['gm_overdriven_guitar','gm_distortion_guitar'],fx:{release:[.08,.18],room:[.15,.3],gain:.8}},
+      {role:'power',name:'Rhythm guitar',p:['x..x..x.x..x..x.','x.x.x.x.x.x.x.x.','x.....x.x.....x.','xx.x.xx.xx.x.xx.'],oct:3,waves:['gm_overdriven_guitar','gm_electric_guitar_muted'],fx:{release:[.08,.18],room:[.15,.3],gain:.8}},
       {role:'bass',name:'Bass',mode:['root','root','fifth','oct'],p:['x.x.x.x.x.x.x.x.','x..x..x.x..x..x.','x.xxx.x.x.xxx.x.'],oct:2,waves:['gm_electric_bass_pick','gm_electric_bass_finger'],fx:{release:.1,gain:.9}},
-      {role:'lead',name:'Lead guitar',p:'-.+.o.+.-.+.o+o.',oct:4,waves:['gm_overdriven_guitar','gm_distortion_guitar'],opt:.6,fx:{delay:[.15,.3],room:.35,release:.25,gain:.6}},
+      {role:'lead',name:'Lead guitar',p:'-.+.o.+.-.+.o+o.',oct:4,waves:['gm_overdriven_guitar','gm_electric_guitar_clean'],opt:.6,fx:{delay:[.15,.3],room:.35,release:.25,gain:.6}},
       {role:'pad',name:'Organ',oct:3,waves:['gm_rock_organ','gm_drawbar_organ'],opt:.35,fx:{release:.3,room:.3,gain:.35}}]},
-  'Heavy metal':{palette:['gm_distortion_guitar','gm_overdriven_guitar','gm_electric_bass_pick','gm_rock_organ','gm_string_ensemble_1','gm_choir_aahs'],kit:['acoustic','uzu'],bpm:[96,124],swing:[0,0],scales:['minor','phrygian','harmonic:minor'],progs:[[0,0,5,6],[0,1,0,1],[0,5,3,4],[0,6,5,6],[0,0,6,5]],form:['Intro','Verse','Chorus','Verse','Chorus','Solo','Chorus','Ending'],drums:[
+  'Heavy metal':{palette:['gm_overdriven_guitar','gm_electric_guitar_muted','gm_electric_guitar_jazz','gm_electric_bass_pick','gm_rock_organ','gm_string_ensemble_1','gm_choir_aahs'],kit:['acoustic','uzu'],bpm:[96,124],swing:[0,0],scales:['minor','phrygian','harmonic:minor'],progs:[[0,0,5,6],[0,1,0,1],[0,5,3,4],[0,6,5,6],[0,0,6,5]],form:['Intro','Verse','Chorus','Verse','Chorus','Solo','Chorus','Ending'],drums:[
       {s:'bd',p:['xxxxxxxxxxxxxxxx','x.xxx.xxx.xxx.xx','x.x.x.x.x.x.x.x.','x.x...x.x.x...x.']},
       {s:'sd',p:['....x.......x...','....x.......x..-']},
       {s:'cr',p:['x.......x.......','x...............'],fx:{gain:.55}},
@@ -621,9 +628,9 @@ const STYLES={
       {s:'rd',p:'x.x.x.x.x.x.x.x.',opt:.4,fx:{gain:.45}},
       {s:'lt',p:'............xoxo',opt:.4}],
     parts:[
-      {role:'power',name:'Rhythm guitar',p:['x.xxx.xxx.xxx.xx','xxxxxxxxxxxxxxxx','x..x..x.x..x..x.','xx.xxx.xxx.xxx.x'],oct:[2,3],waves:['gm_distortion_guitar','gm_overdriven_guitar'],fx:{release:[.06,.12],gain:.85}},
+      {role:'power',name:'Rhythm guitar',p:['x.xxx.xxx.xxx.xx','xxxxxxxxxxxxxxxx','x..x..x.x..x..x.','xx.xxx.xxx.xxx.x'],oct:[2,3],waves:['gm_overdriven_guitar','gm_electric_guitar_muted'],fx:{release:[.06,.12],gain:.85}},
       {role:'bass',name:'Bass',mode:['root'],p:['x.xxx.xxx.xxx.xx','xxxxxxxxxxxxxxxx','x.x.x.x.x.x.x.x.'],oct:[1,2],waves:['gm_electric_bass_pick'],fx:{release:.08,gain:.9}},
-      {role:'lead',name:'Lead guitar',p:['oooooooooooooooo','o+o+o+o+o+o+o+o+'],oct:4,waves:['gm_distortion_guitar','gm_overdriven_guitar'],opt:.5,fx:{delay:[.15,.3],room:.3,release:.15,gain:.55}},
+      {role:'lead',name:'Lead guitar',p:['oooooooooooooooo','o+o+o+o+o+o+o+o+'],oct:4,waves:['gm_overdriven_guitar','gm_electric_guitar_jazz'],opt:.5,fx:{delay:[.15,.3],room:.3,release:.15,gain:.55}},
       {role:'pad',name:'Choir',oct:3,waves:['gm_choir_aahs','gm_string_ensemble_1','gm_rock_organ'],opt:.3,fx:{attack:.3,release:1,room:.6,gain:.35}}]},
   'Country':{palette:['gm_acoustic_guitar_steel','gm_banjo','gm_violin','gm_harmonica','gm_electric_guitar_clean','gm_piano','piano','gm_acoustic_bass','gm_electric_bass_finger'],kit:['acoustic','uzu'],bpm:[76,100],swing:[0,.08],scales:['major','mixolydian'],progs:[[0,3,4,0],[0,0,3,4],[0,3,0,4],[0,4,5,3],[0,3,4,4]],form:['Intro','Verse','Chorus','Verse','Chorus','Bridge','Chorus','Ending'],drums:[
       {s:'bd',p:['x.......x.......','x.......x..-....','x...x...x...x...']},
@@ -1008,6 +1015,54 @@ function inferRole(t){
   return /bass|sub|808|reese|rumble/.test(n)?'bass':/pad|keys|rhodes|organ|swell/.test(n)?'pad':/chord|stab|skank|pluck|guitar/.test(n)?'chords':/arp/.test(n)?'arp':'lead';
 }
 // Copy a section's tracks (same instruments, kits, effects) with new melodies.
+// Chords that do the same job, used to make a related progression: tonic I↔vi↔iii, subdominant IV↔ii↔vi, dominant V↔vii°↔iii
+const CHORD_SUBS={0:[5,2],1:[3],2:[0,4],3:[1,5],4:[6,2],5:[0,3],6:[4]};
+function relatedProg(prog){
+  // keep the first chord (home) and the cadence shape; swap 1–2 others for chords with the same function
+  for(let tries=0;tries<6;tries++){
+    const p=prog.slice();const last=p.length-1;const idx=[...Array(p.length).keys()].slice(1).filter(i=>!(i===last&&[0,4].includes(((p[i]%7)+7)%7)));if(!idx.length)return p;
+    const n=Math.min(idx.length,chance(.5)?1:2);
+    for(let k=0;k<n;k++){const i=idx.splice(ri(0,idx.length-1),1)[0];const subs=CHORD_SUBS[((p[i]%7)+7)%7]||[];if(subs.length)p[i]=pick(subs);}
+    if(p.join()!==prog.join())return p;
+  }
+  return prog.slice();
+}
+// Develop a part instead of replacing it: the rhythm and contour stay recognisable.
+function developTrack(t,role,oldProg,newProg){
+  const steps=t.steps||16,prog=newProg||oldProg;
+  const chordOf=(pr,i)=>pr[Math.floor(i/steps*pr.length)];
+  const isChordTone=(d,r)=>[0,2,4].includes((((d-r)%7)+7)%7);
+  const nearestChordTone=(d,r)=>{for(const o of[0,-1,1,-2,2,-3,3]){if(isChordTone(d+o,r)&&d+o>=0&&d+o<ROWS)return d+o;}return d;};
+  const notes=t.notes.map(a=>a.slice());
+  // 1. follow the new chords: move each note by how far its chord moved
+  if(newProg)for(let i=0;i<steps;i++){const sh=chordOf(newProg,i)-chordOf(oldProg,i);if(sh&&notes[i].length)notes[i]=[...new Set(notes[i].map(d=>clampDeg(d+sh)))].sort((a,b)=>a-b);}
+  const hit=[];for(let i=0;i<steps;i++)if(notes[i].length)hit.push(i);
+  if(!hit.length)return notes;
+  if(role==='lead'||role==='arp'){
+    // 2. a classic motif technique
+    const tech=pick(['sequence','invert','retrograde','answer','rhythm','answer']);
+    const pitches=hit.map(i=>notes[i][0]);
+    if(tech==='sequence'){const sh=pick([1,-1,2,-2]);hit.forEach(i=>notes[i]=notes[i].map(d=>clampDeg(d+sh)));}
+    else if(tech==='invert'){const ax=pitches[0];hit.forEach((i,j)=>notes[i]=[clampDeg(2*ax-pitches[j])]);}
+    else if(tech==='retrograde'){const rev=pitches.slice().reverse();hit.forEach((i,j)=>notes[i]=[rev[j]]);}
+    else if(tech==='answer'){const half=hit.filter(i=>i>=steps/2);half.forEach(i=>notes[i]=[clampDeg(notes[i][0]+pick([-2,-1,1,2]))]);}
+    else{ // rhythm: shift one note by a 16th, or split a long one
+      const i=pick(hit),j=i+(chance(.5)?1:-1);if(j>=0&&j<steps&&!notes[j].length){notes[j]=notes[i];notes[i]=[];}
+      else{const k=hit.find(x=>!notes[x+1]?.length&&x+1<steps);if(k!=null)notes[k+1]=[clampDeg(notes[k][0]+pick([-1,1]))];}
+    }
+    // 3. strong beats land on chord tones; the phrase ends on the chord root or third
+    for(let i=0;i<steps;i+=4)if(notes[i].length)notes[i]=[nearestChordTone(notes[i][0],chordOf(prog,i))];
+    const last=Math.max(...notes.map((a,i)=>a.length?i:-1));if(last>=0){const r=chordOf(prog,last);notes[last]=[nearestChordTone(notes[last][0],r)];}
+  }else if(role==='bass'&&!newProg){
+    // same chords: keep the bassline, add a passing / approach note before a chord change or on the last beat
+    const gap=[...Array(steps).keys()].filter(i=>!notes[i].length&&i>0&&notes[i-1].length);
+    if(gap.length){const i=pick(gap);const nx=chordOf(prog,Math.min(steps-1,i+1));notes[i]=[clampDeg(nx+pick([-1,1]))];}
+  }else if((role==='chords'||role==='pad'||role==='power')&&!newProg){
+    // same chords: a new voicing (inversion) keeps it familiar but fresh
+    const up=chance(.5);for(const i of hit){const a=notes[i];if(a.length>1)notes[i]=(up?[...a.slice(1),clampDeg(a[0]+7)]:[clampDeg(a[a.length-1]-7),...a.slice(0,-1)]).sort((x,y)=>x-y);}
+  }
+  return notes;
+}
 function varySection(srcTracks,ctx,newProg){
   const S=STYLES[ctx.style||state?.style];
   return srcTracks.map(src=>{
@@ -1017,10 +1072,14 @@ function varySection(srcTracks,ctx,newProg){
     // every melodic part gets a new line (riff / rhythm / voicing / melody) over this section's chords
     const spec=(S?.parts||[]).find(p=>p.name===t.name)||(S?.parts||[]).find(p=>p.role===role)||GENERIC_PARTS[role==='power'?'chords':role]||GENERIC_PARTS.lead;
     const before=JSON.stringify(t.notes);
-    for(let tries=0;tries<6;tries++){
-      const fresh=genPartTrack({...spec,role,steps:t.steps,waves:[t.wave]},{...ctx,prog:newProg||ctx.prog});
-      t.notes=fresh.notes;if(JSON.stringify(t.notes)!==before)break;
+    if(ctx.fresh||!t.notes.some(a=>a.length)){ // nothing to develop (or a contrasting part): write a new line
+      for(let tries=0;tries<6;tries++){
+        const fresh=genPartTrack({...spec,role,steps:t.steps,waves:[t.wave]},{...ctx,prog:newProg||ctx.prog});
+        t.notes=fresh.notes;if(JSON.stringify(t.notes)!==before)break;
+      }
+      return t;
     }
+    for(let tries=0;tries<6;tries++){t.notes=developTrack(src,role,ctx.prog,newProg);if(JSON.stringify(t.notes)!==before)break;}
     return t;
   });
 }
@@ -1057,7 +1116,7 @@ function partTracks(kind,base,ctx,S){
     case 'Intro':{const ts=drop(cloneTracks(base),t=>(isDrumish(t)&&!/^(hh|sh|rd|oh|cr)$/.test(t.sound||''))||inferRole(t)==='lead'||(t.type==='synth'&&inferRole(t)==='bass'));return{tracks:ts.length?ts:cloneTracks(base).slice(0,2),repeat:4};}
     case 'Verse':return{tracks:cloneTracks(base),repeat:4};
     case 'Pre-chorus':case 'Build':return{tracks:drop(varySection(base,ctx,null),t=>t.type==='drum'&&t.sound==='bd'),repeat:4};
-    case 'Chorus':case 'Drop':{const pr=other();return{tracks:varySection(base,ctx,pr),repeat:4,prog:pr};}
+    case 'Chorus':case 'Drop':{const pr=chance(.5)?relatedProg(ctx.prog):other();return{tracks:varySection(base,{...ctx,fresh:chance(.5)},pr),repeat:4,prog:pr};}
     case 'Bridge':{const pr=other();return{tracks:drop(varySection(base,ctx,pr),t=>t.type==='drum'&&t.sound==='bd'),repeat:4,prog:pr};}
     case 'Break':return{tracks:drop(varySection(base,ctx,null),isDrumish),repeat:4};
     case 'Solo':{const ts=varySection(base,ctx,null);if(!ts.some(t=>inferRole(t)==='lead')){const sp=(S?.parts||[]).find(p=>p.role==='lead')||GENERIC_PARTS.lead;ts.push(genPartTrack({...sp,opt:0},ctx));}return{tracks:ts,repeat:8};}
@@ -1125,11 +1184,20 @@ function presetList(){
 }
 
 // sounds removed because their files can't be fetched by web pages -> working replacements (for saved grooves)
-const RETIRED={steinway:'piano',kawai:'piano',kalimba:'gm_kalimba',ocarina:'gm_pan_flute',psaltery_pluck:'harp',shaker_large:'sh',shaker_small:'sh',snare_modern:'sd',tom_mallet:'lt'};
+const RETIRED={gm_distortion_guitar:'gm_overdriven_guitar',steinway:'piano',kawai:'piano',kalimba:'gm_kalimba',ocarina:'gm_pan_flute',psaltery_pluck:'harp',shaker_large:'sh',shaker_small:'sh',snare_modern:'sd',tom_mallet:'lt'};
 let state;
 // A song is a list of sections; state.tracks always points at the selected section's tracks.
 // sections are numbered 1, 2, 3… (letters read like chord names in music)
-const nextSectionNumber=secs=>{const used=new Set(secs.map(x=>String(x.fam)));let n=1;while(used.has(String(n)))n++;return String(n);};
+// sections are named with friendly single words (Comet, Maple…); versions add m, m1… (Comet m1)
+const SECTION_WORDS=['Amber','Aspen','Aurora','Bamboo','Beacon','Birch','Bloom','Breeze','Brook','Canyon','Cedar','Cinder','Citrus','Clover','Cobalt','Comet','Coral','Cosmo','Crystal','Dawn','Delta','Drift','Dune','Echo','Ember','Fern','Fjord','Flare','Flint','Frost','Galaxy','Garnet','Glacier','Glow','Harbor','Hazel','Horizon','Indigo','Iris','Ivory','Jade','Jasmine','Juniper','Lagoon','Lantern','Lark','Lilac','Lotus','Lumen','Maple','Marble','Meadow','Mesa','Mint','Mist','Nectar','Nimbus','Nova','Oasis','Ocean','Olive','Onyx','Opal','Orbit','Orchid','Pebble','Pepper','Pine','Pixel','Plume','Prism','Quartz','Raven','Reef','Ripple','River','Saffron','Sage','Sierra','Solstice','Spark','Spruce','Summit','Sunset','Tangerine','Thistle','Thunder','Tide','Topaz','Tulip','Velvet','Violet','Willow','Zephyr'];
+const nextSectionNumber=secs=>{const used=new Set(secs.flatMap(x=>[String(x.fam),String(x.name)]));const free=SECTION_WORDS.filter(w=>!used.has(w));if(free.length)return free[Math.floor(Math.random()*free.length)];let n=2;while(used.has('Section '+n))n++;return 'Section '+n;};
+// older songs used numbers: give each number a word (same number → same word)
+function wordifySections(st){
+  const map={};
+  for(const sec of st.sections){
+    if(/^\d+$/.test(String(sec.fam??sec.name))){const k=String(sec.fam??sec.name);if(!map[k])map[k]=nextSectionNumber(st.sections.concat(Object.values(map).map(w=>({fam:w,name:w}))));sec.fam=map[k];if(!sec.renamed)sec.name=map[k];}
+  }
+}
 const SEC_COLORS=['#ff8a3d','#4fb3ff','#c6f432','#ff9de2','#3dd6c5','#ffd23f','#a78bfa','#ff5d73'];
 function nextSecColor(secs){const used=secs.map(x=>x.color);return SEC_COLORS.find(c=>!used.includes(c))||SEC_COLORS[secs.length%SEC_COLORS.length];}
 // a section's musical content, ignoring track ids and UI-only flags
@@ -1137,7 +1205,7 @@ const secSig=sec=>JSON.stringify(sec.tracks.map(({id,fxOpen,_bad,color,...t})=>t
 // Section names show lineage: copies share a name (B-B-B); when one is edited it becomes Bm,
 // a copy edited differently Bm1, Bm2... A section keeps its version name while you keep editing it,
 // goes back to B if it matches the original again. Names typed by the user are kept.
-function secLabels(secs){return secs.map(sec=>sec.renamed?sec.name:(sec.fam||sec.name||'?')+(sec.ver||''));}
+function secLabels(secs){return secs.map(sec=>sec.renamed?sec.name:(sec.fam||sec.name||'?')+(sec.ver?' '+sec.ver:''));}
 function updateVersion(sec){
   if(!sec||!sec.fam)return;
   const sig=secSig(sec);
@@ -1174,7 +1242,7 @@ function ensureSections(s){
   if(!Array.isArray(s.sections)||!s.sections.length)s.sections=[{id:'s'+Date.now().toString(36),name:'1',repeat:4,prog:s.prog,tracks:s.tracks||[]}];
   s.sections.forEach((x,i)=>{if(!x.color)x.color=SEC_COLORS[i%SEC_COLORS.length];if(!x.fam){x.fam=String(x.name||'1');x.famSig=null;x.ver=null;}if(/^[A-P]$/.test(x.fam)){x.fam=String(x.fam.charCodeAt(0)-64);if(!x.renamed)x.name=x.fam;}if(x.famSig==null||(!x.ver&&x.famSig.includes('"color"')))x.famSig=secSig(x);});
   s.cur=Math.min(Math.max(0,s.cur|0),s.sections.length-1);
-  ensureParts(s);
+  ensureParts(s);wordifySections(s);
   s.tracks=s.sections[s.cur].tracks;s.prog=s.sections[s.cur].prog||s.prog;
   return s;
 }
@@ -1662,10 +1730,18 @@ function playCode(){
   return playOffset?codeEl.value+`.early(${playOffset})`:codeEl.value;
 }
 // metronome bar above the pads: 4 beat lights, bar number, optional click
-let metroBeat=-1,metroClick=!!prefs.metroClick;
 function metroTick(c){
   const beat=c==null?-1:Math.floor(((c%1)+1)%1*4);
   if(beat===metroBeat)return;metroBeat=beat;
+  // the small metronomes in the song section
+  document.querySelectorAll('.sec-metro i.on').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.arr-chip .aprog').forEach(x=>x.style.width='0');
+  if(c!=null&&!customCode&&state.sections){
+    const ps=playingSection(c);const box=document.querySelector(`.sec[data-i="${ps.i}"] .sec-metro`);
+    if(box){box.querySelectorAll('.mb i')[beat]?.classList.add('on');const pips=box.querySelectorAll('.mp i');const n=pips.length;const k=n<ps.of?Math.floor(ps.bar*n/ps.of):ps.bar;for(let j=0;j<=k&&j<n;j++)pips[j].classList.add('on');}
+    if(ps.occ>=0){const order=playOrder();let done=0,tot=0;order.forEach((o,k)=>{if(o.occ!==ps.occ)return;const r=state.sections[o.i].repeat;tot+=r;if(k<ps.k)done+=r;});
+      const chip=document.querySelector(`.arr-chip[data-occ="${ps.occ}"] .aprog`);if(chip&&tot)chip.style.width=((done+ps.bar+(beat+1)/4)/tot*100)+'%';}
+  }
   document.querySelectorAll('.metro-beats i').forEach((el,i)=>el.classList.toggle('on',i===beat));
   const pos=document.getElementById('metroPos');
   if(pos)pos.textContent=c==null?'–':`bar ${Math.floor(c)+1} · ${beat+1}`;
@@ -1719,7 +1795,7 @@ function addSection(at){
   syncSection();
   const cur=state.sections[state.cur],ctx=currentCtx();
   const S=STYLES[state.style],progs=(S?.progs||PROGS).filter(pr=>pr.join()!==ctx.prog.join());
-  const newProg=Math.random()<.5&&progs.length?pick(progs):null; // sometimes new chords, always new melodies
+  const newProg=Math.random()<.5?relatedProg(ctx.prog):null; // sometimes related chords (same functions), always a developed melody
   const name=nextSectionNumber(state.sections);
   const sec={id:'s'+Date.now().toString(36),name,fam:name,repeat:cur.repeat||4,prog:newProg||ctx.prog,tracks:varySection(cur.tracks,ctx,newProg),color:nextSecColor(state.sections),part:cur.part};
   sec.famSig=secSig(sec);
@@ -1778,7 +1854,7 @@ function startSectionDrag(e,box,i,onDrop){
   window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);
 }
 function renderSections(){
-  const el=document.getElementById('sections');el.innerHTML='';lastSecMark=''; // redraw the 'playing' marker on the new chips
+  const el=document.getElementById('sections');el.innerHTML='';lastSecMark='';metroBeat=-1; // redraw the 'playing' marker on the new chips
   const secs=state.sections;if(!secs)return;
   const labels=secLabels(secs);
   renderArrangement(labels);
@@ -1798,6 +1874,7 @@ function renderSections(){
     const relText=isModified(sec)?`modified from ${sec.fam}`:twins>1?`${twins}× in song`:'';
     const box=h('div',{class:'sec'+(i===state.cur?' sel':'')+(kin?' kin':''),'data-i':i,style:`--sc:${sec.color}`,title:'Click to edit · drag to reorder',onclick:()=>{if(box.__dragged)return;if(i!==state.cur)selectSection(i);}},
       h('div',{class:'top'},nm,h('span',{class:'bar'})),
+      h('div',{class:'sec-metro',title:'Beats and bars of this section while it plays'},h('span',{class:'mb'},h('i'),h('i'),h('i'),h('i')),h('span',{class:'mp'},...Array.from({length:Math.min(sec.repeat,16)},()=>h('i')))),
       relText?h('span',{class:'rel'+(isModified(sec)?' edited':''),title:isModified(sec)?`Changed from the original ${sec.fam}`:`Identical copies share the name ${labels[i]} — edit one and it becomes ${sec.fam}m`},relText):null,
       h('div',{class:'rep',title:'How many bars this section plays before the next one'},
         h('button',{class:'mini',onclick:stop(()=>{sec.repeat=Math.max(1,sec.repeat-1);changed(true);})},'−'),
@@ -2518,7 +2595,7 @@ function newPart(name){
   pushUndo(`new part ${name}`);syncSection();
   const cur=state.sections[state.cur],ctx=currentCtx();
   const S=STYLES[state.style],progs=(S?.progs||PROGS).filter(pr=>pr.join()!==ctx.prog.join());
-  const newProg=progs.length&&Math.random()<.6?pick(progs):null;
+  const newProg=Math.random()<.6?relatedProg(ctx.prog):null;
   const pt={id:newId('p'),name,color:PART_COLORS[state.parts.length%PART_COLORS.length]};
   const num=nextSectionNumber(state.sections);
   const sec={id:newId('s'),name:num,fam:num,repeat:cur.repeat||4,prog:newProg||ctx.prog,tracks:varySection(cur.tracks,ctx,newProg),color:nextSecColor(state.sections),part:pt.id};
@@ -2538,7 +2615,7 @@ function renderArrangement(labels){
     const nm=h('span',{class:'an'},pt.name);
     const chip=h('div',{class:'arr-chip'+(pid===curPart?' sel':''),'data-occ':occ,style:`--pc:${pt.color}`,title:`${pt.name}: ${n} section${n>1?'s':''}, ${bars} bars · click to edit · drag to reorder · double-click to rename`,
       onclick:()=>{if(chip.__dragged)return;selectPart(pid,occ);}},
-      nm,h('span',{class:'ab'},`${bars} bars`),h('span',{class:'bar'}),
+      nm,h('span',{class:'ab'},`${bars} bars`),h('span',{class:'bar'}),h('span',{class:'aprog'}),
       state.arrangement.length>1?h('button',{class:'ax',title:'Remove from the song (the part is kept in “+ part”)',onclick:e=>{e.stopPropagation();pushUndo('remove part from song');state.arrangement.splice(occ,1);changed(true);toast(`Removed ${pt.name} from the song`,undoAction);}},'✕'):null);
     nm.ondblclick=e=>{e.stopPropagation();const inp=h('input',{class:'small-in',value:pt.name,maxlength:20,style:'width:90px'});
       const done=()=>{const v=inp.value.trim();if(v)pt.name=v;changed(true);};inp.onkeydown=ev=>{ev.stopPropagation();if(ev.key==='Enter')done();if(ev.key==='Escape')renderSections();};inp.onblur=done;inp.onclick=ev=>ev.stopPropagation();nm.replaceWith(inp);inp.focus();inp.select();};
