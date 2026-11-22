@@ -222,6 +222,7 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 .sec-add:hover{color:var(--text);border-color:var(--accent);background:#ff8a3d0a}
 .sec-add b{display:block;color:var(--text)}.sec-add small{font-family:var(--mono);font-size:10px}
 .sec-loop{align-self:center;font-size:11px}
+.sec-clear{margin-left:auto}.sec-clear.confirm{color:#fff;background:var(--err);border-color:var(--err)}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(80px);background:#24242c;border:1px solid var(--line2);padding:9px 14px;border-radius:10px;transition:transform .2s;z-index:50;font-size:12px}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .empty{color:var(--dim);text-align:center;padding:30px;border:1px dashed var(--line);border-radius:12px}
@@ -1413,6 +1414,7 @@ function renderSections(){
   });
   el.append(h('button',{class:'sec-add',title:'Same instruments and drums, new melodies',onclick:addSection},h('b',{},'+ New section'),h('small',{},'same sounds · new melodies')));
   if(secs.length>1)el.append(h('button',{class:'tog sec-loop'+(state.loopSection?' on':''),title:'Play only the section you are editing',onclick:()=>{state.loopSection=!state.loopSection;changed(true);}},state.loopSection?'🔁 looping '+secs[state.cur].name:'🔁 loop this section'));
+  el.append(h('button',{class:'tog sec-loop sec-clear',title:'Start over: remove every section and track',onclick:e=>clearSong(e.currentTarget)},'🗑 Clear song'));
 }
 function render(){
   renderSections();
@@ -1714,7 +1716,28 @@ document.addEventListener('click',e=>{if(!savesPanel.hidden&&!e.composedPath().i
 document.getElementById('saveNew').onclick=saveNew;
 document.getElementById('saveName').onkeydown=e=>{if(e.key==='Enter')saveNew();e.stopPropagation();};
 renderSaves();
-presetEl.onchange=()=>{const k=presetEl.value;if(!k)return;applyNewState(presetList()[k](),'Loaded “'+k+'”');};
+// A preset replaces only the section being edited; the rest of the song stays.
+function applyPreset(k){
+  syncSection();
+  const multi=state.sections.length>1,sec=state.sections[state.cur];
+  let p;
+  if(multi){
+    const ctx=currentCtx();
+    if(STYLES[k]&&!HANDMADE[k])p=Object.assign(genStyle(k,hashStr(k),{root:ctx.root,scale:ctx.scale}),{style:k}); // same groove, in the song's key
+    else{p=presetList()[k]();p.tracks.forEach(t=>{if(t.type==='synth')t.root=ctx.root;});}
+  }else p=presetList()[k]();
+  state.tracks=p.tracks;state.prog=p.prog;state.style=p.style;
+  if(!multi){state.bpm=p.bpm;state.swing=p.swing;state.key=p.key;} // tempo & swing are song-wide: only taken from the preset for a one-section song
+  syncSection();
+  customCode=false;document.getElementById('banner').classList.remove('show');
+  changed(true);syncPresetSel();
+  toast(multi?`Loaded “${k}” into section ${sec.name} — other sections kept`:`Loaded “${k}”`);
+}
+presetEl.onchange=()=>{const k=presetEl.value;if(!k)return;applyPreset(k);};
+function clearSong(btn){
+  if(!btn.classList.contains('confirm')){btn.classList.add('confirm');btn.textContent='🗑 Click again to clear';setTimeout(()=>{if(btn.isConnected){btn.classList.remove('confirm');btn.textContent='🗑 Clear song';}},3000);return;}
+  applyNewState(presetList()['Blank'](),'Song cleared — one empty section');
+}
 function randomize(){
   const name=state.style&&STYLES[state.style]?state.style:randomStyleName();
   if(state.sections&&state.sections.length>1){ // re-roll just this section, in the song's key and tempo
