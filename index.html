@@ -306,6 +306,7 @@ header .field>div{flex-wrap:wrap;align-items:center}
 .pad-menu{position:absolute;right:5px;bottom:7px;width:22px;height:20px;border-radius:3px;background:#00000033;border:none;color:#17171bcc;font-size:10px;line-height:20px;cursor:pointer;padding:0}
 .pad-menu:hover{background:#00000055;color:#000}
 @media (max-width:700px){.pads{max-width:none;gap:9px}.pads-hint{display:none}.pad-menu{width:28px;height:24px}}
+#run.stop{background:#ff5d731f;border-color:#ff5d7388;color:#ffb3be}
 .toast-act{margin-left:8px;background:var(--accent);color:#170c03;border:none;border-radius:6px;padding:3px 9px;font-weight:700;cursor:pointer}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(80px);background:#24242c;border:1px solid var(--line2);padding:9px 14px;border-radius:10px;transition:transform .2s;z-index:50;font-size:12px}
 .toast.show{transform:translateX(-50%) translateY(0)}
@@ -323,6 +324,9 @@ header .field>div{flex-wrap:wrap;align-items:center}
   </div>
   <div class="field"><label>Swing</label>
     <div class="hslider"><input id="swing" type="range" min="0" max="0.3" step="0.01" value="0" style="width:90px;--c:var(--accent)"><output id="swingOut">0</output></div>
+  </div>
+  <div class="field"><label>Classical</label>
+    <select id="classical" class="ui" title="Load a simplified classical piece (replaces the song; you can undo)"></select>
   </div>
   <div class="field"><label>Preset / style</label>
     <div style="display:flex;gap:6px">
@@ -434,7 +438,7 @@ const INSTRUMENTS=[
   ['gm_drawbar_organ','drawbar organ',16],['gm_percussive_organ','percussive organ',17],['gm_rock_organ','rock organ',18],['gm_church_organ','church organ',19],['gm_accordion','accordion',21],['gm_harmonica','harmonica',22],
   ['gm_acoustic_guitar_nylon','nylon guitar',24],['gm_acoustic_guitar_steel','steel guitar',25],['gm_electric_guitar_jazz','jazz guitar',26],['gm_electric_guitar_clean','clean electric guitar',27],['gm_electric_guitar_muted','muted guitar',28],['gm_overdriven_guitar','overdriven guitar',29],['gm_distortion_guitar','distortion guitar',30],
   ['gm_acoustic_bass','acoustic bass',32],['gm_electric_bass_finger','finger bass',33],['gm_electric_bass_pick','pick bass',34],['gm_fretless_bass','fretless bass',35],['gm_slap_bass_1','slap bass',36],['gm_synth_bass_1','synth bass',38],['gm_synth_bass_2','synth bass 2',39],
-  ['gm_violin','violin',40],['gm_cello','cello',42],['gm_pizzicato_strings','pizzicato strings',45],['gm_orchestral_harp','harp',46],['gm_string_ensemble_1','strings',48],['gm_synth_strings_1','synth strings',50],['gm_choir_aahs','choir',52],['gm_voice_oohs','voice oohs',53],
+  ['gm_violin','violin',40],['gm_cello','cello',42],['gm_pizzicato_strings','pizzicato strings',45],['gm_orchestral_harp','harp',46],['gm_timpani','timpani',47],['gm_string_ensemble_1','strings',48],['gm_synth_strings_1','synth strings',50],['gm_choir_aahs','choir',52],['gm_voice_oohs','voice oohs',53],
   ['gm_trumpet','trumpet',56],['gm_trombone','trombone',57],['gm_tuba','tuba',58],['gm_muted_trumpet','muted trumpet',59],['gm_french_horn','french horn',60],['gm_brass_section','brass section',61],['gm_synth_brass_1','synth brass',62],
   ['gm_soprano_sax','soprano sax',64],['gm_alto_sax','alto sax',65],['gm_tenor_sax','tenor sax',66],['gm_baritone_sax','baritone sax',67],['gm_oboe','oboe',68],['gm_clarinet','clarinet',71],['gm_flute','flute',73],['gm_pan_flute','pan flute',75],
   ['gm_lead_1_square','square lead',80],['gm_lead_2_sawtooth','saw lead',81],['gm_pad_warm','warm pad',89],['gm_pad_halo','halo pad',94],
@@ -1186,7 +1190,7 @@ codeEl.addEventListener('keydown',e=>{
   else if(e.key==='Tab'){e.preventDefault();const s=codeEl.selectionStart;codeEl.setRangeText('  ',s,codeEl.selectionEnd,'end');codeEl.dispatchEvent(new Event('input'));}
 });
 document.getElementById('resync').onclick=()=>{customCode=false;document.getElementById('banner').classList.remove('show');changed();syncPlayBtn();toast('Back to the sequencer');};
-document.getElementById('run').onclick=()=>runCode(true);
+document.getElementById('run').onclick=()=>playing?stop():runCode(true); // Ctrl/⌘+Enter still re-runs edited code while playing
 // code panel: hide / show, resize (desktop), wrap long lines — remembered in prefs (defaults from settings.json)
 function applyCodePanel(){
   const cp=SETTINGS.codePanel||{};const w=Math.max(cp.minWidth||280,Math.min(cp.maxWidth||900,prefs.codeWidth||cp.width||440));
@@ -1470,6 +1474,7 @@ function stop(){
 }
 function syncPlayBtn(){
   const fab=document.getElementById('fab');if(fab){fab.classList.toggle('on',playing);fab.innerHTML=playing?'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>':'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';}
+  const run=document.getElementById('run');if(run){run.textContent=playing?'■ Stop':'▶ Run code';run.title=playing?'Stop playback':'Play the code below (Ctrl/⌘+Enter)';run.classList.toggle('stop',playing);}
   const b=document.getElementById('play');b.classList.toggle('on',playing);
   b.innerHTML=playing?'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>':'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';
   setStatus(engineReady?'ready':'loading',playing?(customCode?'▶ playing your code':'▶ playing the sequencer'):engineReady?'engine ready':'loading engine…');
@@ -2196,6 +2201,84 @@ function deleteGroove(){
   changed(true);
   toast(`🗑 Deleted section ${name}`,undoAction);
 }
+/* ---------- Classical pieces: simplified, public-domain, at most 4 sections ----------
+   Each part is a note pattern that plays one bar per cycle: note("<bar1 bar2 …>") */
+function cpart(name,sound,bars,gain=.8,extra={}){return mkPattern({name,mode:'note',sound,mini:bars.length>1?`<${bars.join(' ')}>`:bars[0],fx:{gain,...(extra.fx||{})}});}
+function csong(bpm,key,sections){
+  const st={bpm,swing:0,style:null,key,prog:[0,0,0,0],sections:sections.map((x,i)=>({id:'s'+Date.now().toString(36)+i,name:String(i+1),repeat:x[0],prog:[0,0,0,0],tracks:x[1]}))};
+  st.sections.forEach(sec=>sec.tracks.forEach((t,j)=>{t.color=COLORS[j%COLORS.length];}));
+  return st;
+}
+const CLASSICAL={
+  'Beethoven — Ode to Joy':()=>{
+    const A=['[e4 e4 f4 g4]','[g4 f4 e4 d4]','[c4 c4 d4 e4]','[e4@1.5 d4@0.5 d4@2]'];
+    const A2=['[e4 e4 f4 g4]','[g4 f4 e4 d4]','[c4 c4 d4 e4]','[d4@1.5 c4@0.5 c4@2]'];
+    const B=['[d4 d4 e4 c4]','[d4 [e4 f4] e4 c4]','[d4 [e4 f4] e4 d4]','[c4 d4 g3@2]'];
+    const bA=['[c3 g3]','[g2 d3]','[c3 g3]','[g2 d3]'],bA2=['[c3 g3]','[g2 d3]','[c3 g3]','[g2 c3]'],bB=['[g2 d3]','[g2 c3]','[g2 d3]','[c3 g2]'];
+    const chA=['[c4,e4,g4]','[b3,d4,g4]','[c4,e4,g4]','[b3,d4,g4]'],chA2=['[c4,e4,g4]','[b3,d4,g4]','[c4,e4,g4]','[[b3,d4,g4] [c4,e4,g4]]'],chB=['[b3,d4,g4]','[[b3,d4,g4] [c4,e4,g4]]','[b3,d4,g4]','[[c4,e4,g4] [b3,d4,g4]]'];
+    return csong(110,{root:'C',scale:'major'},[
+      [4,[cpart('Melody','piano',A,.85),cpart('Bass','piano',bA,.6)]],
+      [4,[cpart('Melody','piano',A2,.85),cpart('Bass','piano',bA2,.6),cpart('Strings','gm_string_ensemble_1',chA2,.35)]],
+      [4,[cpart('Melody','gm_violin',B,.7),cpart('Bass','gm_cello',bB,.6),cpart('Strings','gm_string_ensemble_1',chB,.35)]],
+      [4,[cpart('Melody','piano',A2,.85),cpart('Violin','gm_violin',A2.map(b=>b.replace(/([a-g]#?b?)(\d)/g,(m,n,o)=>n+(+o+1))),.4),cpart('Bass','gm_cello',bA2,.6),cpart('Strings','gm_string_ensemble_1',chA2,.35)]]
+    ]);},
+  'Pachelbel — Canon in D':()=>{
+    const bass=['[d3 a2]','[b2 f#2]','[g2 d2]','[g2 a2]'];
+    const ch=['[[d4,f#4,a4] [c#4,e4,a4]]','[[b3,d4,f#4] [c#4,f#4,a4]]','[[b3,d4,g4] [a3,d4,f#4]]','[[b3,d4,g4] [c#4,e4,a4]]'];
+    const m1=['[f#5 e5]','[d5 c#5]','[b4 a4]','[b4 c#5]'],m2=['[d5 c#5]','[b4 a4]','[g4 f#4]','[g4 e4]'];
+    return csong(64,{root:'D',scale:'major'},[
+      [4,[cpart('Cello','gm_cello',bass,.7),cpart('Strings','gm_string_ensemble_1',ch,.3)]],
+      [4,[cpart('Violin 1','gm_violin',m1,.6),cpart('Cello','gm_cello',bass,.7),cpart('Strings','gm_string_ensemble_1',ch,.3)]],
+      [4,[cpart('Violin 2','gm_violin',m2,.6),cpart('Cello','gm_cello',bass,.7),cpart('Strings','gm_string_ensemble_1',ch,.3)]],
+      [4,[cpart('Violin 1','gm_violin',m1,.55),cpart('Violin 2','gm_violin',m2,.5),cpart('Cello','gm_cello',bass,.7),cpart('Harpsichord','gm_harpsichord',ch,.3)]]
+    ]);},
+  'Bach (Petzold) — Minuet in G':()=>{
+    const A=['[d5 [g4 a4] [b4 c5]]','[d5 g4 g4]','[e5 [c5 d5] [e5 f#5]]','[g5 g4 g4]','[c5 [d5 c5] [b4 a4]]','[b4 [c5 b4] [a4 g4]]','[f#4 [g4 a4] [b4 g4]]','a4'];
+    const A2=['[d5 [g4 a4] [b4 c5]]','[d5 g4 g4]','[e5 [c5 d5] [e5 f#5]]','[g5 g4 g4]','[c5 [d5 c5] [b4 a4]]','[b4 [c5 b4] [a4 g4]]','[a4 [b4 a4] [g4 f#4]]','g4'];
+    const bA=['[[g3,b3]@2 a3]','b3','c4','b3','a3','g3','[d4 b3 g3]','[d4 d3 c4]'],bA2=['[[g3,b3]@2 a3]','b3','c4','b3','a3','g3','[d4 d3]','g3'];
+    return csong(150,{root:'G',scale:'major'},[
+      [8,[cpart('Right hand','gm_harpsichord',A,.75),cpart('Left hand','gm_harpsichord',bA,.6)]],
+      [8,[cpart('Right hand','gm_harpsichord',A2,.75),cpart('Left hand','gm_harpsichord',bA2,.6)]]
+    ]);},
+  'Mozart — Eine kleine Nachtmusik':()=>{
+    const M=['[g4 [~ d4] g4 [~ d4]]','[[g4 d4] [g4 b4] d5@2]','[c5 [~ a4] c5 [~ a4]]','[[c5 a4] [f#4 a4] d4@2]'];
+    const low=M.map(b=>b.replace(/([a-g]#?)(\d)/g,(m,n,o)=>n+(+o-1)));
+    const pulse=['[g2 g2 g2 g2]','[g2 g2 g2 g2]','[d2 d2 d2 d2]','[d2 d2 d2 d2]'];
+    const ch=['[b3,d4,g4]','[b3,d4,g4]','[a3,c4,f#4]','[a3,c4,f#4]'];
+    return csong(130,{root:'G',scale:'major'},[
+      [4,[cpart('Violins','gm_violin',M,.7),cpart('Cellos (unison)','gm_cello',low,.6)]],
+      [4,[cpart('Violins','gm_violin',M,.7),cpart('Viola','gm_string_ensemble_1',ch,.35),cpart('Bass','gm_cello',pulse,.55)]]
+    ]);},
+  'Beethoven — Für Elise':()=>{
+    const R=['[e5 d#5 e5 b4 d5 c5 a4@2 ~ c4 e4 a4]','[b4@2 ~ e4 g#4 b4 c5@2 ~ e4 e5 d#5]','[e5 d#5 e5 b4 d5 c5 a4@2 ~ c4 e4 a4]','[b4@2 ~ e4 c5 b4 a4@2 ~ ~ e5 d#5]'];
+    const L=['[~ ~ ~ ~ ~ ~ a2 e3 a3 ~ ~ ~]','[e2 e3 g#3 ~ ~ ~ a2 e3 a3 ~ ~ ~]','[~ ~ ~ ~ ~ ~ a2 e3 a3 ~ ~ ~]','[e2 e3 g#3 ~ ~ ~ a2 e3 a3 ~ ~ ~]'];
+    return csong(90,{root:'A',scale:'minor'},[
+      [4,[cpart('Right hand','piano',R,.8),cpart('Left hand','piano',L,.55)]],
+      [4,[cpart('Right hand','piano',R,.8),cpart('Left hand','piano',L,.55)]]
+    ]);},
+  'Beethoven — Symphony No. 5':()=>{
+    const M=['[[~ g4 g4 g4] eb4]','[[~ f4 f4 f4] d4]'],O=M.map(b=>b.replace(/([a-g]b?)(\d)/g,(m,n,o)=>n+(+o-1)));
+    const T=['[[~ g2 g2 g2] c2]','[[~ g2 g2 g2] g1]'];
+    return csong(100,{root:'C',scale:'minor'},[
+      [2,[cpart('Strings','gm_string_ensemble_1',M,.75),cpart('Cellos','gm_cello',O,.7)]],
+      [2,[cpart('Strings','gm_string_ensemble_1',M,.8),cpart('Cellos','gm_cello',O,.75),cpart('Brass','gm_brass_section',M,.45),cpart('Timpani','gm_timpani',T,.7)]]
+    ]);},
+  'Mozart — Twinkle Twinkle (Ah vous dirai-je)':()=>{
+    const A=['[c4 c4 g4 g4]','[a4 a4 g4@2]','[f4 f4 e4 e4]','[d4 d4 c4@2]'],B=['[g4 g4 f4 f4]','[e4 e4 d4@2]'];
+    const bA=['[c3 g3 e3 g3]','[f3 c4 e3 g3]','[d3 g3 c3 g3]','[g2 f3 c3 g3]'],bB=['[e3 g3 d3 g3]','[c3 g3 b2 g3]'];
+    return csong(100,{root:'C',scale:'major'},[
+      [4,[cpart('Melody','piano',A,.8),cpart('Left hand','piano',bA,.5)]],
+      [4,[cpart('Melody','piano',B,.8),cpart('Left hand','piano',bB,.5)]],
+      [4,[cpart('Melody','glockenspiel',A,.6),cpart('Piano','piano',A,.6),cpart('Left hand','piano',bA,.5)]]
+    ]);}
+};
+function loadClassical(k){
+  const f=CLASSICAL[k];if(!f)return;
+  pushUndo(`load “${k}”`);
+  state=normalizeState(f(),true);customCode=false;document.getElementById('banner').classList.remove('show');
+  changed(true);syncPresetSel();
+  toast(`🎻 Loaded ${k}`,undoAction);
+}
 function clearGroove(){
   const name=secLabels(state.sections)[state.cur];
   if(!state.tracks.length){toast(`Section ${name} is already empty`);return;}
@@ -2221,6 +2304,9 @@ function randomize(){
   toast('🎲 New '+name+' groove',undoAction);
 }
 document.getElementById('randomize').onclick=randomize;
+const clEl=document.getElementById('classical');
+clEl.append(h('option',{value:''},'Load a piece…'),...Object.keys(CLASSICAL).map(k=>h('option',{value:k},k)));
+clEl.onchange=()=>{const k=clEl.value;clEl.value='';if(k)loadClassical(k);};
 document.getElementById('undo').onclick=undo;
 const psEl=document.getElementById('preferSynth');psEl.checked=!!prefs.preferSynth;
 psEl.onchange=()=>{prefs.preferSynth=psEl.checked;savePrefs();toast(psEl.checked?'Synth sounds preferred — press 🎲 to hear it':'Real instruments allowed again — press 🎲 to hear it');};
