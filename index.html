@@ -1737,7 +1737,7 @@ function basicsStrip(t){
     add('pitch','Pitch',()=>12*Math.log2(F.speed||1),v=>F.speed=Math.pow(2,v/12),0,{step:.5,fmt:v=>(v>0?'+':'')+(Math.round(v*2)/2)+' st',title:'Semitones (drum samples play faster/slower)'});
   }else add('pitch','Pitch',()=>F.pitch||0,v=>F.pitch=Math.round(v),0,{step:1,fmt:v=>(v>0?'+':'')+Math.round(v)+' st',title:'Transpose in semitones'});
   add('tone','Tone',()=>F.lpf,v=>F.lpf=v,20000,{log:true,fmt:v=>v>=19900?'bright':v<1000?Math.round(v)+' Hz':(v/1000).toFixed(1)+' kHz',title:'Dark ↔ bright (low-pass filter cutoff)'});
-  if(isOneShot(t))add('decay','Decay',()=>F.decay||ctlDef('decay').max,v=>F.decay=v>=ctlDef('decay').max-0.01?0:v,ctlDef('decay').max,{fmt:v=>v>=ctlDef('decay').max-0.01?'natural':Math.round(v*1000)+' ms',title:'Short ↔ long (shortens the sound)'});
+  if(isOneShot(t))add('decay','Decay',()=>F.decay||ctlDef('decay').max,v=>F.decay=v>=ctlDef('decay').max-0.01?0:v,ctlDef('decay').max,{fmt:v=>Math.round(v*1000)+' ms'+(v>=ctlDef('decay').max-0.01?' (full)':''),title:'Short ↔ long (shortens the sound)'});
   else if(synthOsc){
     const cur=t.type==='synth'?t.wave:t.sound;
     strip.prepend(h('div',{class:'bctl wave',title:'Waveform'},h('span',{class:'bl'},'Wave'),h('span',{class:'seg'},...OSC.map(w=>h('button',{class:cur===w?'on':'',title:w,onclick:()=>{if(t.type==='synth')t.wave=w;else t.sound=w;changed(true);}},{sine:'∿ sin',triangle:'△ tri',sawtooth:'⩘ saw',square:'⊓ sqr'}[w])))));
