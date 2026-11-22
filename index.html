@@ -198,7 +198,8 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 .save-row .nm small{font-family:var(--mono);font-size:10px;color:var(--dim)}
 .save-row .tbtn{height:26px;min-width:26px;padding:0 6px}
 .sections{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;padding:2px 0 4px;position:relative}
-.sec{cursor:grab;touch-action:none;user-select:none}
+.sec{cursor:grab;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.sec.lifted,.sec-add.lifted{transform:scale(1.04);box-shadow:0 8px 24px #000a}
 .sec-add.dragging{cursor:grabbing;opacity:.9;z-index:30;box-shadow:0 10px 30px #000a}
 .sec.dragging{cursor:grabbing;opacity:.9;z-index:30;box-shadow:0 10px 30px #000a;transition:none}
 .sec.drag-src-gap{opacity:.35}
@@ -219,12 +220,31 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 .sec .mini{background:var(--bg);border:1px solid var(--line);border-radius:5px;color:var(--dim);font-size:11px;height:22px;min-width:22px;padding:0 5px}
 .sec .mini:hover{color:var(--text);border-color:var(--line2)}
 .sec .acts{display:flex;gap:3px}
-.sec-add{cursor:grab;touch-action:none;user-select:none;border:1px dashed var(--line2);background:transparent;border-radius:10px;padding:7px 12px;color:var(--dim);text-align:left;min-width:150px}
+.sec-add{cursor:grab;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;border:1px dashed var(--line2);background:transparent;border-radius:10px;padding:7px 12px;color:var(--dim);text-align:left;min-width:150px}
 .sec-add:hover{color:var(--text);border-color:var(--accent);background:#ff8a3d0a}
 .sec-add b{display:block;color:var(--text)}.sec-add small{font-family:var(--mono);font-size:10px}
 .sec-loop{align-self:center;font-size:11px}
 .sec-clear{margin-left:auto}
 .song-order{flex-basis:100%;order:99;font-family:var(--mono);font-size:11px;color:var(--dim);padding:2px 2px 0}.song-order b{color:var(--text);font-weight:600}.sec-clear.confirm{color:#fff;background:var(--err);border-color:var(--err)}
+.fab{display:none}
+@media (max-width:700px){
+  header{position:static;padding:10px 12px;gap:10px 12px}
+  .logo span{display:none}
+  .field label{font-size:9px}
+  #tracksCol{padding:12px 10px 96px}
+  .thead{gap:6px}.tname{width:110px}
+  .rgrid .cell,.key{height:28px}
+  .grid .cell{height:38px}
+  .sec{flex:1 1 150px;min-width:0}
+  .sec .mini{height:28px;min-width:28px}
+  .tbtn{height:32px;min-width:32px}
+  .saves-panel{position:fixed;left:8px;right:8px;top:60px;width:auto;max-height:75vh}
+  .fab{display:grid;place-items:center;position:fixed;right:16px;bottom:16px;z-index:60;width:60px;height:60px;border-radius:50%;border:none;background:var(--accent);color:#170c03;box-shadow:0 6px 20px #000a}
+  .fab.on{background:var(--ok)}
+  .fab svg{width:24px;height:24px}
+  .toast{bottom:88px}
+  .hint{font-size:9px}
+}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(80px);background:#24242c;border:1px solid var(--line2);padding:9px 14px;border-radius:10px;transition:transform .2s;z-index:50;font-size:12px}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .empty{color:var(--dim);text-align:center;padding:30px;border:1px dashed var(--line);border-radius:12px}
@@ -317,6 +337,7 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
   </aside>
 </main>
 <div id="toast" class="toast"></div>
+<button id="fab" class="fab" aria-label="Play / stop" title="Play / stop"></button>
 
 <script>
 // Own scope: Strudel writes its functions (hp, lp, h, euclid…) onto window,
@@ -1304,11 +1325,13 @@ function stop(){
   playing=false;syncPlayBtn();clearPlayheads();
 }
 function syncPlayBtn(){
+  const fab=document.getElementById('fab');if(fab){fab.classList.toggle('on',playing);fab.innerHTML=playing?'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>':'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';}
   const b=document.getElementById('play');b.classList.toggle('on',playing);
   b.innerHTML=playing?'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>':'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';
   setStatus(engineReady?'ready':'loading',playing?'playing':engineReady?'engine ready':'loading engine…');
 }
 document.getElementById('play').onclick=()=>playing?stop():runCode(true);
+document.getElementById('fab').onclick=()=>playing?stop():runCode(true);
 
 let evalTimer=null;
 function changed(structural){
@@ -1414,13 +1437,19 @@ function sectionDropIndex(x,y,chips){
     if(y<=r.bottom&&x<r.left+r.width/2)return j;}          // left half of a chip in this row
   return chips.length;
 }
+let sectionTouchDrag=false;
+document.addEventListener('touchmove',e=>{if(sectionTouchDrag)e.preventDefault();},{passive:false}); // hold-to-drag: stop the page scrolling
 function startSectionDrag(e,box,i,onDrop){
   if(e.button>0||(!onDrop&&e.target.closest('button,input')))return;
   const x0=e.clientX,y0=e.clientY;let dragging=false,target=i,mark=null;
+  const touch=e.pointerType==='touch';let armed=!touch;
+  const holdT=touch?setTimeout(()=>{armed=true;sectionTouchDrag=true;box.classList.add('lifted');try{navigator.vibrate?.(12);}catch(_){}},350):null;
+  const quit=()=>{clearTimeout(holdT);sectionTouchDrag=false;box.classList.remove('lifted');window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up);};
   const wrap=document.getElementById('sections');
   const chips=()=>[...wrap.querySelectorAll('.sec')].filter(c=>c!==box); // the other chips (not the one being dragged)
   const move=ev=>{
     const dx=ev.clientX-x0,dy=ev.clientY-y0;
+    if(!armed){if(Math.hypot(dx,dy)>8)quit();return;} // a swipe before the hold: let the page scroll
     if(!dragging){if(Math.hypot(dx,dy)<6)return;dragging=true;box.classList.add('dragging');try{box.setPointerCapture(ev.pointerId);}catch(_){}
       mark=h('div',{class:'drop-mark'});wrap.append(mark);}
     box.style.transform=`translate(${dx}px,${dy}px)`;
@@ -1431,7 +1460,7 @@ function startSectionDrag(e,box,i,onDrop){
     Object.assign(mark.style,{left:(left-wr.left)+'px',top:(ref.top-wr.top)+'px',height:ref.height+'px'});
   };
   const up=()=>{
-    window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up);
+    quit();
     if(!dragging)return;
     box.__dragged=true;setTimeout(()=>{box.__dragged=false;},0);
     mark?.remove();box.style.transform='';box.classList.remove('dragging');
@@ -1447,10 +1476,11 @@ function renderSections(){
   const labels=secLabels(secs);
   secs.forEach((sec,i)=>{
     const nm=h('span',{class:'nm',title:'Double-click to rename'},labels[i]);
-    nm.ondblclick=e=>{e.stopPropagation();const inp=h('input',{class:'small-in',value:labels[i],maxlength:16,style:'width:90px'});
+    const startRename=e=>{e?.stopPropagation();const inp=h('input',{class:'small-in',value:labels[i],maxlength:16,style:'width:90px'});
       const done=()=>{const v=inp.value.trim();if(v&&v!==labels[i]){sec.name=v.slice(0,16);sec.renamed=true;}else if(!v)sec.renamed=false;changed(true);};
       inp.onkeydown=ev=>{ev.stopPropagation();if(ev.key==='Enter')done();if(ev.key==='Escape')renderSections();};inp.onblur=done;inp.onclick=ev=>ev.stopPropagation();
       nm.replaceWith(inp);inp.focus();inp.select();};
+    nm.ondblclick=startRename;
     const stop=f=>e=>{e.stopPropagation();f();};
     const kin=i!==state.cur&&sec.fam===secs[state.cur].fam;
     const twins=labels.filter(l=>l===labels[i]).length;
@@ -1464,6 +1494,7 @@ function renderSections(){
         h('button',{class:'mini',onclick:stop(()=>{sec.repeat=Math.min(64,sec.repeat+1);changed(true);})},'+'),
         h('span',{class:'hint',style:'margin-left:4px'},sec.repeat===1?'bar':'bars')),
       h('div',{class:'acts'},
+        h('button',{class:'mini',title:'Rename',onclick:startRename},'✎'),
         h('button',{class:'mini',title:'Move earlier',disabled:i===0,onclick:stop(()=>{syncSection();[secs[i-1],secs[i]]=[secs[i],secs[i-1]];if(state.cur===i)state.cur--;else if(state.cur===i-1)state.cur++;changed(true);})},'◀'),
         h('button',{class:'mini',title:'Move later',disabled:i===secs.length-1,onclick:stop(()=>{syncSection();[secs[i+1],secs[i]]=[secs[i],secs[i+1]];if(state.cur===i)state.cur++;else if(state.cur===i+1)state.cur--;changed(true);})},'▶'),
         h('button',{class:'mini',title:'Duplicate exactly (same name until you change it)',onclick:stop(()=>{syncSection();const c=JSON.parse(JSON.stringify(sec));c.id='s'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);c.tracks.forEach(t=>t.id=uid++);secs.splice(i+1,0,c);state.cur=i+1;state.tracks=c.tracks;state.prog=c.prog;changed(true);toast(`Duplicated ${labels[i]}`);})},'⧉'),
@@ -1537,14 +1568,18 @@ function renderTrackHeadBtn(el,t){el.querySelectorAll('.thead .tbtn').forEach(b=
 function sel(opts,val,on,title){const s=h('select',{title,onchange:e=>on(e.target.value)});let grp=s,found=false;for(const[v,l]of opts){if(v==='--'){grp=h('optgroup',{label:l});s.append(grp);continue;}const o=h('option',{value:v},l);if(String(v)===String(val)){o.selected=true;found=true;}grp.append(o);}if(!found&&val){const o=h('option',{value:val},String(val));o.selected=true;s.prepend(o);}return s;}
 
 // drag-to-paint helper
-let paint=null;
-document.addEventListener('pointerup',()=>{if(paint){paint=null;changed();}});
+let paint=null,touchTap=null;
+document.addEventListener('pointerup',()=>{if(paint){paint=null;changed();}if(touchTap){const f=touchTap.fn;touchTap=null;f();changed();}});
+document.addEventListener('pointermove',e=>{if(touchTap&&Math.hypot(e.clientX-touchTap.x,e.clientY-touchTap.y)>10)touchTap=null;});
+document.addEventListener('pointercancel',()=>{touchTap=null;});
+// touch: remember the tap, apply it on release only if the finger didn't move (it was a tap, not a scroll)
+const tapOnTouch=(e,fn)=>{if(e.pointerType!=='touch')return false;touchTap={x:e.clientX,y:e.clientY,fn};return true;};
 function drumGrid(t){
   const g=h('div',{class:'grid',style:`grid-template-columns:repeat(${t.steps},1fr)`});
   const per=t.steps%4===0?4:3;
   for(let i=0;i<t.steps;i++){
     const c=h('button',{class:'cell'+(i%per===0?' beat':'')+(t.hits[i]?' on':''),'data-step':i,'aria-label':`step ${i+1}`});
-    c.onpointerdown=e=>{e.preventDefault();paint={val:!t.hits[i],t};t.hits[i]=paint.val;c.classList.toggle('on',paint.val);};
+    c.onpointerdown=e=>{if(tapOnTouch(e,()=>{t.hits[i]=!t.hits[i];c.classList.toggle('on',t.hits[i]);}))return;e.preventDefault();paint={val:!t.hits[i],t};t.hits[i]=paint.val;c.classList.toggle('on',paint.val);};
     c.onpointerenter=()=>{if(paint&&paint.t===t){t.hits[i]=paint.val;c.classList.toggle('on',paint.val);}};
     g.append(c);
   }
@@ -1562,7 +1597,7 @@ function pianoRoll(t){
     for(let i=0;i<t.steps;i++){
       const on=t.notes[i].includes(r);
       const c=h('button',{class:'cell'+(on?' on':'')+(r%L===0?' rootrow':''),'data-step':i,'aria-label':`degree ${r} step ${i+1}`});
-      c.onpointerdown=e=>{e.preventDefault();paint={val:!t.notes[i].includes(r),t};setNote(t,i,r,paint.val);c.classList.toggle('on',paint.val);};
+      c.onpointerdown=e=>{if(tapOnTouch(e,()=>{const v=!t.notes[i].includes(r);setNote(t,i,r,v);c.classList.toggle('on',v);}))return;e.preventDefault();paint={val:!t.notes[i].includes(r),t};setNote(t,i,r,paint.val);c.classList.toggle('on',paint.val);};
       c.onpointerenter=()=>{if(paint&&paint.t===t){setNote(t,i,r,paint.val);c.classList.toggle('on',paint.val);}};
       g.append(c);
     }
@@ -1822,7 +1857,7 @@ document.addEventListener('keydown',e=>{
 let toastT;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1800);}
 
 /* go */
-render();changed();
+render();changed();syncPlayBtn();
 boot();
 })();
 </script>
