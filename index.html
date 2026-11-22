@@ -56,7 +56,9 @@ header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px
 .field{display:flex;flex-direction:column;gap:3px}
 .field label{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--dim)}
 .num{display:flex;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.num input{width:52px;background:transparent;border:none;padding:6px 8px;font-family:var(--mono);font-size:14px;text-align:center;outline:none}
+.num input::-webkit-inner-spin-button,.num input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.num input{-moz-appearance:textfield;appearance:textfield}
+.num input{width:56px;background:transparent;border:none;padding:6px 8px;font-family:var(--mono);font-size:14px;text-align:center;outline:none}
 .num button{background:none;border:none;color:var(--dim);padding:6px 8px}
 .num button:hover{color:var(--text);background:var(--panel2)}
 .num button.big{font-family:var(--mono);font-size:11px;padding:6px 7px}
