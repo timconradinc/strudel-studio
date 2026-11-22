@@ -1387,7 +1387,8 @@ function phraseBars(t){
   const last=hit[hit.length-1];ans[last]=[near(ans[last][0],chordOf(last),[0])];
   if(t.phrase==='answer')return[A,ans];
   // B: the idea moved up a third (a sequence), strong beats on chord tones
-  const B=A.map((a,i)=>a.length?[clampDeg(a[0]+2)]:[]);for(let i=0;i<steps;i+=4)if(B[i].length)B[i]=[near(B[i][0],chordOf(i),[0,2,4])];
+  const top=Math.max(...hit.map(i=>A[i][0])),bot=Math.min(...hit.map(i=>A[i][0])),sq=top+2<=ROWS-1?2:bot-2>=0?-2:0;
+  const B=A.map((a,i)=>a.length?[a[0]+sq]:[]);for(let i=0;i<steps;i+=4)if(B[i].length)B[i]=[near(B[i][0],chordOf(i),[0,2,4])];
   return[A,A,B,ans];
 }
 // Synth tracks hold each note until the next one, except stab/chord parts (unless switched)
