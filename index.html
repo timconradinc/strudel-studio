@@ -322,6 +322,13 @@ header .field>div{flex-wrap:wrap;align-items:center}
 .pad-menu:hover{background:#00000055;color:#000}
 @media (max-width:700px){.pads{max-width:none;gap:9px}.pads-hint{display:none}.pad-menu{width:28px;height:24px}}
 #run.stop{background:#ff5d731f;border-color:#ff5d7388;color:#ffb3be}
+.faq{border:1px solid var(--line);border-radius:10px;margin:0 0 10px;background:var(--panel)}
+.faq>summary{cursor:pointer;padding:9px 12px;font-weight:600;font-size:13px}
+.faq[open]>summary{border-bottom:1px solid var(--line)}
+.faq-q{padding:0 12px;border-bottom:1px solid var(--line)}.faq-q:last-child{border-bottom:0}
+.faq-q>summary{cursor:pointer;padding:8px 0;font-size:13px;color:var(--text)}
+.faq-q p,.faq-q dl{margin:0 0 10px;font-size:12.5px;line-height:1.45;color:var(--dim)}
+.faq-q dt{color:var(--text);font-weight:600;margin-top:6px}.faq-q dd{margin:0}
 .arrangement{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:2px 0}
 .arr-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-right:2px}
 .arr-chip{position:relative;display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--pc);border-radius:8px;padding:6px 8px;cursor:grab;touch-action:manipulation;user-select:none;-webkit-user-select:none}
@@ -339,6 +346,10 @@ header .field>div{flex-wrap:wrap;align-items:center}
 .sec-metro .mp{display:flex;gap:2px;flex-wrap:wrap;max-width:110px}.sec-metro .mp i{width:6px;height:4px;border-radius:2px;background:var(--line)}
 .sec-metro .mp i.on{background:var(--sc,var(--ok))}
 .arr-add{background:transparent;border:1px dashed var(--line2);border-radius:8px;padding:6px 10px;color:var(--dim);cursor:pointer}.arr-add:hover{color:var(--text);border-color:var(--accent)}
+.part-opt{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:1px}.part-opt small{color:var(--dim);font-size:11px;line-height:1.25}
+.pk-row.cur{background:color-mix(in srgb,var(--accent) 14%,transparent);border-radius:6px}
+.arr-chip .an{cursor:pointer}.arr-chip .acaret{font-size:9px;color:var(--dim);margin-left:3px}.arr-chip:not(.sel) .acaret{display:none}
+.ask-pop{padding:12px}.ask-pop p{margin:0 0 10px;font-size:13px;line-height:1.4}.ask-btns{display:flex;gap:6px;flex-wrap:wrap}
 .pdot{width:10px;height:10px;border-radius:3px;flex:0 0 auto;margin-left:6px}
 .part-menu{max-height:420px;overflow:auto}
 .toast-act{margin-left:8px;background:var(--accent);color:#170c03;border:none;border-radius:6px;padding:3px 9px;font-weight:700;cursor:pointer}
@@ -362,6 +373,7 @@ header .field>div{flex-wrap:wrap;align-items:center}
   <div class="field"><label>Preset / style</label>
     <div style="display:flex;gap:6px">
       <select id="preset" class="ui"></select>
+      <button id="newSong" class="btn" title="A new song in a random genre, built with that genre's rules: tempo, instruments, rhythms, chords and song structure">🆕 New song</button>
       <button id="randomize" class="btn" title="Roll a new groove in the current style (R)">🎲 Randomize</button>
       <button id="undo" class="btn" title="Nothing to undo" disabled>↶ Undo</button>
       <label class="chk" title="New grooves, presets and added tracks use synth sounds and drum machines instead of real instruments"><input type="checkbox" id="preferSynth"> prefer synths</label>
@@ -420,6 +432,17 @@ header .field>div{flex-wrap:wrap;align-items:center}
 
   <aside id="codeCol">
     <div id="codeResize" title="Drag to resize"></div>
+    <details id="faq" class="faq"><summary>❓ FAQ — parts, sections & how it works</summary>
+      <details class="faq-q"><summary>What are parts?</summary><p>A song is a list of parts — Intro, Verse, Chorus… — shown in the Song row. Each part holds one or more sections, and a part can come back (Verse → Chorus → Verse). Drag parts to reorder, ✕ to remove one from the song, + part to add.</p></details>
+      <details class="faq-q"><summary>What does each part mean?</summary><dl id="faqParts"></dl></details>
+      <details class="faq-q"><summary>Sections vs. parts</summary><p>Sections are the actual loops of music (Cedar, Drift…). Parts group sections into the song's structure. Click a part to see and edit its sections.</p></details>
+      <details class="faq-q"><summary>What do names like Bob-M2-M1 mean?</summary><p>Copies of a section share its name. When you change a copy it becomes a modified version: Bob-M1, then Bob-M2 for the next one. Change a copy of Bob-M2 and it becomes Bob-M2-M1.</p></details>
+      <details class="faq-q"><summary>Randomize, Start a new groove, New song?</summary><p>🎲 Randomize rolls a new groove for the section you're editing (on a preset or example it offers to start a new song instead). ✨ Start a new groove builds a whole new song in the current style. 🆕 New song (top) picks a random genre and builds a full song with that genre's structure. 🆕 New empty song starts from nothing.</p></details>
+      <details class="faq-q"><summary>How many grooves can I save?</summary><p>As many as you like. Grooves are saved in this browser, so there's no fixed limit — only your browser's storage. They don't sync to other devices.</p></details>
+      <details class="faq-q"><summary>Why does the editor jump between sections?</summary><p>With 👁 Follow on, the editor shows whichever section is playing. Turn Follow off to keep editing one section while the song plays.</p></details>
+      <details class="faq-q"><summary>The metronome</summary><p>The bar above the pads shows the beat (yellow = beat 1). The small dots in each section show the beat and how many bars of that section have played; the green line under a part shows its progress. 🔈 adds a click.</p></details>
+      <details class="faq-q"><summary>Can I edit the code?</summary><p>Yes — edit it and press ▶ Run code. Your hand-edited code plays until you go back to the sequencer.</p></details>
+    </details>
     <div class="codehead">
       <h2>Strudel code</h2><span class="spacer"></span>
       <button class="tog" id="wrapBtn" title="Wrap long lines">wrap</button>
@@ -508,13 +531,14 @@ const isOneShot=t=>t.type==='drum'||(t.type==='pattern'&&t.mode==='s');
 const trackSound=t=>t.type==='synth'?t.wave:t.type==='pattern'&&t.mode==='note'?t.sound:null;
 const isOsc=w=>SYNTHS.includes(w);
 // App settings: defaults below mirror settings.json, which is fetched at startup and overrides them.
-const SETTINGS_DEFAULT={"_about":"Strudel Studio settings. Edit these values to change the app's defaults; the app reads this file when it starts. Generated with Claude Opus 5.5.","attribution":"Claude Opus 5.5","defaultPreset":"House groove","maxSaves":15,"undoDepth":40,"codePanel":{"width":440,"minWidth":280,"maxWidth":900,"collapsed":false,"wrap":true},"controls":{"volume":{"min":0,"max":1.5,"default":1},"pitch":{"min":-12,"max":12,"default":0,"unit":"semitones"},"tone":{"min":150,"max":20000,"default":20000,"unit":"Hz low-pass"},"decay":{"min":0.03,"max":2,"default":0,"unit":"seconds (0 = natural)"},"attack":{"min":0,"max":2,"default":0},"release":{"min":0.01,"max":3,"default":0.1}},"pads":{"phoneMaxWidth":700,"layouts":{"phone":{"cols":3,"rows":5},"desktop":{"cols":4,"rows":4}},"colors":{"drums":"#f2b417","keys":"#14e0ff","bass":"#ff6b5a","lead":"#a46bff"},"symbolColor":"#17171b","quantize":16,"sounds":[{"sound":"bd"},{"sound":"sd"},{"sound":"cp"},{"sound":"hh"},{"sound":"oh"},{"sound":"lt"},{"sound":"ht"},{"sound":"cr"},{"sound":"rim"},{"sound":"sh"},{"sound":"cb"},{"sound":"gm_electric_bass_finger","degree":0},{"sound":"gm_epiano1","degree":0,"chord":true},{"sound":"sawtooth","degree":4},{"sound":"square","degree":7},{"sound":"conga"}]}};
+const SETTINGS_DEFAULT={"_about":"Strudel Studio settings. Edit these values to change the app's defaults; the app reads this file when it starts. Generated with Claude Opus 5.5.","attribution":"Claude Opus 5.5","defaultPreset":"House groove","undoDepth":40,"codePanel":{"width":440,"minWidth":280,"maxWidth":900,"collapsed":false,"wrap":true},"controls":{"volume":{"min":0,"max":1.5,"default":1},"pitch":{"min":-12,"max":12,"default":0,"unit":"semitones"},"tone":{"min":150,"max":20000,"default":20000,"unit":"Hz low-pass"},"decay":{"min":0.03,"max":2,"default":0,"unit":"seconds (0 = natural)"},"attack":{"min":0,"max":2,"default":0},"release":{"min":0.01,"max":3,"default":0.1}},"pads":{"phoneMaxWidth":700,"layouts":{"phone":{"cols":3,"rows":5},"desktop":{"cols":4,"rows":4}},"colors":{"drums":"#f2b417","keys":"#14e0ff","bass":"#ff6b5a","lead":"#a46bff"},"symbolColor":"#17171b","quantize":16,"sounds":[{"sound":"bd"},{"sound":"sd"},{"sound":"cp"},{"sound":"hh"},{"sound":"oh"},{"sound":"lt"},{"sound":"ht"},{"sound":"cr"},{"sound":"rim"},{"sound":"sh"},{"sound":"cb"},{"sound":"gm_electric_bass_finger","degree":0},{"sound":"gm_epiano1","degree":0,"chord":true},{"sound":"sawtooth","degree":4},{"sound":"square","degree":7},{"sound":"conga"}]}};
 let SETTINGS=JSON.parse(JSON.stringify(SETTINGS_DEFAULT));
 const deepMerge=(a,b)=>{for(const[k,v]of Object.entries(b||{})){a[k]=v&&typeof v==='object'&&!Array.isArray(v)&&a[k]&&typeof a[k]==='object'?deepMerge(a[k],v):v;}return a;};
 const settingsHooks=[];
 fetch('settings.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(j=>{if(!j)return;SETTINGS=deepMerge(JSON.parse(JSON.stringify(SETTINGS_DEFAULT)),j);settingsHooks.forEach(f=>{try{f();}catch(e){console.warn(e);}});}).catch(()=>{});
 // user preferences (kept separately from songs)
 const prefs=(()=>{try{return JSON.parse(localStorage.getItem('strudel-studio-prefs'))||{};}catch(e){return{};}})();
+const followOn=()=>prefs.follow!==false&&playing&&songMode();
 let metroBeat=-1,metroClick=!!prefs.metroClick; // metronome state (bar above the pads + small ones in the song section)
 function savePrefs(){try{localStorage.setItem('strudel-studio-prefs',JSON.stringify(prefs));}catch(e){}}
 // "prefer synths": electronic stand-ins for real instruments, by the part's job
@@ -618,7 +642,7 @@ const STYLES={
     parts:[
       {role:'power',name:'Rhythm guitar',p:['x..x..x.x..x..x.','x.x.x.x.x.x.x.x.','x.....x.x.....x.','xx.x.xx.xx.x.xx.'],oct:3,waves:['gm_overdriven_guitar','gm_electric_guitar_muted'],fx:{release:[.08,.18],room:[.15,.3],gain:.8}},
       {role:'bass',name:'Bass',mode:['root','root','fifth','oct'],p:['x.x.x.x.x.x.x.x.','x..x..x.x..x..x.','x.xxx.x.x.xxx.x.'],oct:2,waves:['gm_electric_bass_pick','gm_electric_bass_finger'],fx:{release:.1,gain:.9}},
-      {role:'lead',name:'Lead guitar',p:'-.+.o.+.-.+.o+o.',oct:4,waves:['gm_overdriven_guitar','gm_electric_guitar_clean'],opt:.6,fx:{delay:[.15,.3],room:.35,release:.25,gain:.6}},
+      {role:'lead',name:'Lead guitar',pent:true,p:'-.+.o.+.-.+.o+o.',oct:4,waves:['gm_overdriven_guitar','gm_electric_guitar_clean'],opt:.6,fx:{delay:[.15,.3],room:.35,release:.25,gain:.6}},
       {role:'pad',name:'Organ',oct:3,waves:['gm_rock_organ','gm_drawbar_organ'],opt:.35,fx:{release:.3,room:.3,gain:.35}}]},
   'Heavy metal':{palette:['gm_overdriven_guitar','gm_electric_guitar_muted','gm_electric_guitar_jazz','gm_electric_bass_pick','gm_rock_organ','gm_string_ensemble_1','gm_choir_aahs'],kit:['acoustic','uzu'],bpm:[96,124],swing:[0,0],scales:['minor','phrygian','harmonic:minor'],progs:[[0,0,5,6],[0,1,0,1],[0,5,3,4],[0,6,5,6],[0,0,6,5]],form:['Intro','Verse','Chorus','Verse','Chorus','Solo','Chorus','Ending'],drums:[
       {s:'bd',p:['xxxxxxxxxxxxxxxx','x.xxx.xxx.xxx.xx','x.x.x.x.x.x.x.x.','x.x...x.x.x...x.']},
@@ -630,7 +654,7 @@ const STYLES={
     parts:[
       {role:'power',name:'Rhythm guitar',p:['x.xxx.xxx.xxx.xx','xxxxxxxxxxxxxxxx','x..x..x.x..x..x.','xx.xxx.xxx.xxx.x'],oct:[2,3],waves:['gm_overdriven_guitar','gm_electric_guitar_muted'],fx:{release:[.06,.12],gain:.85}},
       {role:'bass',name:'Bass',mode:['root'],p:['x.xxx.xxx.xxx.xx','xxxxxxxxxxxxxxxx','x.x.x.x.x.x.x.x.'],oct:[1,2],waves:['gm_electric_bass_pick'],fx:{release:.08,gain:.9}},
-      {role:'lead',name:'Lead guitar',p:['oooooooooooooooo','o+o+o+o+o+o+o+o+'],oct:4,waves:['gm_overdriven_guitar','gm_electric_guitar_jazz'],opt:.5,fx:{delay:[.15,.3],room:.3,release:.15,gain:.55}},
+      {role:'lead',name:'Lead guitar',pent:true,p:['o.o+o.ooo+o.o.oo','o+o+o.o.oooo+o..','x.xxx.x.xxxx.x..'],oct:4,waves:['gm_overdriven_guitar','gm_electric_guitar_jazz'],opt:.5,fx:{delay:[.15,.3],room:.3,release:.15,gain:.55}},
       {role:'pad',name:'Choir',oct:3,waves:['gm_choir_aahs','gm_string_ensemble_1','gm_rock_organ'],opt:.3,fx:{attack:.3,release:1,room:.6,gain:.35}}]},
   'Country':{palette:['gm_acoustic_guitar_steel','gm_banjo','gm_violin','gm_harmonica','gm_electric_guitar_clean','gm_piano','piano','gm_acoustic_bass','gm_electric_bass_finger'],kit:['acoustic','uzu'],bpm:[76,100],swing:[0,.08],scales:['major','mixolydian'],progs:[[0,3,4,0],[0,0,3,4],[0,3,0,4],[0,4,5,3],[0,3,4,4]],form:['Intro','Verse','Chorus','Verse','Chorus','Bridge','Chorus','Ending'],drums:[
       {s:'bd',p:['x.......x.......','x.......x..-....','x...x...x...x...']},
@@ -642,7 +666,7 @@ const STYLES={
       {role:'bass',name:'Bass',mode:['fifth'],p:['x...x...x...x...','x...x...x...x.x.'],oct:2,waves:['gm_acoustic_bass','gm_electric_bass_finger'],fx:{release:.2,gain:.85}},
       {role:'chords',name:'Acoustic guitar',p:['x.x.x.xxx.x.x.xx','x.xx.xx.x.xx.xx.','..x...x...x...x.'],oct:3,waves:['gm_acoustic_guitar_steel','gm_acoustic_guitar_nylon'],fx:{release:.25,room:.25,gain:.6}},
       {role:'arp',name:'Banjo',p:['xxxxxxxxxxxxxxxx','x+x+x+x+x+x+x+x+'],oct:4,waves:['gm_banjo'],opt:.6,fx:{release:.1,gain:.45}},
-      {role:'lead',name:'Fiddle',p:['o.+.o.+.o+o.-.+.','o+o+o.o.o+o+o...'],oct:4,waves:['gm_violin','gm_harmonica','gm_electric_guitar_clean'],opt:.7,fx:{room:.3,release:.25,gain:.5}}]},
+      {role:'lead',name:'Fiddle',pent:true,p:['o.+.o.+.o+o.-.+.','o+o+o.o.o+o+o...'],oct:4,waves:['gm_violin','gm_harmonica','gm_electric_guitar_clean'],opt:.7,fx:{room:.3,release:.25,gain:.5}}]},
   'Boom bap':{form:['Intro','Verse','Chorus','Verse','Chorus','Ending'],palette:['piano','piano1','gm_epiano1', 'gm_piano', 'gm_vibraphone', 'gm_string_ensemble_1', 'gm_acoustic_bass', 'gm_muted_trumpet', 'gm_flute', 'gm_electric_guitar_jazz'],kit:['sp12','mpc60','acoustic','dirt'],bpm:[84,94],swing:[.1,.18],scales:['dorian','minor'],drums:[
       {s:'bd',p:['x.....x...x.....','x..-..x.-.x..-..','x.....x.-.x...-.']},
       {s:'sd',p:['....x.......x..-','....x.-.....x...']},
@@ -837,13 +861,16 @@ function genPartTrack(p,ctx){
     hitIdx.forEach(i=>{const r=chordAt(i,steps);notes[i]=[clampDeg(r+lift+seq[k%seq.length])];k++;});
   }else{ // lead melody: a contour or a developing motif, resolving to a chord tone
     const H=hitIdx.length;const lo=ri(1,4),hi=Math.min(ROWS-1,lo+ri(4,6));
-    const shape=pick(['rise','fall','arch','valley','wave','qa','motif','motif']);
+    const shape=pick(['rise','fall','arch','valley','wave','qa','motif','motif','run','bend','run','bend']);
+    const bendBase=ri(lo+1,hi-1),runDown=chance(.6);
     const target=x=>shape==='rise'?lo+(hi-lo)*x:shape==='fall'?hi-(hi-lo)*x:shape==='arch'?lo+(hi-lo)*Math.sin(Math.PI*x):shape==='valley'?hi-(hi-lo)*Math.sin(Math.PI*x):shape==='wave'?(lo+hi)/2+(hi-lo)/2*Math.sin(2*Math.PI*x*pick([1,1.5,2])):x<.5?lo+(hi-lo)*x*2:hi-(hi-lo)*(x-.5)*2;
     const motif=Array.from({length:ri(2,4)},()=>pick([-2,-1,-1,1,1,2,2,3,-3,4,0]));
     const seqStep=pick([0,1,-1,2,-2]);let start=ri(3,6),prev=null,same=0;
     hitIdx.forEach((i,j)=>{
       const r=chordAt(i,steps);let n;
       if(shape==='motif'){const ph=Math.floor(j/motif.length),pos=j%motif.length;n=start+ph*seqStep+motif.slice(0,pos+1).reduce((a,b)=>a+b,0)-(pos===0?motif[0]:0);}
+      else if(shape==='run')n=runDown?hi-j:lo+j;                       // a scale run, like a guitar lick
+      else if(shape==='bend')n=j===H-1?bendBase-1:bendBase+(j%2?1:0);   // repeated 'bend' up a step and back, then resolve
       else n=Math.round(target(H>1?j/(H-1):.5))+pick([0,0,0,1,-1]);
       if((i%4===0&&chance(.5))||j===H-1){const ct=[r,r+2,r+4,r+7].map(clampDeg);n=ct.reduce((a,b)=>Math.abs(b-n)<Math.abs(a-n)?b:a);} // land on chord tones on strong beats + at the end
       if(prev!==null&&Math.abs(n-prev)>4&&chance(.8))n=prev+Math.sign(n-prev)*pick([1,2,2,3]); // mostly steps, the odd leap
@@ -851,11 +878,15 @@ function genPartTrack(p,ctx){
       if(n===prev&&++same>=2){n=Math.max(0,Math.min(ROWS-1,n+pick([-1,1,2])));same=0;}else if(n!==prev)same=0;
       notes[i]=[n];prev=n;
     });
+    if(p.pent){ // rock, metal and country leads stay on the pentatonic scale (no 4th or 7th in major, no 2nd or 6th in minor)
+      const minor=/minor|phrygian|dorian|aeolian/.test(scale),ok=minor?[0,2,3,4,6]:[0,1,2,4,5];
+      for(let i=0;i<16;i++)if(notes[i].length){let d=notes[i][0];if(!ok.includes(((d%7)+7)%7))d=ok.includes((((d+1)%7)+7)%7)&&d+1<ROWS?d+1:d-1;notes[i]=[Math.max(0,d)];}
+    }
   }
   if(!notes.some(x=>x.length))notes[0]=p.role==='chords'||p.role==='pad'?triad(prog[0],sev):[prog[0]];
   const oct=Array.isArray(p.oct)?ri(p.oct[0],p.oct[1]):p.oct;
   const waves=p.waves.filter(isSoundName);
-  return Object.assign(mkSynth({name:p.name,wave:pick(waves.length?waves:SYNTHS),root,octave:oct,scale,steps,notes,fx,mods}),{role:p.role});
+  return Object.assign(mkSynth({name:p.name,wave:pick(waves.length?waves:SYNTHS),root,octave:oct,scale,steps,notes,fx,mods}),{role:p.role},p.role==='lead'&&steps===16&&chance(.75)?{phrase:pick(['answer','aaba','answer'])}:{});
 }
 // Kick sets the main kit; other drums often come from another kit the style uses.
 function kitHas(kit,snd){return kit==='studio'||!!KITS[kit]?.has?.includes(snd);}
@@ -1205,7 +1236,8 @@ const secSig=sec=>JSON.stringify(sec.tracks.map(({id,fxOpen,_bad,color,...t})=>t
 // Section names show lineage: copies share a name (B-B-B); when one is edited it becomes Bm,
 // a copy edited differently Bm1, Bm2... A section keeps its version name while you keep editing it,
 // goes back to B if it matches the original again. Names typed by the user are kept.
-function secLabels(secs){return secs.map(sec=>sec.renamed?sec.name:(sec.fam||sec.name||'?')+(sec.ver?' '+sec.ver:''));}
+function secLabels(secs){return secs.map(sec=>sec.renamed?sec.name:(sec.fam||sec.name||'?')+(sec.ver?'-'+sec.ver:''));}
+const parentLabel=sec=>sec.fam+(sec.ver&&sec.ver.includes('-')?'-'+sec.ver.slice(0,sec.ver.lastIndexOf('-')):'');
 function updateVersion(sec){
   if(!sec||!sec.fam)return;
   const sig=secSig(sec);
@@ -1213,14 +1245,36 @@ function updateVersion(sec){
   const fam=state.sections.filter(x=>x!==sec&&x.fam===sec.fam);
   const twin=fam.find(x=>x.ver&&secSig(x)===sig);if(twin){sec.ver=twin.ver;return;}   // same as an existing version
   if(sec.ver&&!fam.some(x=>x.ver===sec.ver))return;                                    // still the only one with this name
-  const used=new Set(fam.map(x=>x.ver));let v='m',k=1;while(used.has(v))v='m'+k++;sec.ver=v; // split off: next free version
+  // split off: a child of the version it was a copy of (Bob → Bob-M1, Bob-M2; Bob-M2 → Bob-M2-M1)
+  const parent=sec.ver&&fam.some(x=>x.ver===sec.ver)?sec.ver+'-':'';
+  const used=new Set(fam.map(x=>x.ver));let k=1;while(used.has(parent+'M'+k))k++;sec.ver=parent+'M'+k;
 }
 // a preset / 🎲 on a section with no copies starts a new original; with copies it counts as an edit (Bm)
 function freshOriginal(sec){if(!state.sections.some(x=>x!==sec&&x.fam===sec.fam)){sec.famSig=secSig(sec);sec.ver=null;}}
 const isModified=(sec)=>!sec.renamed&&!!sec.ver;
 // Song parts: every section belongs to a part (Intro, Verse, Chorus…); the song plays state.arrangement,
 // a list of part ids in order (a part can appear more than once).
-const PART_NAMES=['Intro','Verse','Pre-chorus','Chorus','Bridge','Solo','Break','Build','Drop','Ending'];
+const PART_NAMES=['Intro','Verse','Pre-chorus','Chorus','Bridge','Solo','Interlude','Break','Build','Drop','Ending'];
+// what each part does — shown on hover, in the part menus and in the FAQ
+const PART_INFO={
+  'Intro':'Opens the song and sets the mood. Usually lighter, with fewer instruments.',
+  'Verse':'Moves the song along. The music repeats while the melody or lyrics change; less energy than the chorus.',
+  'Pre-chorus':'A short lift that builds tension right before the chorus.',
+  'Chorus':'The main hook, the part people remember. The biggest energy, played the same way each time it comes back.',
+  'Bridge':'A contrast late in the song — new chords or melody — before the final chorus.',
+  'Solo':'One instrument (often guitar) takes the spotlight with a lead line, usually over verse or chorus chords.',
+  'Interlude':'A short instrumental link between two parts.',
+  'Break':'A stripped-back moment where most instruments drop out (a breakdown).',
+  'Build':'Rising tension — drums thin out or speed up — leading into a drop.',
+  'Drop':'In electronic music, the payoff after a build: full beat and bass come back in.',
+  'Ending':'The outro: winds the song down or stops on a final hit.',
+  'Theme':'The main melody of a classical piece.','Middle':'A contrasting middle passage before the theme returns.',
+  'Variation':'The theme again, changed — new rhythm, harmony or instruments.','Ground':'A repeating bass line that the other parts are built over.',
+  'Minuet':'A stately dance in 3, the main part of the piece.','Trio':'A gentler contrasting section, originally for three players.',
+  'Episode':'A passage between returns of the main theme.','Motif':'A short, recognisable musical idea the piece is built from.',
+  'Call':'A phrase that asks a question…','Answer':'…and the phrase that replies to it.','Opening':'The first notes of the piece.'
+};
+const partInfo=n=>PART_INFO[n]||PART_INFO[String(n).replace(/ \d+$/,'')]||'A part of the song you named yourself.';
 const PART_COLORS=['#7cc7ff','#ff8a3d','#ffd23f','#ff6b8a','#a78bfa','#3dd6c5','#c6f432','#ff9de2'];
 const newId=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 function ensureParts(s){
@@ -1243,6 +1297,7 @@ function ensureSections(s){
   s.sections.forEach((x,i)=>{if(!x.color)x.color=SEC_COLORS[i%SEC_COLORS.length];if(!x.fam){x.fam=String(x.name||'1');x.famSig=null;x.ver=null;}if(/^[A-P]$/.test(x.fam)){x.fam=String(x.fam.charCodeAt(0)-64);if(!x.renamed)x.name=x.fam;}if(x.famSig==null||(!x.ver&&x.famSig.includes('"color"')))x.famSig=secSig(x);});
   s.cur=Math.min(Math.max(0,s.cur|0),s.sections.length-1);
   ensureParts(s);wordifySections(s);
+  for(const sec of s.sections){const m=/^m(\d*)$/.exec(sec.ver||'');if(m)sec.ver='M'+((+m[1]||0)+1);} // old m, m1 → M1, M2
   s.tracks=s.sections[s.cur].tracks;s.prog=s.sections[s.cur].prog||s.prog;
   return s;
 }
@@ -1283,7 +1338,10 @@ function trackExpr(t){
     if(!notes.some(n=>n.length))return null;
     let tok=notes.map(n=>!n.length?'~':n.length===1?String(n[0]):`[${[...n].sort((a,b)=>a-b).join(',')}]`);
     if(holdsNotes(t)){let on=false;tok=tok.map(x=>x==='~'?(on?'_':'~'):(on=true,x));} // "_" = keep holding the previous note
-    e=`n("${groupTokens(tok,t.steps)}").scale("${t.root}${t.octave}:${t.scale}").s("${t.wave}")`;
+    const bars=t.phrase?phraseBars(t):null;
+    const toks=nb=>{let tk=nb.slice(0,t.steps).map(n=>!n.length?'~':n.length===1?String(n[0]):`[${[...n].sort((a,b)=>a-b).join(',')}]`);if(holdsNotes(t)){let on=false;tk=tk.map(x=>x==='~'?(on?'_':'~'):(on=true,x));}return groupTokens(tk,t.steps);};
+    const body=bars?`<${bars.map(b=>`[${toks(b)}]`).join(' ')}>`:groupTokens(tok,t.steps);
+    e=`n("${body}").scale("${t.root}${t.octave}:${t.scale}").s("${t.wave}")`;
   }else{
     const m=(t.mini||'').replace(/"/g,"'").trim();
     if(!m||t._bad)return null;
@@ -1315,6 +1373,22 @@ function trackExpr(t){
   if(F.gain!==1)e+=`.gain(${f2(F.gain)})`;
   if(M.jux)e+='.jux(rev)';
   return e;
+}
+// Lead phrases built from the one bar you see: 'answer' = call & answer over 2 bars, 'aaba' = 4 bars A A B A'
+function phraseBars(t){
+  const steps=t.steps||16,prog=(state.sections?.find(x=>x.tracks.includes(t))?.prog)||state.prog||[0];
+  const chordOf=i=>prog[Math.floor(i/steps*prog.length)]||0;
+  const near=(d,r,set)=>{let best=d,bd=99;for(let x=0;x<ROWS;x++){const m=(((x-r)%7)+7)%7;if(set.includes(m)&&Math.abs(x-d)<bd){bd=Math.abs(x-d);best=x;}}return best;};
+  const A=t.notes.map(a=>a.slice());const hit=[];for(let i=0;i<steps;i++)if(A[i]?.length)hit.push(i);
+  if(hit.length<2)return null;
+  const sum=hit.reduce((a,i)=>a+A[i][0],0),dir=sum%2?1:-1;
+  // answer: same start, second half moves the other way and comes home to the chord root
+  const ans=A.map(a=>a.slice());hit.filter(i=>i>=steps/2).forEach(i=>ans[i]=[clampDeg(ans[i][0]-dir)]);
+  const last=hit[hit.length-1];ans[last]=[near(ans[last][0],chordOf(last),[0])];
+  if(t.phrase==='answer')return[A,ans];
+  // B: the idea moved up a third (a sequence), strong beats on chord tones
+  const B=A.map((a,i)=>a.length?[clampDeg(a[0]+2)]:[]);for(let i=0;i<steps;i+=4)if(B[i].length)B[i]=[near(B[i][0],chordOf(i),[0,2,4])];
+  return[A,A,B,ans];
 }
 // Synth tracks hold each note until the next one, except stab/chord parts (unless switched)
 const holdsNotes=t=>t.hold??(t.role!=='chords');
@@ -1752,6 +1826,7 @@ function frame(){
   metroTick(c);
   const mark=c==null||customCode?'':JSON.stringify(playingSection(c));
   if(mark!==lastSecMark){lastSecMark=mark;
+    if(mark&&followOn()){const ps=JSON.parse(mark);if(ps.i!==state.cur&&!document.querySelector('#sections input,#arrangement input,.picker,.dragging')){syncSection();state.cur=ps.i;state.tracks=state.sections[ps.i].tracks;state.prog=state.sections[ps.i].prog;render();lastSecMark=mark;}}
     document.querySelectorAll('.sec,.arr-chip').forEach(el=>{el.classList.remove('playing');const b=el.querySelector('.bar');if(b)b.textContent='';});
     if(mark){const ps=JSON.parse(mark);const el=document.querySelector(`.sec[data-i="${ps.i}"]`);if(el){el.classList.add('playing');el.querySelector('.bar').textContent=`▶ ${ps.bar+1}/${ps.of}`;}
       document.querySelector(`.arr-chip[data-occ="${ps.occ}"]`)?.classList.add('playing');}}
@@ -1871,11 +1946,11 @@ function renderSections(){
     const stop=f=>e=>{e.stopPropagation();f();};
     const kin=i!==state.cur&&sec.fam===secs[state.cur].fam;
     const twins=labels.filter(l=>l===labels[i]).length;
-    const relText=isModified(sec)?`modified from ${sec.fam}`:twins>1?`${twins}× in song`:'';
+    const relText=isModified(sec)?`modified from ${parentLabel(sec)}`:twins>1?`${twins}× in song`:'';
     const box=h('div',{class:'sec'+(i===state.cur?' sel':'')+(kin?' kin':''),'data-i':i,style:`--sc:${sec.color}`,title:'Click to edit · drag to reorder',onclick:()=>{if(box.__dragged)return;if(i!==state.cur)selectSection(i);}},
       h('div',{class:'top'},nm,h('span',{class:'bar'})),
       h('div',{class:'sec-metro',title:'Beats and bars of this section while it plays'},h('span',{class:'mb'},h('i'),h('i'),h('i'),h('i')),h('span',{class:'mp'},...Array.from({length:Math.min(sec.repeat,16)},()=>h('i')))),
-      relText?h('span',{class:'rel'+(isModified(sec)?' edited':''),title:isModified(sec)?`Changed from the original ${sec.fam}`:`Identical copies share the name ${labels[i]} — edit one and it becomes ${sec.fam}m`},relText):null,
+      relText?h('span',{class:'rel'+(isModified(sec)?' edited':''),title:isModified(sec)?`Changed from ${parentLabel(sec)}`:`Identical copies share the name ${labels[i]} — edit one and it becomes ${labels[i]}-M1`},relText):null,
       h('div',{class:'rep',title:'How many bars this section plays before the next one'},
         h('button',{class:'mini',onclick:stop(()=>{sec.repeat=Math.max(1,sec.repeat-1);changed(true);})},'−'),
         h('b',{},'×'+sec.repeat),
@@ -1892,6 +1967,7 @@ function renderSections(){
     if(i===state.cur){const add=h('button',{class:'sec-add',title:`Click: add a section right after ${labels[i]} · drag: drop it anywhere in the song. Same instruments and drums, new melodies`,onclick:()=>{if(!add.__dragged)addSection();}},h('b',{},secs.length>1?`+ New section after ${labels[i]}`:'+ New section'),h('small',{},secs.length>1?'or drag it into place':'same sounds · new melodies'));
       add.onpointerdown=e=>startSectionDrag(e,add,-1,at=>addSection(at));el.append(add);}
   });
+  if(playOrder().length>1)el.append(h('button',{class:'tog sec-loop'+(prefs.follow!==false?' on':''),title:'Follow playback: show the section that is playing',onclick:()=>{prefs.follow=prefs.follow===false;savePrefs();renderSections();toast(prefs.follow!==false?'👁 Following the music — the editor shows the playing section':'Follow off — the editor stays on the section you pick');}},prefs.follow!==false?'👁 Following':'👁 Follow'));
   if(playOrder().length>1)el.append(h('button',{class:'tog sec-loop'+(state.loopSection?' on':''),title:'Play only the section you are editing',onclick:()=>{state.loopSection=!state.loopSection;changed(true);}},state.loopSection?'🔁 looping '+labels[state.cur]:'🔁 loop this section'));
   if(playOrder().length>1)el.append(h('div',{class:'song-order',title:'The order the song plays in'},'Song: ',h('b',{},songSummary())));
   el.append(h('div',{class:'sec-tools'},
@@ -1928,6 +2004,7 @@ function renderTrack(t){
   }else if(t.type==='synth'){
     head.append(soundPicker(soundOptions(),t.wave,v=>{t.wave=v;changed(true);},{title:'Instrument / oscillator'}));
     head.append(h('button',{class:'tbtn'+(holdsNotes(t)?' on':''),title:holdsNotes(t)?'Notes ring until the next note (click for short, staccato notes)':'Short notes (click to let notes ring until the next one)',onclick:()=>{t.hold=!holdsNotes(t);changed(true);}},holdsNotes(t)?'hold':'short'));
+    head.append(sel([['','1-bar loop'],['answer','2-bar call & answer'],['aaba','4-bar phrase (AABA)']],t.phrase||'',v=>{t.phrase=v||null;changed(true);},'Phrase: play this bar as written, or develop it into a longer phrase'));
     head.append(sel(NOTE_NAMES.map(n=>[n,n]),t.root,v=>{t.root=v;changed(true);},'Root'));
     head.append(sel([1,2,3,4,5].map(o=>[o,'oct '+o]),t.octave,v=>{t.octave=+v;changed(true);},'Octave'));
     head.append(sel(Object.keys(SCALES).map(s=>[s,s.replace(':',' ')]),t.scale,v=>{t.scale=v;changed(true);},'Scale'));
@@ -2340,7 +2417,7 @@ function syncPresetSel(){presetEl.value=state.style&&STYLES[state.style]?state.s
 function applyNewState(s,msg){state=ensureSections(s);customCode=false;document.getElementById('banner').classList.remove('show');changed(true);syncPresetSel();toast(msg);}
 
 /* ---------- My grooves: up to 15 named saves, including hand-edited code ---------- */
-const SAVES_KEY='strudel-studio-saves';let MAX_SAVES=SETTINGS.maxSaves||15;settingsHooks.push(()=>{MAX_SAVES=SETTINGS.maxSaves||15;try{renderSaves();}catch(e){}});
+const SAVES_KEY='strudel-studio-saves';let MAX_SAVES=SETTINGS.maxSaves||Infinity;settingsHooks.push(()=>{MAX_SAVES=SETTINGS.maxSaves||Infinity;try{renderSaves();}catch(e){}});
 function getSaves(){try{const a=JSON.parse(localStorage.getItem(SAVES_KEY));return Array.isArray(a)?a:[];}catch(e){return[];}}
 function putSaves(a){try{localStorage.setItem(SAVES_KEY,JSON.stringify(a));return true;}catch(e){toast('Could not save — browser storage is full');return false;}}
 function snapshot(name){return{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,savedAt:Date.now(),state:JSON.parse(serializeState()),code:customCode?codeEl.value:null};}
@@ -2395,15 +2472,16 @@ function renderSongName(){
   const src=state.source||{kind:'new'};const nm=state.name;
   if(src.kind==='save'&&getSaves().some(x=>x.id===src.id))el.append(nm);
   else if(src.kind==='example')el.append(h('span',{class:'hint'},'Example: '),nm.replace(/^.* — /,''));
+  else if(src.kind==='preset')el.append(h('span',{class:'hint'},'Preset: '),nm);
   else el.append(h('span',{class:'new-tag'},'New: '),nm);
-  el.parentElement.title=`${src.kind==='save'?'Saved groove':src.kind==='example'?'Example':'New song (not saved yet)'}: ${nm} — click to open another`;
+  el.parentElement.title=`${src.kind==='save'?'Saved groove':src.kind==='example'?'Example':src.kind==='preset'?'Preset':'New song (not saved yet)'}: ${nm} — click to open another`;
 }
 function renderSaves(){
   const saves=getSaves(),list=document.getElementById('savesList');
-  document.getElementById('savesCount').textContent=`${saves.length}/${MAX_SAVES}`;
+  document.getElementById('savesCount').textContent=MAX_SAVES===Infinity?(saves.length?`${saves.length} saved`:''):`${saves.length}/${MAX_SAVES}`;
   const full=saves.length>=MAX_SAVES;const src=state?.source||{};
   document.getElementById('saveNew').disabled=full;document.getElementById('saveName').placeholder=full?'All slots used':'Name this groove…';document.getElementById('saveName').disabled=full;document.getElementById('rerollName').disabled=full;
-  document.getElementById('saveHint').textContent=full?`All ${MAX_SAVES} slots used — overwrite (⤓) or delete (✕) one in My grooves to save another.`:`Saves keep every change, including hand-edited code. ${saves.length}/${MAX_SAVES} used.`;
+  document.getElementById('saveHint').textContent=full?`All ${MAX_SAVES} slots used — overwrite (⤓) or delete (✕) one in My grooves to save another.`:`Saves keep every change, including hand-edited code. They're stored in this browser, so there's no limit.`;
   document.getElementById('savesHint').textContent=saves.length?'Click a name to open it.':'Nothing saved yet — use 💾 Save Groove.';
   list.innerHTML='';
   for(const sv of saves){
@@ -2439,7 +2517,7 @@ function applyPreset(k){
     else{p=presetList()[k]();p.tracks.forEach(t=>{if(t.type==='synth')t.root=ctx.root;});}
   }else p=presetList()[k]();
   state.tracks=p.tracks;state.prog=p.prog;state.style=p.style;
-  if(!multi){state.bpm=p.bpm;state.swing=p.swing;state.key=p.key;} // tempo & swing are song-wide: only taken from the preset for a one-section song
+  if(!multi){state.bpm=p.bpm;state.swing=p.swing;state.key=p.key;state.name=k;state.source={kind:'preset',id:k};} // tempo & swing are song-wide: only taken from the preset for a one-section song
   syncSection();freshOriginal(state.sections[state.cur]);
   customCode=false;document.getElementById('banner').classList.remove('show');
   changed(true);syncPresetSel();
@@ -2578,10 +2656,10 @@ function partMenu(anchor){
   const close=()=>closePicker();
   const used=new Set(state.arrangement);
   box.append(h('div',{class:'pk-grp'},'Add a part you already have'));
-  for(const pt of state.parts)box.append(h('div',{class:'pk-row'},h('span',{class:'pdot',style:`background:${pt.color}`}),h('button',{class:'pk-name',onclick:()=>{close();addPartOccurrence(pt.id);}},pt.name+(used.has(pt.id)?'':' (not in song)'))));
+  for(const pt of state.parts)box.append(h('div',{class:'pk-row',title:partInfo(pt.name)},h('span',{class:'pdot',style:`background:${pt.color}`}),h('button',{class:'pk-name',onclick:()=>{close();addPartOccurrence(pt.id);}},pt.name+(used.has(pt.id)?'':' (not in song)'))));
   box.append(h('div',{class:'pk-grp'},'New part'));
   const taken=new Set(state.parts.map(p=>p.name));
-  for(const n of PART_NAMES)box.append(h('div',{class:'pk-row'},h('button',{class:'pk-name',onclick:()=>{close();newPart(taken.has(n)?n+' 2':n);}},'+ '+n)));
+  for(const n of PART_NAMES)box.append(h('div',{class:'pk-row',title:partInfo(n)},h('button',{class:'pk-name part-opt',onclick:()=>{close();newPart(taken.has(n)?n+' 2':n);}},h('b',{},'+ '+n),h('small',{},partInfo(n)))));
   const inp=h('input',{class:'mini-in',placeholder:'or type a name…',maxlength:20});
   inp.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter'&&inp.value.trim()){close();newPart(inp.value.trim());}};
   box.append(inp);
@@ -2589,6 +2667,19 @@ function partMenu(anchor){
   const r=anchor.getBoundingClientRect(),W=innerWidth;
   if(W<=700)Object.assign(box.style,{left:'8px',right:'8px',bottom:'8px'});
   else Object.assign(box.style,{left:Math.max(8,Math.min(r.left,W-268))+'px',top:Math.min(r.bottom+4,innerHeight-380)+'px',width:'260px'});
+}
+// dropdown on a part's name: pick what kind of part it is
+function partTypeMenu(anchor,pt){
+  closePicker();
+  const box=h('div',{class:'picker part-menu'});box.__for=anchor;pickerEl=box;
+  box.append(h('div',{class:'pk-grp'},`What is “${pt.name}”?`));
+  for(const n of PART_NAMES)box.append(h('div',{class:'pk-row'+(pt.name===n?' cur':''),title:partInfo(n)},h('button',{class:'pk-name part-opt',onclick:()=>{closePicker();pushUndo('rename part');pt.name=n;changed(true);}},h('b',{},(pt.name===n?'● ':'')+n),h('small',{},partInfo(n)))));
+  const inp=h('input',{class:'mini-in',placeholder:'or type your own name…',maxlength:20});
+  inp.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter'&&inp.value.trim()){closePicker();pushUndo('rename part');pt.name=inp.value.trim();changed(true);}};
+  box.append(inp);document.body.append(box);
+  const r=anchor.getBoundingClientRect(),W=innerWidth;
+  if(W<=700)Object.assign(box.style,{left:'8px',right:'8px',bottom:'8px'});
+  else Object.assign(box.style,{left:Math.max(8,Math.min(r.left,W-308))+'px',top:Math.min(r.bottom+4,innerHeight-420)+'px',width:'300px'});
 }
 function addPartOccurrence(pid){pushUndo('add part to song');state.arrangement.push(pid);changed(true);toast(`Added ${state.parts.find(p=>p.id===pid).name} to the song`,undoAction);}
 function newPart(name){
@@ -2612,11 +2703,12 @@ function renderArrangement(labels){
   state.arrangement.forEach((pid,occ)=>{
     const pt=state.parts.find(p=>p.id===pid);if(!pt)return;
     const n=state.sections.filter(x=>x.part===pid).length,bars=state.sections.filter(x=>x.part===pid).reduce((a,x)=>a+x.repeat,0);
-    const nm=h('span',{class:'an'},pt.name);
-    const chip=h('div',{class:'arr-chip'+(pid===curPart?' sel':''),'data-occ':occ,style:`--pc:${pt.color}`,title:`${pt.name}: ${n} section${n>1?'s':''}, ${bars} bars · click to edit · drag to reorder · double-click to rename`,
+    const nm=h('span',{class:'an',title:`${pt.name}: ${partInfo(pt.name)}\nClick to change what this part is`},pt.name,h('span',{class:'acaret'},'▾'));
+    const chip=h('div',{class:'arr-chip'+(pid===curPart?' sel':''),'data-occ':occ,style:`--pc:${pt.color}`,title:`${pt.name} — ${partInfo(pt.name)}\n${n} section${n>1?'s':''}, ${bars} bars · click to edit · drag to reorder · double-click the name to rename`,
       onclick:()=>{if(chip.__dragged)return;selectPart(pid,occ);}},
       nm,h('span',{class:'ab'},`${bars} bars`),h('span',{class:'bar'}),h('span',{class:'aprog'}),
       state.arrangement.length>1?h('button',{class:'ax',title:'Remove from the song (the part is kept in “+ part”)',onclick:e=>{e.stopPropagation();pushUndo('remove part from song');state.arrangement.splice(occ,1);changed(true);toast(`Removed ${pt.name} from the song`,undoAction);}},'✕'):null);
+    nm.onclick=e=>{if(pid!==curPart)return; e.stopPropagation();partTypeMenu(nm,pt);};
     nm.ondblclick=e=>{e.stopPropagation();const inp=h('input',{class:'small-in',value:pt.name,maxlength:20,style:'width:90px'});
       const done=()=>{const v=inp.value.trim();if(v)pt.name=v;changed(true);};inp.onkeydown=ev=>{ev.stopPropagation();if(ev.key==='Enter')done();if(ev.key==='Escape')renderSections();};inp.onblur=done;inp.onclick=ev=>ev.stopPropagation();nm.replaceWith(inp);inp.focus();inp.select();};
     chip.onpointerdown=e=>startChipDrag(e,chip,occ);
@@ -2661,7 +2753,26 @@ function clearSong(){
   const st=genSong(name);applyNewState(st,'');
   toast(`✨ New ${name} song “${st.name}”: ${st.arrangement.map(id=>st.parts.find(p=>p.id===id).name).join(' → ')}`,undoAction);
 }
-function randomize(){
+function newBasicSong(){
+  pushUndo('new song');
+  const name=state.style&&STYLES[state.style]?state.style:randomStyleName();
+  const st=genStyle(name,(Math.random()*2**32)>>>0);st.name=suggestName();st.source={kind:'new'};st.bpm=Math.round(st.bpm);
+  applyNewState(st,'');toast(`✨ New ${name} song “${st.name}”`,undoAction);
+}
+function askNewSong(anchor){
+  closePicker();
+  const src=state.source,what=src.kind==='example'?'an example':'a preset';
+  const box=h('div',{class:'picker ask-pop'});box.__for=anchor;pickerEl=box;
+  box.append(h('p',{},`“${state.name}” is ${what}. Make a new song instead of changing it?`),
+    h('div',{class:'ask-btns'},h('button',{class:'btn primary',onclick:()=>{closePicker();newBasicSong();}},'✨ New song'),
+      h('button',{class:'btn',onclick:()=>{closePicker();randomize(true);}},'Randomize it anyway'),h('button',{class:'btn',onclick:closePicker},'Cancel')));
+  document.body.append(box);
+  const r=anchor.getBoundingClientRect(),W=innerWidth;
+  if(W<=700)Object.assign(box.style,{left:'8px',right:'8px',bottom:'8px'});
+  else Object.assign(box.style,{left:Math.max(8,Math.min(r.left,W-330))+'px',top:(r.bottom+6)+'px',width:'320px'});
+}
+function randomize(force){
+  if(force!==true&&['preset','example'].includes(state.source?.kind)){askNewSong(document.getElementById('randomize'));return;}
   pushUndo('🎲 Randomize');
   const name=state.style&&STYLES[state.style]?state.style:randomStyleName();
   if(state.sections&&state.sections.length>1){ // re-roll just this section, in the song's key and tempo
@@ -2671,9 +2782,14 @@ function randomize(){
   applyNewState(genStyle(name,(Math.random()*2**32)>>>0),'🎲 New '+name+' groove');
   toast('🎲 New '+name+' groove',undoAction);
 }
-document.getElementById('randomize').onclick=randomize;
+document.getElementById('newSong').onclick=()=>{
+  pushUndo('new song');const g=randomStyleName();const st=genSong(g);applyNewState(st,'');
+  toast(`🆕 New ${g} song “${st.name}”: ${st.arrangement.map(id=>st.parts.find(p=>p.id===id).name).join(' → ')}`,undoAction);
+};
+document.getElementById('randomize').onclick=e=>{e.stopPropagation();randomize();};
 renderSaves();
 document.getElementById('undo').onclick=undo;
+{const dl=document.getElementById('faqParts');for(const n of PART_NAMES)dl.append(h('dt',{},n),h('dd',{},PART_INFO[n]));}
 const psEl=document.getElementById('preferSynth');psEl.checked=!!prefs.preferSynth;
 psEl.onchange=()=>{prefs.preferSynth=psEl.checked;savePrefs();toast(psEl.checked?'Synth sounds preferred — press 🎲 to hear it':'Real instruments allowed again — press 🎲 to hear it');};
 document.getElementById('libSearch').oninput=buildLibrary;
