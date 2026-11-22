@@ -290,6 +290,22 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 .pk-play{background:none;border:1px solid var(--line);border-radius:50%;width:24px;height:24px;font-size:9px;color:var(--dim);flex:0 0 auto;cursor:pointer}.pk-play:hover{color:var(--text);border-color:var(--accent)}
 .pk-name{flex:1;text-align:left;background:none;border:none;padding:6px 4px;font-size:13px;color:var(--text);cursor:pointer}
 @media (max-width:700px){.picker{max-height:70vh}.pk-list{max-height:calc(70vh - 60px)}.pk-play{width:30px;height:30px}.bctl{min-width:130px}}
+.pads-box{background:#1b1b1e;background-image:repeating-linear-gradient(0deg,#ffffff05 0 1px,transparent 1px 4px);border:1px solid #2c2c31;border-radius:14px;padding:12px 14px 14px;box-shadow:inset 0 1px 0 #ffffff0a}
+.pads-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.pads-title{font-family:var(--mono);font-weight:800;letter-spacing:.18em;font-size:13px;color:#d8d4c8;background:none;border:none;cursor:pointer;padding:0}
+.pads-title span{color:var(--dim);font-size:10px}
+.pads-box.closed .pads,.pads-box.closed .pads-hint{display:none}.pads-box.closed .pads-head{margin-bottom:0}
+.rec{font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:.1em;background:#2a2a2f;border:1px solid #3a3a40;color:#ff6b6b;border-radius:4px;padding:5px 10px;cursor:pointer}
+.rec.on{background:#e0333d;color:#fff;border-color:#e0333d;animation:recblink 1s steps(2) infinite}
+@keyframes recblink{50%{opacity:.6}}
+.pads{display:grid;grid-template-columns:repeat(var(--cols,4),1fr);gap:10px;max-width:460px}
+.pad{position:relative;aspect-ratio:1;border:none;border-radius:4px;background:var(--pc);box-shadow:inset 0 -7px 0 #0000004a,inset 0 2px 0 #ffffff40,0 4px 0 #000a;display:grid;place-items:center;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;transition:transform .04s,filter .04s}
+.pad svg{width:48%;height:48%;pointer-events:none}
+.pad.hit{transform:translateY(3px);filter:brightness(1.3);box-shadow:inset 0 -3px 0 #0000004a,inset 0 2px 0 #ffffff40,0 1px 0 #000a}
+.pad.rec-hit{outline:3px solid #ff4d57;outline-offset:2px}
+.pad-menu{position:absolute;right:5px;bottom:7px;width:22px;height:20px;border-radius:3px;background:#00000033;border:none;color:#17171bcc;font-size:10px;line-height:20px;cursor:pointer;padding:0}
+.pad-menu:hover{background:#00000055;color:#000}
+@media (max-width:700px){.pads{max-width:none;gap:9px}.pads-hint{display:none}.pad-menu{width:28px;height:24px}}
 .toast-act{margin-left:8px;background:var(--accent);color:#170c03;border:none;border-radius:6px;padding:3px 9px;font-weight:700;cursor:pointer}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(80px);background:#24242c;border:1px solid var(--line2);padding:9px 14px;border-radius:10px;transition:transform .2s;z-index:50;font-size:12px}
 .toast.show{transform:translateX(-50%) translateY(0)}
@@ -336,6 +352,14 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 
 <main>
   <section id="tracksCol">
+    <section id="padsBox" class="pads-box">
+      <div class="pads-head">
+        <button id="padsToggle" class="pads-title" title="Show / hide the pads">PAD·16 <span id="padsCaret">▾</span></button>
+        <button id="recBtn" class="rec" title="Record: tap pads while the groove plays; hits are written into the groove">● REC</button>
+        <span class="hint pads-hint">tap a pad to play it · turn on REC while playing to record into the groove</span>
+      </div>
+      <div id="pads" class="pads"></div>
+    </section>
     <div id="sections" class="sections"></div>
     <div id="tracks"></div>
     <div class="addrow">
@@ -1413,7 +1437,7 @@ async function boot(){
     registerInstruments();
     loadPacks();
     try{ if(typeof soundMap!=='undefined'){const keys=Object.keys(soundMap.get());SYNTHS=SYNTHS.filter(s=>keys.includes(s));if(!SYNTHS.length)SYNTHS=['sawtooth','square','triangle','sine'];} }catch(e){}
-    engineReady=true;setStatus('ready','engine ready');render();
+    engineReady=true;setStatus('ready','engine ready');render();renderPads();
   }catch(e){setStatus('error','engine error');showErr(e?.message||e);}
 }
 
@@ -1771,6 +1795,120 @@ async function defaultPreview(name,{bank=null,note=null}={}){
     await superdough(v,ac.currentTime+.03,v.duration);
   }catch(e){toast('Could not play '+name+': '+(e.message||e));}
 }
+/* =========================================================
+   Pads: an '80s drum-machine style pad grid you can play and record
+   ========================================================= */
+const KEYS_RE=/piano|epiano|organ|clav|harpsi|vibra|marimba|xylo|glock|bell|chime|kalimba|harp|accordion|string|choir|voice|pad_|celesta|balafon|steel_drums|dulcimer|wineglass|fmpiano/;
+function padType(snd){
+  if(!snd)return 'drums';
+  if(DRUMS.some(d=>d[0]===snd)||PERC.includes(snd)||WORLD.includes(snd)||DIRT_DRUMS.includes(snd)||/^mridangam|^tabla/.test(snd))return 'drums';
+  if(/bass|808/.test(snd))return 'bass';
+  if(KEYS_RE.test(snd))return 'keys';
+  if(SYNTHS.includes(snd)||INSTR[snd]||SAMPLED_SET.has(snd))return 'lead';
+  return 'drums';
+}
+// flat, single-colour stencil symbols (24x24)
+const SYM={
+  bd:'<circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="12" cy="12" r="3.2"/>',
+  sd:'<rect x="3" y="8" width="18" height="9" rx="1.5"/><path d="M3 7h18v-1.6H3z"/><path d="M5 10l3 5 3-5 3 5 3-5 2 3" fill="none" stroke="#fff0" />',
+  hh:'<path d="M2 9.5c0-1.6 4.5-3 10-3s10 1.4 10 3z"/><path d="M2 12.5c0 1.6 4.5 3 10 3s10-1.4 10-3z"/><rect x="11" y="15" width="2" height="7"/>',
+  oh:'<path d="M2 7c0-1.6 4.5-3 10-3s10 1.4 10 3z"/><path d="M2 13c0 1.6 4.5 3 10 3s10-1.4 10-3z"/><rect x="11" y="16" width="2" height="6"/>',
+  cp:'<path d="M5 13l4-9 2.4 1.1-2.6 6.5 1 .4 3.7-6.1 2.2 1.3-3.6 6.1.9.6 4.4-4.6 1.8 1.8-5.3 6c-2.3 2.6-6.5 3-8.9.4z"/>',
+  rim:'<circle cx="11" cy="13" r="7.5" fill="none" stroke="currentColor" stroke-width="2.6"/><rect x="2" y="3.5" width="21" height="3" rx="1.5" transform="rotate(28 12 5)"/>',
+  lt:'<ellipse cx="12" cy="8" rx="9" ry="3"/><path d="M3 9.5v6c0 1.7 4 3 9 3s9-1.3 9-3v-6c-1.8 1.4-5 2.2-9 2.2s-7.2-.8-9-2.2z"/>',
+  ht:'<ellipse cx="12" cy="9" rx="6.5" ry="2.3"/><path d="M5.5 10.3v4.5c0 1.3 2.9 2.4 6.5 2.4s6.5-1.1 6.5-2.4v-4.5c-1.4 1-3.7 1.6-6.5 1.6s-5.1-.6-6.5-1.6z"/>',
+  cr:'<path d="M1.5 9.5l20-4.5.6 2.6-20 4.5z"/><rect x="11" y="9" width="2" height="13"/><circle cx="11.9" cy="7.6" r="1.6"/>',
+  rd:'<ellipse cx="12" cy="9" rx="10.5" ry="3"/><circle cx="12" cy="7" r="2"/><rect x="11" y="11" width="2" height="11"/>',
+  sh:'<rect x="5" y="2.5" width="9" height="15" rx="4.5" transform="rotate(30 9.5 10)"/><circle cx="17" cy="19" r="1.4"/><circle cx="20" cy="16" r="1.1"/><circle cx="14.5" cy="21.5" r="1"/>',
+  cb:'<path d="M8 3h8l3.5 16h-15z"/><rect x="10" y="19" width="4" height="3"/>',
+  perc:'<path d="M7 2h10l1.5 6-1.5 14H7L5.5 8z"/><path d="M6 6h12" stroke="#0000" />',
+  drums:'<path d="M12 1.5l2.4 6.5 6.9.3-5.4 4.3 1.9 6.7L12 15.4l-5.8 3.9 1.9-6.7L2.7 8.3l6.9-.3z"/>',
+  keys:'<path d="M2 4h20v16H2zM5.2 4v9h2.6V4zm5.5 0v9h2.6V4zm5.5 0v9h2.6V4z" fill-rule="evenodd"/>',
+  bass:'<path d="M5 5.2c5.6-2.8 12.2-1 12.2 5.4 0 5.4-5.2 8.6-11.8 9.6l-.4-2.2c5-.9 9.3-3.3 9.3-7.4 0-4.6-4.4-5.5-8.2-3.8a2.6 2.6 0 11-1.1-1.6z"/><circle cx="20.3" cy="8" r="1.6"/><circle cx="20.3" cy="13.5" r="1.6"/>',
+  lead:'<path d="M13.5 1.5L4 13.5h6.5L8.5 22.5 20 9.5h-6.8z"/>'
+};
+function padSymbol(snd){
+  const ty=padType(snd);
+  let k=ty;
+  if(ty==='drums'){k=SYM[snd]?snd:/^(cr|crash|sus_cymbal|gong)/.test(snd)?'cr':/hh|hihat|hat/.test(snd)?'hh':/oh/.test(snd)?'oh':/bd|kick|bassdrum/.test(snd)?'bd':/sd|snare/.test(snd)?'sd':/clap|cp/.test(snd)?'cp':/tom|lt|ht/.test(snd)?'lt':/shak|cabasa|maraca|sh$/.test(snd)?'sh':/cow|cb|agogo/.test(snd)?'cb':/conga|bongo|cajon|darbuka|framedrum|tabla|mridangam|timpani/.test(snd)?'perc':'drums';}
+  return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${SYM[k]}</svg>`;
+}
+function padList(){const saved=Array.isArray(prefs.pads)?prefs.pads:null;const base=(SETTINGS.pads?.sounds||[]).map(x=>({...x}));if(saved)saved.forEach((p,i)=>{if(p&&p.sound)base[i]={...base[i],...p};});return base;}
+function padLayout(){const P=SETTINGS.pads||{};const phone=innerWidth<=(P.phoneMaxWidth||700);return(P.layouts||{})[phone?'phone':'desktop']||{cols:phone?3:4,rows:phone?5:4};}
+let recording=false;const padsWarm=new Set();
+function padOctave(ty){return ty==='bass'?2:ty==='keys'?4:4;}
+function padNotes(pad){const ctx=currentCtx();const ty=padType(pad.sound);const d=pad.degree||0;const degs=pad.chord?[d,d+2,d+4]:[d];return degs.map(x=>scaleNote(ctx.root,ctx.scale,x,padOctave(ty)));}
+function padKit(snd){const tr=state.tracks.find(t=>t.type==='drum'&&t.sound===snd);if(tr)return tr.kit;const kick=state.tracks.find(t=>t.type==='drum'&&t.sound==='bd');return kick?.kit||'studio';}
+async function warmPad(pad){
+  if(!engineReady)return;const key=pad.sound+'|'+padKit(pad.sound);if(padsWarm.has(key))return;padsWarm.add(key);
+  try{const ty=padType(pad.sound);const bank=ty==='drums'?kitBank(padKit(pad.sound),pad.sound):null;
+    await ensureSounds(bank?`.bank("${bank}") ${pad.sound}`:pad.sound);
+    if(!INSTR[pad.sound]&&!SYNTHS.includes(pad.sound)&&!(bank==='acoustic')){const ac=getAudioContext();await superdough({s:bank?bank+'_'+pad.sound:pad.sound,gain:0,note:ty==='drums'?undefined:60},ac.currentTime+.01,.05);}
+  }catch(e){padsWarm.delete(key);}
+}
+async function playPad(pad){
+  if(!engineReady){toast('Engine still loading…');return;}
+  const ac=getAudioContext();try{await ac.resume();}catch(e){}
+  if(!audioInited){audioInited=true;try{await initAudio();}catch(e){}}
+  const ty=padType(pad.sound);
+  if(ty==='drums'){const bank=kitBank(padKit(pad.sound),pad.sound);superdough({s:bank?bank+'_'+pad.sound:pad.sound,gain:.95},ac.currentTime+.005,.3);}
+  else for(const n of padNotes(pad))superdough({s:pad.sound,note:n,gain:.8,duration:.45,release:.3},ac.currentTime+.005,.45);
+}
+// write a hit into the groove at the nearest step of the bar that's playing
+function recordHit(pad){
+  if(!recording||!playing||customCode)return false;
+  let c;try{c=replRef.scheduler.now();}catch(e){return false;}
+  if(!isFinite(c))return false;
+  const cps=state.bpm/240;c-=0.1*cps;                          // what you hear is ~0.1s behind the scheduler
+  const cs=c+(songMode()?playOffset:0);
+  const si=playingSection(cs).i;const sec=state.sections[si];
+  syncSection();const tracks=si===state.cur?state.tracks:sec.tracks;
+  const ty=padType(pad.sound);let t;
+  if(ty==='drums'){
+    t=tracks.find(x=>x.type==='drum'&&x.sound===pad.sound);
+    if(!t){t=mkDrum(pad.sound,Array(16).fill(false));const kick=tracks.find(x=>x.type==='drum'&&x.sound==='bd');t.kit=kitHas(kick?.kit||'studio',pad.sound)?(kick?.kit||'studio'):'studio';t.color=COLORS[tracks.length%COLORS.length];tracks.push(t);}
+  }else{
+    t=tracks.find(x=>x.type==='synth'&&x.wave===pad.sound);
+    if(!t){const ctx=currentCtx();t=mkSynth({name:(INSTR[pad.sound]?.label||SAMPLED.find(x=>x[0]===pad.sound)?.[1]||pad.sound).replace(/^./,m=>m.toUpperCase()),wave:pad.sound,root:ctx.root,octave:padOctave(ty),scale:ctx.scale,steps:16,notes:Array.from({length:16},()=>[])});t.role=ty==='bass'?'bass':ty==='keys'?'chords':'lead';t.color=COLORS[tracks.length%COLORS.length];tracks.push(t);}
+  }
+  const steps=t.steps||16;const step=((Math.round((cs-Math.floor(cs))*steps))%steps+steps)%steps;
+  if(t.type==='drum')t.hits[step]=true;
+  else{const d=pad.degree||0;for(const x of(pad.chord?[d,d+2,d+4]:[d]))if(!t.notes[step].includes(x))t.notes[step].push(x);}
+  if(si!==state.cur)updateVersion(sec);
+  changed(true);
+  return true;
+}
+function renderPads(){
+  const box=document.getElementById('padsBox'),el=document.getElementById('pads');if(!el)return;
+  const open=prefs.padsOpen!==false;box.classList.toggle('closed',!open);document.getElementById('padsCaret').textContent=open?'▾':'▸';
+  const{cols,rows}=padLayout();el.style.setProperty('--cols',cols);el.innerHTML='';
+  const colors=SETTINGS.pads?.colors||{},symColor=SETTINGS.pads?.symbolColor||'#17171b';
+  const all=padList();
+  all.slice(0,cols*rows).forEach((pad,i)=>{
+    const ty=padType(pad.sound);
+    const b=h('button',{class:'pad',style:`--pc:${colors[ty]||'#888'};color:${symColor}`,title:`${pad.sound} (${ty})`,'aria-label':`${pad.sound} pad`});
+    b.innerHTML=padSymbol(pad.sound);
+    b.onpointerdown=e=>{if(e.target.closest('.pad-menu'))return;e.preventDefault();b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),110);
+      playPad(pad);if(recordHit(pad)){b.classList.add('rec-hit');setTimeout(()=>b.classList.remove('rec-hit'),160);}};
+    const menu=h('button',{class:'pad-menu',title:'Change this pad\'s sound'},'▾');
+    menu.onpointerdown=e=>e.stopPropagation();
+    menu.onclick=e=>{e.stopPropagation();openPicker(menu,drumOptions().concat(soundOptions()),pad.sound,v=>{const list=padList();list[i]={...list[i],sound:v};if(padType(v)!=='drums'&&list[i].degree==null)list[i].degree=0;prefs.pads=list;savePrefs();renderPads();warmPad(list[i]);toast(`Pad ${i+1}: ${v}`);},v=>playPad({...pad,sound:v}));};
+    b.append(menu);el.append(b);
+    if(open)warmPad(pad);
+  });
+}
+document.getElementById('padsToggle').onclick=()=>{prefs.padsOpen=prefs.padsOpen===false;savePrefs();renderPads();};
+document.getElementById('recBtn').onclick=()=>{
+  recording=!recording;document.getElementById('recBtn').classList.toggle('on',recording);
+  if(recording){
+    if(customCode){recording=false;document.getElementById('recBtn').classList.remove('on');toast('Recording writes into the sequencer — switch back from your hand-edited code first');return;}
+    pushUndo('pad recording');
+    if(!playing)runCode(true);
+    toast('● Recording — tap pads in time; hits land on the nearest step',undoAction);
+  }else toast('Recording stopped');
+};
+let padLayoutKey='';addEventListener('resize',()=>{const k=JSON.stringify(padLayout());if(k!==padLayoutKey){padLayoutKey=k;renderPads();}});
+settingsHooks.push(renderPads);
 function renderTrackHeadBtn(el,t){el.querySelectorAll('.thead .tbtn').forEach(b=>{if(b.textContent==='FX')b.classList.toggle('on',t.fxOpen);});}
 function sel(opts,val,on,title){const s=h('select',{title,onchange:e=>on(e.target.value)});let grp=s,found=false;for(const[v,l]of opts){if(v==='--'){grp=h('optgroup',{label:l});s.append(grp);continue;}const o=h('option',{value:v},l);if(String(v)===String(val)){o.selected=true;found=true;}grp.append(o);}if(!found&&val){const o=h('option',{value:val},String(val));o.selected=true;s.prepend(o);}return s;}
 
@@ -2101,7 +2239,7 @@ function undo(){
 const undoAction={label:'Undo',fn:()=>undo()};
 
 /* go */
-render();changed();syncPlayBtn();applyCodePanel();syncUndoBtn();initHint();
+render();changed();syncPlayBtn();applyCodePanel();syncUndoBtn();initHint();renderPads();
 boot();
 })();
 </script>
