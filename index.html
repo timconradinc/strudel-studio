@@ -296,20 +296,20 @@ const INSTRUMENTS=[
 const INSTR=Object.fromEntries(INSTRUMENTS.map(([n,l,p])=>[n,{label:l,prog:p}]));
 // Sampled instruments from strudel.cc's sample packs (grand piano + VCSL), playable at any note
 const SAMPLED=[
-  ['piano','grand piano'],['steinway','steinway piano'],['kawai','kawai piano'],['piano1','upright piano'],['fmpiano','fm piano'],['clavisynth','clavisynth'],
-  ['harp','concert harp'],['folkharp','folk harp'],['strumstick','strumstick'],['dantranh','đàn tranh zither'],['psaltery_pluck','psaltery'],['balafon','balafon'],
+  ['piano','grand piano'],['piano1','upright piano'],['fmpiano','fm piano'],['clavisynth','clavisynth'],
+  ['harp','concert harp'],['folkharp','folk harp'],['strumstick','strumstick'],['dantranh','đàn tranh zither'],['balafon','balafon'],
   ['sax','saxophone'],['sax_vib','sax (vibrato)'],['saxello','saxello'],['recorder_soprano_sus','soprano recorder'],['recorder_alto_sus','alto recorder'],['recorder_tenor_sus','tenor recorder'],['recorder_bass_sus','bass recorder'],
-  ['ocarina','ocarina'],['harmonica','harmonica (VCSL)'],['super64','chromatic harmonica'],
+  ['harmonica','harmonica (VCSL)'],['super64','chromatic harmonica'],
   ['pipeorgan_loud','pipe organ'],['pipeorgan_quiet','pipe organ (soft)'],['organ_full','reed organ'],['organ_8inch','organ 8"'],
   ['marimba','marimba (VCSL)'],['vibraphone','vibraphone (VCSL)'],['vibraphone_bowed','bowed vibraphone'],['glockenspiel','glockenspiel'],['xylophone_medium_ff','xylophone'],
-  ['kalimba','kalimba (VCSL)'],['tubularbells','tubular bells (VCSL)'],['handchimes','hand chimes'],['belltree','bell tree'],['wineglass','wine glass']
+  ['tubularbells','tubular bells (VCSL)'],['handchimes','hand chimes'],['belltree','bell tree'],['wineglass','wine glass']
 ];
 const SAMPLED_SET=new Set(SAMPLED.map(x=>x[0]));
 const isSoundName=w=>SYNTHS.includes(w)||!!INSTR[w]||SAMPLED_SET.has(w);
 const isRealSound=w=>!!w&&(w.startsWith('gm_')||SAMPLED_SET.has(w));
 function soundOptions(){return [['--','Synths']].concat(SYNTHS.map(s=>[s,'∿ '+s]),[['--','Instruments (General MIDI)']],INSTRUMENTS.map(([n,l])=>[n,'♪ '+l]),[['--','Sampled instruments']],SAMPLED.map(([n,l])=>[n,'◉ '+l]));}
 // Extra one-shot sounds for drum tracks (played as-is; the kit menu only affects the standard drums)
-const PERC=['conga','bongo','cajon','darbuka','framedrum','tambourine','clave','woodblock','agogo','cowbell','guiro','cabasa','shaker_large','shaker_small','triangles','sleighbells','vibraslap','slapstick','fingercymbal','sus_cymbal','gong','timpani','bassdrum1','snare_modern','tom_mallet','clap','hihat'];
+const PERC=['conga','bongo','cajon','darbuka','framedrum','tambourine','clave','woodblock','agogo','cowbell','guiro','cabasa','triangles','sleighbells','vibraslap','slapstick','fingercymbal','sus_cymbal','gong','timpani','bassdrum1','clap','hihat'];
 const WORLD=['tabla','tabla2','mridangam_ta','mridangam_ki','mridangam_dhin','mridangam_na','mridangam_tha','mridangam_dhum','mridangam_chaapu','mridangam_gumki'];
 const DIRT_DRUMS=['808bd','808sd','808oh','808hc','808cy','909','clubkick','hardkick','popkick','reverbkick','kicklinn','linnhats','realclaps','gretsch','drum','dr','dr2','drumtraks','electro1','house','techno','jungle','amencutup','breaks125','breaks152','hand','click','tink','tok','glitch','bleep','blip','metal','can','bottle'];
 function drumOptions(){return [['--','Kit drums (use the kit menu)']].concat(DRUMS.map(d=>[d[0],`${d[0]} · ${d[1]}`]),[['--','Percussion (VCSL)']],PERC.map(x=>[x,x]),[['--','World']],WORLD.map(x=>[x,x]),[['--','Dirt-Samples']],DIRT_DRUMS.map(x=>[x,x]));}
@@ -399,13 +399,13 @@ const STYLES={
       {role:'bass',name:'Bass',mode:['root','root','fifth','oct'],p:['x.x.x.x.x.x.x.x.','x..x..x.x..x..x.','x.xxx.x.x.xxx.x.'],oct:2,waves:['gm_electric_bass_pick','gm_electric_bass_finger'],fx:{release:.1,gain:.9}},
       {role:'lead',name:'Lead guitar',p:'-.+.o.+.-.+.o+o.',oct:4,waves:['gm_overdriven_guitar','gm_distortion_guitar'],opt:.6,fx:{delay:[.15,.3],room:.35,release:.25,gain:.6}},
       {role:'pad',name:'Organ',oct:3,waves:['gm_rock_organ','gm_drawbar_organ'],opt:.35,fx:{release:.3,room:.3,gain:.35}}]},
-  'Boom bap':{palette:['piano','steinway','gm_epiano1', 'gm_piano', 'gm_vibraphone', 'gm_string_ensemble_1', 'gm_acoustic_bass', 'gm_muted_trumpet', 'gm_flute', 'gm_electric_guitar_jazz'],kit:['sp12','mpc60','acoustic','dirt'],bpm:[84,94],swing:[.1,.18],scales:['dorian','minor'],drums:[
+  'Boom bap':{palette:['piano','piano1','gm_epiano1', 'gm_piano', 'gm_vibraphone', 'gm_string_ensemble_1', 'gm_acoustic_bass', 'gm_muted_trumpet', 'gm_flute', 'gm_electric_guitar_jazz'],kit:['sp12','mpc60','acoustic','dirt'],bpm:[84,94],swing:[.1,.18],scales:['dorian','minor'],drums:[
       {s:'bd',p:['x.....x...x.....','x..-..x.-.x..-..','x.....x.-.x...-.']},
       {s:'sd',p:['....x.......x..-','....x.-.....x...']},
       {s:'hh',p:['x.x.x.x.x.x.x.x.','x+x.x+x.x+x.x+x.'],fx:{gain:[.55,.75]}},
       {s:'rim',p:'-.......-.......',opt:.4,fx:{gain:.5}}],
     parts:[
-      {role:'pad',name:'Keys',p:'x.......x.......',oct:3,waves:['gm_epiano1','piano','steinway','gm_vibraphone'],sev:.6,fx:{room:[.4,.7],lpf:[1800,3000],release:[.3,.6],attack:.01}},
+      {role:'pad',name:'Keys',p:'x.......x.......',oct:3,waves:['gm_epiano1','piano','piano1','gm_vibraphone'],sev:.6,fx:{room:[.4,.7],lpf:[1800,3000],release:[.3,.6],attack:.01}},
       {role:'bass',name:'Bass',mode:['root','walk'],p:['x.....o...o.....','x.....x...o..-..'],oct:2,waves:['gm_acoustic_bass','gm_electric_bass_finger'],fx:{release:.25,gain:.9}}]},
   'Trap':{palette:['piano','glockenspiel','gm_piano', 'gm_kalimba', 'gm_vibraphone', 'gm_pizzicato_strings', 'gm_choir_aahs', 'gm_flute', 'gm_synth_bass_1', 'gm_orchestral_harp'],kit:['tr808','tr808','tr707'],bpm:[136,150],swing:[0,0],scales:['minor','harmonic:minor','phrygian'],progs:[[0,0,5,5],[0,0,3,4],[0,5,0,6]],drums:[
       {s:'bd',p:['x.....-+..o...-.','x......x..x.....','x..-....-.o....-']},
@@ -423,15 +423,15 @@ const STYLES={
     parts:[
       {role:'bass',name:'Reese',mode:['root'],p:['x.......o.......','x.....o...x.....'],oct:[1,2],waves:['supersaw','sawtooth'],fx:{lpf:[400,900],lfo:true,lfoRate:[2,8],lpq:[4,10],release:[.4,.8],gain:.8}},
       {role:'pad',name:'Pad',oct:4,waves:['gm_string_ensemble_1','gm_pad_warm','supersaw'],sev:.5,fx:{attack:[.2,.5],release:[1,2],room:[.6,.9],lpf:[1500,3000],gain:.4}}]},
-  'Lo-fi chill':{palette:['kawai','vibraphone','kalimba','gm_epiano1', 'gm_piano', 'gm_vibraphone', 'gm_electric_guitar_jazz', 'gm_flute', 'gm_acoustic_bass', 'gm_electric_bass_finger', 'gm_string_ensemble_1'],kit:['mpc60','sp12','acoustic','uzu'],bpm:[70,85],swing:[.15,.22],scales:['dorian','major','minor'],progs:[[0,3,1,4],[0,5,1,4],[1,4,0,0],[0,3,2,5]],drums:[
+  'Lo-fi chill':{palette:['fmpiano','vibraphone','gm_kalimba','gm_epiano1', 'gm_piano', 'gm_vibraphone', 'gm_electric_guitar_jazz', 'gm_flute', 'gm_acoustic_bass', 'gm_electric_bass_finger', 'gm_string_ensemble_1'],kit:['mpc60','sp12','acoustic','uzu'],bpm:[70,85],swing:[.15,.22],scales:['dorian','major','minor'],progs:[[0,3,1,4],[0,5,1,4],[1,4,0,0],[0,3,2,5]],drums:[
       {s:'bd',p:['x......-..x.....','x.....-...x..-..']},
       {s:'sd',p:'....x.......x...',fx:{room:.3}},
       {s:'hh',p:['x+x+x+x+x+x+x+x+','x.x.x.x.x.x.x.x.'],fx:{gain:.45,crush:[6,9]}},
       {s:'sh',p:'..-...-...-...-.',opt:.5,fx:{gain:.4}},
       {s:'tambourine',p:'....-.......x...',opt:.25,fx:{gain:.35}}],
     parts:[
-      {role:'pad',name:'Rhodes',oct:3,waves:['gm_epiano1','kawai','piano'],sev:1,fx:{room:[.5,.8],lpf:[1200,2000],attack:.02,release:[.6,1],crush:[0,8],gain:.6}},
-      {role:'lead',name:'Melody',p:'o.-.+.-.-.+.-...',oct:4,waves:['vibraphone','gm_electric_guitar_jazz','gm_flute','kalimba','sine'],fx:{delay:[.3,.6],room:.5,release:.3,gain:.45}},
+      {role:'pad',name:'Rhodes',oct:3,waves:['gm_epiano1','piano','fmpiano'],sev:1,fx:{room:[.5,.8],lpf:[1200,2000],attack:.02,release:[.6,1],crush:[0,8],gain:.6}},
+      {role:'lead',name:'Melody',p:'o.-.+.-.-.+.-...',oct:4,waves:['vibraphone','gm_electric_guitar_jazz','gm_flute','gm_kalimba','sine'],fx:{delay:[.3,.6],room:.5,release:.3,gain:.45}},
       {role:'bass',name:'Bass',mode:['root','walk'],p:'x.....-...x.....',oct:2,waves:['gm_acoustic_bass','gm_electric_bass_finger'],fx:{release:.4,gain:.8}}]},
   'Synthwave':{palette:['gm_synth_strings_1', 'gm_synth_brass_1', 'gm_lead_2_sawtooth', 'gm_pad_warm', 'gm_synth_bass_1'],kit:['linndrum','tr707','tr909'],bpm:[96,110],swing:[0,0],scales:['minor','dorian'],progs:[[0,5,2,6],[0,5,3,4],[0,3,5,4]],drums:[
       {s:'bd',p:'x...x...x...x...'},
@@ -535,7 +535,7 @@ function genPartTrack(p,ctx){
   }
   if(p.role==='bells'){
     const n=ri(4,6),notes=Array.from({length:n},()=>scaleNote(root,scale,ri(0,6),5));
-    return mkPattern({name:p.name,mode:'note',mini:`<${notes.join(' ')}>*${pick([2,4,4,8])}?`,sound:ctx.real?pick(['glockenspiel','vibraphone','gm_tubular_bells','kalimba','handchimes','gm_marimba']):pick(['sine','triangle']),mods:Object.assign(baseMods(),{jux:true}),fx:resolveFx({delay:[.4,.7],room:[.7,.9],gain:p.gain||.5,fm:[0,3],release:.6})});
+    return mkPattern({name:p.name,mode:'note',mini:`<${notes.join(' ')}>*${pick([2,4,4,8])}?`,sound:ctx.real?pick(['glockenspiel','vibraphone','gm_tubular_bells','gm_kalimba','handchimes','gm_marimba']):pick(['sine','triangle']),mods:Object.assign(baseMods(),{jux:true}),fx:resolveFx({delay:[.4,.7],room:[.7,.9],gain:p.gain||.5,fm:[0,3],release:.6})});
   }
   if(p.role==='mini')return mkPattern({name:p.name,mode:p.mode||'s',sound:p.sound||'triangle',mini:p.gen(ctx),fx,mods});
   const steps=p.steps||16;
@@ -631,7 +631,7 @@ const PATTERN_KINDS={
     ()=>Array.from({length:8},()=>pick(['mridangam_ta','mridangam_ki','mridangam_na','mridangam_dhin','~','mridangam_tha'])).join(' '),
     ()=>`tabla:${ri(0,8)}(${ri(3,5)},8) tabla:${ri(9,20)}(${pick([5,7])},16,${ri(0,3)})`,
     ()=>`conga(${ri(3,5)},8,${ri(0,2)}), bongo(${pick([5,7])},16)`,
-    ()=>`[cajon ~ ~ cajon] [~ cajon ~ ~], shaker_small*8?`
+    ()=>`[cajon ~ ~ cajon] [~ cajon ~ ~], cabasa*8?`
   ])()}),
   'Sample texture':()=>({role:'mini',name:'Texture',fx:{gain:[.4,.6],room:[.2,.5],delay:[0,.3]},gen:()=>{
     const smp=pick(['arpy','pluck','jvbass','casio','east','bleep','blip','glitch','metal','space','jazz','insect','wind','birds','fm','sid','stab','hoover','future']);
