@@ -66,6 +66,9 @@ header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px
 .hslider output{font-family:var(--mono);min-width:30px;text-align:right;color:var(--dim)}
 select.ui{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 8px;outline:none}
 .spacer{flex:1}
+.first-hint{order:2;background:#ff8a3d1f;border:1px solid #ff8a3d66;color:#ffd2b0;border-radius:20px;padding:6px 12px;font-size:12px;position:relative}
+.first-hint::before{content:"";position:absolute;left:-6px;top:50%;margin-top:-5px;border:5px solid transparent;border-right-color:#ff8a3d66;border-left:0}
+.logo{order:0}#play{order:1}header>.field,header>.spacer,header>.status,header>#openStrudel,header>.hdr-rest{order:3}
 .btn{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 12px;display:inline-flex;gap:6px;align-items:center;text-decoration:none;color:var(--text);white-space:nowrap}
 .btn:hover{border-color:var(--line2);background:var(--panel2)}
 .btn.primary{background:#ff8a3d1a;border-color:#ff8a3d66;color:#ffc59c}
@@ -75,7 +78,7 @@ select.ui{background:var(--panel);border:1px solid var(--line);border-radius:8px
 @keyframes pulse{50%{opacity:.3}}
 
 /* ---------- layout ---------- */
-main{display:grid;grid-template-columns:minmax(0,1fr) 440px;min-height:calc(100vh - 71px)}
+main{display:grid;grid-template-columns:minmax(0,1fr) var(--codew,440px);min-height:calc(100vh - 71px)}
 @media (max-width:1100px){main{grid-template-columns:1fr}}
 #tracksCol{padding:16px 18px 80px;display:flex;flex-direction:column;gap:12px;min-width:0}
 #codeCol{border-left:1px solid var(--line);background:#101014;display:flex;flex-direction:column;position:sticky;top:71px;height:calc(100vh - 71px)}
@@ -106,8 +109,18 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 440px;min-height:calc(100v
 .cell.ph::after{content:"";position:absolute;inset:-2px;border-radius:7px;border:2px solid #fff9;pointer-events:none}
 .cell.on.ph{filter:brightness(1.35)}
 
+.grid .cell.g-end,.rgrid .cell.g-end,.leds .led.g-end{margin-right:7px}
+.leds{display:grid;gap:4px;margin-bottom:5px}
+.roll .leds{gap:3px}
+.led{height:5px;border-radius:3px;background:#2a2a33}
+.led.beat{background:#3a3a46}
+.led.ph{background:#fff;box-shadow:0 0 8px #fffc}
+.grid .cell.ph:not(.on){background:#454552}
+.cell.on.ph{filter:brightness(1.5) saturate(1.2)}
+.rgrid .cell.colph{background:#3b3b48 !important}
 /* piano roll */
-.roll{display:grid;grid-template-columns:44px 1fr;gap:4px}
+.roll{display:grid;grid-template-columns:44px 1fr;gap:4px;row-gap:0}
+.roll .keys{margin-top:0}
 .keys{display:grid;gap:3px}
 .key{height:22px;font-family:var(--mono);font-size:10px;color:var(--dim);display:flex;align-items:center;justify-content:flex-end;padding-right:6px;border-radius:4px;background:#1a1a20}
 .key.root{color:var(--c)}
@@ -171,9 +184,20 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
 .editor{position:relative;flex:1;min-height:280px;overflow:hidden}
 .editor pre,.editor textarea{position:absolute;inset:0;margin:0;padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.65;white-space:pre;overflow:auto;tab-size:2;border:none}
 .editor pre{pointer-events:none;color:#cfcfe0}
+.editor.wrap pre,.editor.wrap textarea{white-space:pre-wrap;overflow-wrap:anywhere;overflow-x:hidden}
+#codeCol{position:sticky}
+#codeResize{position:absolute;left:-4px;top:0;bottom:0;width:8px;cursor:col-resize;z-index:5}
+#codeResize:hover,#codeResize.on{background:linear-gradient(90deg,transparent 3px,var(--accent) 3px,var(--accent) 5px,transparent 5px)}
+main.code-hidden{grid-template-columns:minmax(0,1fr) 0}
+main.code-hidden #codeCol{display:none}
+.show-code{display:none;position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:35;background:var(--panel);border:1px solid var(--line2);border-right:none;border-radius:8px 0 0 8px;color:var(--dim);padding:12px 6px;writing-mode:vertical-rl;font-family:var(--mono);font-size:11px;cursor:pointer}
+.show-code:hover{color:var(--text)}
+body.codeless .show-code{display:block}
+@media (max-width:1100px){#codeResize{display:none}body.codeless .show-code{writing-mode:horizontal-tb;top:auto;bottom:16px;left:16px;right:auto;transform:none;border-radius:8px;border-right:1px solid var(--line2)}}
 .editor textarea{background:transparent;color:transparent;caret-color:#fff;resize:none;outline:none}
 .tk-c{color:#5f6070;font-style:italic}.tk-s{color:#ffc08a}.tk-n{color:#c6f432}.tk-m{color:#7cc7ff}.tk-f{color:#c9a7ff}
 .tk-s .r{color:#6b5a4c}
+.srcline{font-size:11px;color:var(--dim);padding:0 14px 8px}.srcline b{color:var(--text)}
 .banner{display:none;margin:0 14px 10px;padding:8px 10px;border-radius:8px;background:#ffd23f14;border:1px solid #ffd23f44;color:#ffe48a;font-size:12px;align-items:center;gap:8px}
 .banner.show{display:flex}
 .banner button{margin-left:auto}
@@ -249,6 +273,7 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 .chk input{accent-color:var(--accent);width:16px;height:16px;cursor:pointer}
 .chk:hover{color:var(--text)}
 .field label.chk{text-transform:none;letter-spacing:0;font-size:12px}
+.toast-act{margin-left:8px;background:var(--accent);color:#170c03;border:none;border-radius:6px;padding:3px 9px;font-weight:700;cursor:pointer}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(80px);background:#24242c;border:1px solid var(--line2);padding:9px 14px;border-radius:10px;transition:transform .2s;z-index:50;font-size:12px}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .empty{color:var(--dim);text-align:center;padding:30px;border:1px dashed var(--line);border-radius:12px}
@@ -257,6 +282,7 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 <body>
 <header>
   <div class="logo">strudel<b>/</b>studio <span>a GUI for strudel.cc</span></div>
+  <span id="firstHint" class="first-hint" hidden></span>
   <button id="play" title="Play / stop (Space)" aria-label="Play">
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
   </button>
@@ -270,6 +296,7 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
     <div style="display:flex;gap:6px">
       <select id="preset" class="ui"></select>
       <button id="randomize" class="btn" title="Roll a new groove in the current style (R)">🎲 Randomize</button>
+      <button id="undo" class="btn" title="Nothing to undo" disabled>↶ Undo</button>
       <label class="chk" title="New grooves, presets and added tracks use synth sounds and drum machines instead of real instruments"><input type="checkbox" id="preferSynth"> prefer synths</label>
     </div>
   </div>
@@ -302,12 +329,16 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
   </section>
 
   <aside id="codeCol">
+    <div id="codeResize" title="Drag to resize"></div>
     <div class="codehead">
       <h2>Strudel code</h2><span class="spacer"></span>
+      <button class="tog" id="wrapBtn" title="Wrap long lines">wrap</button>
       <button class="btn" id="copy">Copy</button>
       <button class="btn primary" id="run">▶ Run code</button>
+      <button class="btn" id="hideCode" title="Hide the code panel to give the tracks more room">⇥</button>
     </div>
-    <div id="banner" class="banner">Hand-edited — GUI changes won't overwrite it. <button class="btn" id="resync">Sync from GUI</button></div>
+    <div class="srcline">Plays: <b id="src">the sequencer</b></div>
+    <div id="banner" class="banner"><span>You're hearing <b>your hand-edited code</b>. Track changes are kept, but you won't hear them until you go back to the sequencer (your edits here will be replaced).</span> <button class="btn" id="resync">Back to the sequencer</button></div>
     <div id="errbox" class="errbox"></div>
     <div class="editor">
       <pre id="hl" aria-hidden="true"></pre>
@@ -341,6 +372,7 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
     </details>
   </aside>
 </main>
+<button id="showCode" class="show-code" title="Show the Strudel code">‹ code</button>
 <div id="toast" class="toast"></div>
 <button id="fab" class="fab" aria-label="Play / stop" title="Play / stop"></button>
 
@@ -381,6 +413,12 @@ const SAMPLED=[
 const SAMPLED_SET=new Set(SAMPLED.map(x=>x[0]));
 const isSoundName=w=>SYNTHS.includes(w)||!!INSTR[w]||SAMPLED_SET.has(w);
 const isRealSound=w=>!!w&&(w.startsWith('gm_')||SAMPLED_SET.has(w));
+// App settings: defaults below mirror settings.json, which is fetched at startup and overrides them.
+const SETTINGS_DEFAULT={"_about":"Strudel Studio settings. Edit these values to change the app's defaults; the app reads this file when it starts. Generated with Claude Opus 5.5.","attribution":"Claude Opus 5.5","defaultPreset":"House groove","firstStepHint":"Press play, then click a step to change the beat.","maxSaves":15,"undoDepth":40,"codePanel":{"width":440,"minWidth":280,"maxWidth":900,"collapsed":false,"wrap":true},"controls":{"volume":{"min":0,"max":1.5,"default":1},"pitch":{"min":-12,"max":12,"default":0,"unit":"semitones"},"tone":{"min":150,"max":20000,"default":20000,"unit":"Hz low-pass"},"decay":{"min":0.03,"max":2,"default":0,"unit":"seconds (0 = natural)"},"attack":{"min":0,"max":2,"default":0},"release":{"min":0.01,"max":3,"default":0.1}},"pads":{"phoneMaxWidth":700,"layouts":{"phone":{"cols":3,"rows":5},"desktop":{"cols":4,"rows":4}},"colors":{"drums":"#f2b417","keys":"#14e0ff","bass":"#ff6b5a","lead":"#a46bff"},"symbolColor":"#17171b","quantize":16,"sounds":[{"sound":"bd"},{"sound":"sd"},{"sound":"cp"},{"sound":"hh"},{"sound":"oh"},{"sound":"lt"},{"sound":"ht"},{"sound":"cr"},{"sound":"rim"},{"sound":"sh"},{"sound":"cb"},{"sound":"gm_electric_bass_finger","degree":0},{"sound":"gm_epiano1","degree":0,"chord":true},{"sound":"sawtooth","degree":4},{"sound":"square","degree":7},{"sound":"conga"}]}};
+let SETTINGS=JSON.parse(JSON.stringify(SETTINGS_DEFAULT));
+const deepMerge=(a,b)=>{for(const[k,v]of Object.entries(b||{})){a[k]=v&&typeof v==='object'&&!Array.isArray(v)&&a[k]&&typeof a[k]==='object'?deepMerge(a[k],v):v;}return a;};
+const settingsHooks=[];
+fetch('settings.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(j=>{if(!j)return;SETTINGS=deepMerge(JSON.parse(JSON.stringify(SETTINGS_DEFAULT)),j);settingsHooks.forEach(f=>{try{f();}catch(e){console.warn(e);}});}).catch(()=>{});
 // user preferences (kept separately from songs)
 const prefs=(()=>{try{return JSON.parse(localStorage.getItem('strudel-studio-prefs'))||{};}catch(e){return{};}})();
 function savePrefs(){try{localStorage.setItem('strudel-studio-prefs',JSON.stringify(prefs));}catch(e){}}
@@ -979,7 +1017,7 @@ function normalizeState(s,freshIds){
 function loadState(){
   try{const s=JSON.parse(localStorage.getItem('strudel-studio-v1'));
     if(s&&(Array.isArray(s.tracks)||Array.isArray(s.sections)))return normalizeState(s);}catch(e){}
-  return ensureSections(presetList()['House groove']());
+  const first=presetList()[SETTINGS.defaultPreset]?SETTINGS.defaultPreset:'House groove';return ensureSections(Object.assign(presetList()[first](),{style:first}));
 }
 function save(){try{localStorage.setItem('strudel-studio-v1',serializeState())}catch(e){}}
 state=loadState();
@@ -1049,7 +1087,7 @@ function sectionStack(tracks){
 const secVar=(sec,i)=>'s'+(i+1)+'_'+(String(sec.name).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')||'part');
 function genCode(){
   syncSection();
-  const lines=[`// made with strudel/studio`,`setcpm(${state.bpm}/4)`,''];
+  const lines=[`// made with strudel/studio · generated with ${SETTINGS.attribution||'Claude Opus 5.5'}`,`setcpm(${state.bpm}/4)`,''];
   const swing=state.swing>0?`.swingBy(${f2(state.swing)}, 8)`:'';
   const secs=state.sections||[{name:'A',repeat:1,tracks:state.tracks}];
   if(secs.length===1||state.loopSection){
@@ -1092,14 +1130,32 @@ function highlight(src){
   return out+esc(src.slice(last))+'\n';
 }
 function paintCode(){hlEl.innerHTML=highlight(codeEl.value);hlEl.scrollTop=codeEl.scrollTop;hlEl.scrollLeft=codeEl.scrollLeft;}
-codeEl.addEventListener('input',()=>{customCode=true;document.getElementById('banner').classList.add('show');paintCode();updateShareLink(codeEl.value);});
+codeEl.addEventListener('input',()=>{const was=customCode;customCode=true;if(!was)syncPlayBtn();document.getElementById('banner').classList.add('show');paintCode();updateShareLink(codeEl.value);});
 codeEl.addEventListener('scroll',()=>{hlEl.scrollTop=codeEl.scrollTop;hlEl.scrollLeft=codeEl.scrollLeft;});
 codeEl.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runCode(true);}
   else if(e.key==='Tab'){e.preventDefault();const s=codeEl.selectionStart;codeEl.setRangeText('  ',s,codeEl.selectionEnd,'end');codeEl.dispatchEvent(new Event('input'));}
 });
-document.getElementById('resync').onclick=()=>{customCode=false;document.getElementById('banner').classList.remove('show');changed();};
+document.getElementById('resync').onclick=()=>{customCode=false;document.getElementById('banner').classList.remove('show');changed();syncPlayBtn();toast('Back to the sequencer');};
 document.getElementById('run').onclick=()=>runCode(true);
+// code panel: hide / show, resize (desktop), wrap long lines — remembered in prefs (defaults from settings.json)
+function applyCodePanel(){
+  const cp=SETTINGS.codePanel||{};const w=Math.max(cp.minWidth||280,Math.min(cp.maxWidth||900,prefs.codeWidth||cp.width||440));
+  const main=document.querySelector('main');main.style.setProperty('--codew',w+'px');
+  const hidden=prefs.codeHidden??!!cp.collapsed;main.classList.toggle('code-hidden',hidden);document.body.classList.toggle('codeless',hidden);
+  const wrap=prefs.codeWrap??(cp.wrap!==false);document.querySelector('.editor').classList.toggle('wrap',wrap);document.getElementById('wrapBtn').classList.toggle('on',wrap);
+  paintCode();
+}
+document.getElementById('hideCode').onclick=()=>{prefs.codeHidden=true;savePrefs();applyCodePanel();};
+document.getElementById('showCode').onclick=()=>{prefs.codeHidden=false;savePrefs();applyCodePanel();};
+document.getElementById('wrapBtn').onclick=()=>{prefs.codeWrap=!document.querySelector('.editor').classList.contains('wrap');savePrefs();applyCodePanel();};
+document.getElementById('codeResize').onpointerdown=e=>{
+  e.preventDefault();const h0=e.currentTarget;h0.classList.add('on');const x0=e.clientX,w0=document.getElementById('codeCol').getBoundingClientRect().width;
+  const mv=ev=>{prefs.codeWidth=Math.round(w0+(x0-ev.clientX));applyCodePanel();};
+  const up=()=>{h0.classList.remove('on');window.removeEventListener('pointermove',mv);window.removeEventListener('pointerup',up);savePrefs();};
+  window.addEventListener('pointermove',mv);window.addEventListener('pointerup',up);
+};
+settingsHooks.push(applyCodePanel);
 document.getElementById('copy').onclick=async()=>{
   try{await navigator.clipboard.writeText(codeEl.value);toast('Code copied');}
   catch(e){codeEl.focus();codeEl.select();toast('Press Ctrl/⌘+C to copy');}
@@ -1347,7 +1403,7 @@ async function runCode(forcePlay){
     syncPlayBtn();
     if(!playing&&songMode())jumpTo=state.cur;      // pressing play starts at the selected section
     await evaluate(playCode());
-    if(!playing){playing=true;clockAnchor={time:performance.now(),cycle:0};syncPlayBtn();}
+    if(!playing){playing=true;clockAnchor={time:performance.now(),cycle:0};syncPlayBtn();hintProgress('play');}
   }catch(e){showErr(e?.message||e);}
 }
 // Don't rely on the global hush(): after the first evaluate(), Strudel's REPL
@@ -1365,7 +1421,8 @@ function syncPlayBtn(){
   const fab=document.getElementById('fab');if(fab){fab.classList.toggle('on',playing);fab.innerHTML=playing?'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>':'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';}
   const b=document.getElementById('play');b.classList.toggle('on',playing);
   b.innerHTML=playing?'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>':'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';
-  setStatus(engineReady?'ready':'loading',playing?'playing':engineReady?'engine ready':'loading engine…');
+  setStatus(engineReady?'ready':'loading',playing?(customCode?'▶ playing your code':'▶ playing the sequencer'):engineReady?'engine ready':'loading engine…');
+  document.getElementById('src')?.replaceChildren(customCode?'your hand-edited code':'the sequencer');
 }
 document.getElementById('play').onclick=()=>playing?stop():runCode(true);
 document.getElementById('fab').onclick=()=>playing?stop():runCode(true);
@@ -1375,6 +1432,7 @@ function changed(structural){
   if(state.sections){syncSection();updateVersion(state.sections[state.cur]);}
   if(structural)render();else if(state.sections&&state.sections.length>1&&!document.querySelector('#sections input'))renderSections(); // keep '= A' / 'edited' labels current
   if(!customCode){codeEl.value=genCode();paintCode();updateShareLink(codeEl.value);}
+  else if(Date.now()-(changed._warned||0)>6000){changed._warned=Date.now();toast('Not heard yet — your hand-edited code is playing',{label:'Use the sequencer',fn:()=>document.getElementById('resync').click()});}
   save();
   if(playing&&!customCode){clearTimeout(evalTimer);evalTimer=setTimeout(()=>runCode(false),120);}
 }
@@ -1436,6 +1494,7 @@ function frame(){
       const step=Math.floor(frac*t.steps);
       if(lastStep[t.id]===step)continue;lastStep[t.id]=step;
       el.querySelectorAll('.ph,.colph').forEach(x=>x.classList.remove('ph','colph'));
+      el.querySelectorAll(`.led[data-led="${step}"]`).forEach(x=>x.classList.add('ph'));
       el.querySelectorAll(`.cell[data-step="${step}"]`).forEach(x=>x.classList.add(t.type==='synth'&&!x.classList.contains('on')?'colph':'ph'));
     }
   }
@@ -1535,7 +1594,7 @@ function renderSections(){
         h('button',{class:'mini',title:'Move earlier',disabled:i===0,onclick:stop(()=>{syncSection();[secs[i-1],secs[i]]=[secs[i],secs[i-1]];if(state.cur===i)state.cur--;else if(state.cur===i-1)state.cur++;changed(true);})},'◀'),
         h('button',{class:'mini',title:'Move later',disabled:i===secs.length-1,onclick:stop(()=>{syncSection();[secs[i+1],secs[i]]=[secs[i],secs[i+1]];if(state.cur===i)state.cur++;else if(state.cur===i+1)state.cur--;changed(true);})},'▶'),
         h('button',{class:'mini',title:'Duplicate exactly (same name until you change it)',onclick:stop(()=>{syncSection();const c=JSON.parse(JSON.stringify(sec));c.id='s'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);c.tracks.forEach(t=>t.id=uid++);secs.splice(i+1,0,c);state.cur=i+1;state.tracks=c.tracks;state.prog=c.prog;changed(true);toast(`Duplicated ${labels[i]}`);})},'⧉'),
-        h('button',{class:'mini',title:'Delete section',disabled:secs.length===1,onclick:stop(()=>{syncSection();secs.splice(i,1);state.cur=Math.min(state.cur>i?state.cur-1:state.cur,secs.length-1);state.tracks=secs[state.cur].tracks;state.prog=secs[state.cur].prog;changed(true);})},'✕')));
+        h('button',{class:'mini',title:'Delete section',disabled:secs.length===1,onclick:stop(()=>{pushUndo(`delete section ${labels[i]}`);syncSection();secs.splice(i,1);toast(`Deleted section ${labels[i]}`,undoAction);state.cur=Math.min(state.cur>i?state.cur-1:state.cur,secs.length-1);state.tracks=secs[state.cur].tracks;state.prog=secs[state.cur].prog;changed(true);})},'✕')));
     box.onpointerdown=e=>startSectionDrag(e,box,i);
     el.append(box);
     if(i===state.cur){const add=h('button',{class:'sec-add',title:`Click: add a section right after ${labels[i]} · drag: drop it anywhere in the song. Same instruments and drums, new melodies`,onclick:()=>{if(!add.__dragged)addSection();}},h('b',{},secs.length>1?`+ New section after ${labels[i]}`:'+ New section'),h('small',{},secs.length>1?'or drag it into place':'same sounds · new melodies'));
@@ -1543,7 +1602,7 @@ function renderSections(){
   });
   if(secs.length>1)el.append(h('button',{class:'tog sec-loop'+(state.loopSection?' on':''),title:'Play only the section you are editing',onclick:()=>{state.loopSection=!state.loopSection;changed(true);}},state.loopSection?'🔁 looping '+labels[state.cur]:'🔁 loop this section'));
   if(secs.length>1)el.append(h('div',{class:'song-order',title:'The order the song plays in'},'Song: ',h('b',{},labels.join('-'))));
-  el.append(h('button',{class:'tog sec-loop sec-clear',title:'Start over: one new randomized section in this style',onclick:e=>clearSong(e.currentTarget)},'🗑 Clear song'));
+  el.append(h('button',{class:'tog sec-loop sec-clear',title:'Replace the whole song with one new randomized section in this style (you can undo)',onclick:()=>clearSong()},'✨ Start a new groove'));
 }
 function render(){
   renderSections();
@@ -1590,7 +1649,7 @@ function renderTrack(t){
   head.append(h('button',{class:'tbtn',title:'Randomize this track (new pattern / notes; sound, kit and effects stay)',onclick:()=>{rerollTrack(t);changed(true);toast('🎲 New '+t.name.toLowerCase());}},'rnd'));
   head.append(h('button',{class:'tbtn'+(t.fxOpen?' on':''),title:'Effects & transforms',onclick:()=>{t.fxOpen=!t.fxOpen;el.classList.toggle('fxopen',t.fxOpen);save();renderTrackHeadBtn(el,t);}},'FX'));
   head.append(h('button',{class:'tbtn',title:'Duplicate',onclick:()=>{const c=JSON.parse(JSON.stringify(t));c.id=uid++;c.name+=' 2';c.color=COLORS[(COLORS.indexOf(t.color)+1)%COLORS.length];state.tracks.splice(state.tracks.indexOf(t)+1,0,c);changed(true);}},'⧉'));
-  head.append(h('button',{class:'tbtn del',title:'Delete track',onclick:()=>{state.tracks=state.tracks.filter(x=>x!==t);changed(true);}},'✕'));
+  head.append(h('button',{class:'tbtn del',title:'Delete track',onclick:()=>{pushUndo(`delete track “${t.name}”`);state.tracks=state.tracks.filter(x=>x!==t);changed(true);toast(`Deleted “${t.name}”`,undoAction);}},'✕'));
   el.append(head);
 
   const body=h('div',{class:'tbody'});
@@ -1611,16 +1670,20 @@ document.addEventListener('pointermove',e=>{if(touchTap&&Math.hypot(e.clientX-to
 document.addEventListener('pointercancel',()=>{touchTap=null;});
 // touch: remember the tap, apply it on release only if the finger didn't move (it was a tap, not a scroll)
 const tapOnTouch=(e,fn)=>{if(e.pointerType!=='touch')return false;touchTap={x:e.clientX,y:e.clientY,fn};return true;};
+// steps are grouped in fours (threes for 12-step tracks); a row of lights shows the playhead
+const stepGroup=steps=>steps%4===0?4:3;
+const groupEnd=(i,steps)=>i%stepGroup(steps)===stepGroup(steps)-1&&i<steps-1;
+function ledRow(steps){const r=h('div',{class:'leds',style:`grid-template-columns:repeat(${steps},1fr)`});for(let i=0;i<steps;i++)r.append(h('span',{class:'led'+(i%stepGroup(steps)===0?' beat':'')+(groupEnd(i,steps)?' g-end':''),'data-led':i}));return r;}
 function drumGrid(t){
   const g=h('div',{class:'grid',style:`grid-template-columns:repeat(${t.steps},1fr)`});
   const per=t.steps%4===0?4:3;
   for(let i=0;i<t.steps;i++){
-    const c=h('button',{class:'cell'+(i%per===0?' beat':'')+(t.hits[i]?' on':''),'data-step':i,'aria-label':`step ${i+1}`});
-    c.onpointerdown=e=>{if(tapOnTouch(e,()=>{t.hits[i]=!t.hits[i];c.classList.toggle('on',t.hits[i]);}))return;e.preventDefault();paint={val:!t.hits[i],t};t.hits[i]=paint.val;c.classList.toggle('on',paint.val);};
+    const c=h('button',{class:'cell'+(i%per===0?' beat':'')+(groupEnd(i,t.steps)?' g-end':'')+(t.hits[i]?' on':''),'data-step':i,'aria-label':`step ${i+1}`});
+    c.onpointerdown=e=>{hintProgress('step');if(tapOnTouch(e,()=>{t.hits[i]=!t.hits[i];c.classList.toggle('on',t.hits[i]);}))return;e.preventDefault();paint={val:!t.hits[i],t};t.hits[i]=paint.val;c.classList.toggle('on',paint.val);};
     c.onpointerenter=()=>{if(paint&&paint.t===t){t.hits[i]=paint.val;c.classList.toggle('on',paint.val);}};
     g.append(c);
   }
-  return g;
+  return h('div',{},ledRow(t.steps),g);
 }
 function degreeMidi(t,d){const iv=SCALES[t.scale];const o=Math.floor(d/iv.length),k=d%iv.length;return(t.octave+1)*12+NOTE_NAMES.indexOf(t.root)+12*o+iv[k];}
 const midiName=m=>NOTE_NAMES[m%12]+(Math.floor(m/12)-1);
@@ -1633,13 +1696,13 @@ function pianoRoll(t){
     keys.append(h('div',{class:'key'+(r%L===0?' root':''),title:`degree ${r}`},midiName(degreeMidi(t,r))));
     for(let i=0;i<t.steps;i++){
       const on=t.notes[i].includes(r);
-      const c=h('button',{class:'cell'+(on?' on':'')+(r%L===0?' rootrow':''),'data-step':i,'aria-label':`degree ${r} step ${i+1}`});
-      c.onpointerdown=e=>{if(tapOnTouch(e,()=>{const v=!t.notes[i].includes(r);setNote(t,i,r,v);c.classList.toggle('on',v);}))return;e.preventDefault();paint={val:!t.notes[i].includes(r),t};setNote(t,i,r,paint.val);c.classList.toggle('on',paint.val);};
+      const c=h('button',{class:'cell'+(on?' on':'')+(r%L===0?' rootrow':'')+(groupEnd(i,t.steps)?' g-end':''),'data-step':i,'aria-label':`degree ${r} step ${i+1}`});
+      c.onpointerdown=e=>{hintProgress('step');if(tapOnTouch(e,()=>{const v=!t.notes[i].includes(r);setNote(t,i,r,v);c.classList.toggle('on',v);}))return;e.preventDefault();paint={val:!t.notes[i].includes(r),t};setNote(t,i,r,paint.val);c.classList.toggle('on',paint.val);};
       c.onpointerenter=()=>{if(paint&&paint.t===t){setNote(t,i,r,paint.val);c.classList.toggle('on',paint.val);}};
       g.append(c);
     }
   }
-  wrap.append(keys,g);
+  wrap.append(h('div',{}),ledRow(t.steps),keys,g);
   return wrap;
 }
 function setNote(t,i,r,on){const a=t.notes[i];const has=a.includes(r);if(on&&!has)a.push(r);if(!on&&has)a.splice(a.indexOf(r),1);}
@@ -1781,7 +1844,7 @@ function syncPresetSel(){presetEl.value=state.style&&STYLES[state.style]?state.s
 function applyNewState(s,msg){state=ensureSections(s);customCode=false;document.getElementById('banner').classList.remove('show');changed(true);syncPresetSel();toast(msg);}
 
 /* ---------- My grooves: up to 15 named saves, including hand-edited code ---------- */
-const SAVES_KEY='strudel-studio-saves',MAX_SAVES=15;
+const SAVES_KEY='strudel-studio-saves';let MAX_SAVES=SETTINGS.maxSaves||15;settingsHooks.push(()=>{MAX_SAVES=SETTINGS.maxSaves||15;renderSaves();});
 function getSaves(){try{const a=JSON.parse(localStorage.getItem(SAVES_KEY));return Array.isArray(a)?a:[];}catch(e){return[];}}
 function putSaves(a){try{localStorage.setItem(SAVES_KEY,JSON.stringify(a));return true;}catch(e){toast('Could not save — browser storage is full');return false;}}
 function snapshot(name){return{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,savedAt:Date.now(),state:JSON.parse(serializeState()),code:customCode?codeEl.value:null};}
@@ -1819,12 +1882,13 @@ function renameSave(id,el){
 }
 function loadSave(id){
   const sv=getSaves().find(x=>x.id===id);if(!sv)return;
+  pushUndo(`load “${sv.name}”`);
   state=normalizeState(JSON.parse(JSON.stringify(sv.state)),true);
   customCode=!!sv.code;
   document.getElementById('banner').classList.toggle('show',customCode);
   changed(true);syncPresetSel();
   if(customCode){codeEl.value=sv.code;paintCode();updateShareLink(sv.code);if(playing)runCode(false);}
-  toast(`Loaded “${sv.name}”`);
+  toast(`Loaded “${sv.name}”`,undoAction);
 }
 function renderSaves(){
   const saves=getSaves(),list=document.getElementById('savesList');
@@ -1852,6 +1916,7 @@ document.getElementById('saveName').onkeydown=e=>{if(e.key==='Enter')saveNew();e
 renderSaves();
 // A preset replaces only the section being edited; the rest of the song stays.
 function applyPreset(k){
+  pushUndo(`load preset “${k}”`);
   syncSection();
   const multi=state.sections.length>1,secName=secLabels(state.sections)[state.cur];
   let p;
@@ -1865,38 +1930,71 @@ function applyPreset(k){
   syncSection();freshOriginal(state.sections[state.cur]);
   customCode=false;document.getElementById('banner').classList.remove('show');
   changed(true);syncPresetSel();
-  toast(multi?`Loaded “${k}” into section ${secName} — other sections kept`:`Loaded “${k}”`);
+  toast(multi?`Loaded “${k}” into section ${secName} — other sections kept`:`Loaded “${k}”`,undoAction);
 }
 presetEl.onchange=()=>{const k=presetEl.value;if(!k)return;applyPreset(k);};
-function clearSong(btn){
-  if(!btn.classList.contains('confirm')){btn.classList.add('confirm');btn.textContent='🗑 Click again to clear';setTimeout(()=>{if(btn.isConnected){btn.classList.remove('confirm');btn.textContent='🗑 Clear song';}},3000);return;}
+function clearSong(){
   // start over with one fresh, randomized section in the current style
+  pushUndo('start a new groove');
   const name=state.style&&STYLES[state.style]?state.style:randomStyleName();
-  applyNewState(genStyle(name,(Math.random()*2**32)>>>0),`Song cleared — new ${name} groove`);
+  applyNewState(genStyle(name,(Math.random()*2**32)>>>0),'');
+  toast(`✨ New ${name} groove`,undoAction);
 }
 function randomize(){
+  pushUndo('🎲 Randomize');
   const name=state.style&&STYLES[state.style]?state.style:randomStyleName();
   if(state.sections&&state.sections.length>1){ // re-roll just this section, in the song's key and tempo
     const k=currentCtx();const g=genStyle(name,(Math.random()*2**32)>>>0,{root:k.root,scale:k.scale});
-    state.tracks=g.tracks;state.prog=g.prog;syncSection();freshOriginal(state.sections[state.cur]);changed(true);toast(`🎲 New ${name} groove for section ${secLabels(state.sections)[state.cur]}`);return;
+    state.tracks=g.tracks;state.prog=g.prog;syncSection();freshOriginal(state.sections[state.cur]);changed(true);toast(`🎲 New ${name} groove for section ${secLabels(state.sections)[state.cur]}`,undoAction);return;
   }
   applyNewState(genStyle(name,(Math.random()*2**32)>>>0),'🎲 New '+name+' groove');
+  toast('🎲 New '+name+' groove',undoAction);
 }
 document.getElementById('randomize').onclick=randomize;
+document.getElementById('undo').onclick=undo;
 const psEl=document.getElementById('preferSynth');psEl.checked=!!prefs.preferSynth;
 psEl.onchange=()=>{prefs.preferSynth=psEl.checked;savePrefs();toast(psEl.checked?'Synth sounds preferred — press 🎲 to hear it':'Real instruments allowed again — press 🎲 to hear it');};
 document.getElementById('libSearch').oninput=buildLibrary;
 buildLibrary();
 syncPresetSel();
 document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&(e.key==='z'||e.key==='Z')&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();undo();return;}
   if(/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)||e.ctrlKey||e.metaKey||e.altKey)return;
   if(e.code==='Space'){e.preventDefault();playing?stop():runCode(true);}
   else if(e.key==='r'||e.key==='R'){e.preventDefault();randomize();}
 });
-let toastT;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1800);}
+let toastT;function toast(m,action){
+  const t=document.getElementById('toast');t.textContent=m;
+  if(action){t.append(' ',h('button',{class:'toast-act',onclick:()=>{t.classList.remove('show');action.fn();}},action.label));}
+  t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),action?5000:1800);
+}
+/* ---------- first-step hint: shown until you've pressed play and clicked a step ---------- */
+function initHint(){
+  const el=document.getElementById('firstHint');el.textContent=SETTINGS.firstStepHint||'Press play, then click a step to change the beat.';
+  el.hidden=!!prefs.hintDone;
+}
+settingsHooks.push(()=>{const el=document.getElementById('firstHint');if(el)el.textContent=SETTINGS.firstStepHint||el.textContent;});
+function hintProgress(kind){if(prefs.hintDone)return;prefs['hint_'+kind]=true;if(prefs.hint_play&&prefs.hint_step){prefs.hintDone=true;document.getElementById('firstHint').hidden=true;}savePrefs();}
+/* ---------- Undo for big changes ---------- */
+const undoStack=[];
+function pushUndo(label){
+  undoStack.push({label,state:serializeState(),code:customCode?codeEl.value:null});
+  while(undoStack.length>(SETTINGS.undoDepth||40))undoStack.shift();
+  syncUndoBtn();
+}
+function syncUndoBtn(){const b=document.getElementById('undo');if(!b)return;const u=undoStack[undoStack.length-1];b.disabled=!u;b.title=u?`Undo: ${u.label} (Ctrl/⌘+Z)`:'Nothing to undo';}
+function undo(){
+  const u=undoStack.pop();if(!u){toast('Nothing to undo');return;}
+  state=normalizeState(JSON.parse(u.state));
+  customCode=!!u.code;document.getElementById('banner').classList.toggle('show',customCode);
+  changed(true);syncPresetSel();
+  if(customCode){codeEl.value=u.code;paintCode();updateShareLink(u.code);if(playing)runCode(false);}
+  syncUndoBtn();toast(`↶ Undid: ${u.label}`);
+}
+const undoAction={label:'Undo',fn:()=>undo()};
 
 /* go */
-render();changed();syncPlayBtn();
+render();changed();syncPlayBtn();applyCodePanel();syncUndoBtn();initHint();
 boot();
 })();
 </script>
