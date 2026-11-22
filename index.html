@@ -273,6 +273,23 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 .chk input{accent-color:var(--accent);width:16px;height:16px;cursor:pointer}
 .chk:hover{color:var(--text)}
 .field label.chk{text-transform:none;letter-spacing:0;font-size:12px}
+.basics{display:flex;flex-wrap:wrap;gap:6px 14px;padding:6px 10px 2px;border-bottom:1px solid var(--line);align-items:flex-end}
+.bctl{display:flex;flex-direction:column;gap:1px;min-width:120px;flex:1 1 120px;max-width:190px}
+.bctl .bl{display:flex;justify-content:space-between;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--dim)}
+.bctl .bl output{font-family:var(--mono);text-transform:none;letter-spacing:0;color:var(--text)}
+.bctl .br{display:flex;align-items:center;gap:4px}.bctl input[type=range]{flex:1}
+.bctl .rst{visibility:hidden;background:none;border:none;color:var(--dim);font-size:13px;padding:0 2px;cursor:pointer}.bctl .rst.vis{visibility:visible}.bctl .rst:hover{color:var(--text)}
+.bctl.wave{max-width:none;flex:0 0 auto}.bctl.wave .seg button{padding:4px 7px}
+.spick{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:12px;max-width:190px;cursor:pointer;color:var(--text)}
+.spick:hover{border-color:var(--line2)}.spick .sp-l{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.spick .sp-c{color:var(--dim);font-size:10px}
+.picker{position:fixed;z-index:80;background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:8px;box-shadow:0 14px 40px #000b;display:flex;flex-direction:column;gap:6px;max-height:360px}
+.picker .mini-in{padding:7px 10px;font-size:13px}
+.pk-list{overflow:auto;max-height:300px}
+.pk-grp{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--dim);margin:8px 2px 3px}
+.pk-row{display:flex;align-items:center;gap:4px;border-radius:6px}.pk-row:hover{background:var(--panel2)}.pk-row.cur{background:#ff8a3d1f}
+.pk-play{background:none;border:1px solid var(--line);border-radius:50%;width:24px;height:24px;font-size:9px;color:var(--dim);flex:0 0 auto;cursor:pointer}.pk-play:hover{color:var(--text);border-color:var(--accent)}
+.pk-name{flex:1;text-align:left;background:none;border:none;padding:6px 4px;font-size:13px;color:var(--text);cursor:pointer}
+@media (max-width:700px){.picker{max-height:70vh}.pk-list{max-height:calc(70vh - 60px)}.pk-play{width:30px;height:30px}.bctl{min-width:130px}}
 .toast-act{margin-left:8px;background:var(--accent);color:#170c03;border:none;border-radius:6px;padding:3px 9px;font-weight:700;cursor:pointer}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(80px);background:#24242c;border:1px solid var(--line2);padding:9px 14px;border-radius:10px;transition:transform .2s;z-index:50;font-size:12px}
 .toast.show{transform:translateX(-50%) translateY(0)}
@@ -467,7 +484,7 @@ const RATES=[['¼',0.25],['½',0.5],['1',1],['2',2],['4',4]];
    State
    ========================================================= */
 let uid=1;
-function baseFx(){return{gain:1,pan:.5,lpf:20000,lpq:0,lfo:false,lfoRate:4,room:0,delay:0,shape:0,crush:0,speed:1,attack:0,release:0.1,fm:0};}
+function baseFx(){return{gain:1,pan:.5,lpf:20000,lpq:0,lfo:false,lfoRate:4,room:0,delay:0,shape:0,crush:0,speed:1,attack:0,release:0.1,fm:0,pitch:0,decay:0};}
 function baseMods(){return{rate:1,rev:false,jux:false,ply:false,degrade:0};}
 function mkDrum(sound='bd',hits){return{id:uid++,type:'drum',kit:'studio',name:(DRUMS.find(d=>d[0]===sound)||[0,sound])[1].replace(/^./,c=>c.toUpperCase()),sound,steps:16,hits:hits?pad(hits):Array(16).fill(false),fx:baseFx(),mods:baseMods(),muted:false,solo:false,fxOpen:false};}
 function mkSynth(opts={}){const t={id:uid++,type:'synth',name:'Synth',wave:'sawtooth',root:'C',octave:3,scale:'minor',steps:16,notes:Array.from({length:16},()=>[]),fx:baseFx(),mods:baseMods(),muted:false,solo:false,fxOpen:false};Object.assign(t,opts);if(opts.fx)t.fx=Object.assign(baseFx(),opts.fx);return t;}
@@ -1054,6 +1071,9 @@ function trackExpr(t){
   if(M.ply)e+='.ply(2)';
   if(M.degrade>0)e+=`.degradeBy(${f2(M.degrade)})`;
   if(t.type==='drum'&&F.speed!==1)e+=`.speed(${f2(F.speed)})`;
+  if(t.type==='pattern'&&t.mode==='s'&&F.pitch)e+=`.speed(${f2(Math.pow(2,F.pitch/12))})`;
+  if(t.type!=='drum'&&!(t.type==='pattern'&&t.mode==='s')&&F.pitch)e+=`.transpose(${Math.round(F.pitch)})`;
+  if(isOneShot(t)&&F.decay>0)e+=`.decay(${f2(F.decay)}).sustain(0)`;
   if(t.type!=='drum'||t.mode==='note'){
     if(F.attack>0)e+=`.attack(${f2(F.attack)})`;
     if(Math.abs(F.release-0.1)>0.001)e+=`.release(${f2(F.release)})`;
@@ -1209,6 +1229,7 @@ function registerKit(){
       const src=ac.createBufferSource();src.buffer=buf;
       const sp=Number(value.speed??1);src.playbackRate.value=Math.max(.05,Math.abs(sp)||1);
       const g=ac.createGain();src.connect(g);src.start(t);
+      const dec=Number(value.decay);if(dec>0&&Number(value.sustain??1)===0){g.gain.setValueAtTime(1,t);g.gain.setTargetAtTime(0,t+.005,dec/3);src.stop(t+dec*2+.05);} // decay control
       src.onended=()=>{try{src.disconnect();g.disconnect();}catch(e){}onended&&onended();};
       return{node:g,stop:(tt)=>{try{src.stop(tt)}catch(e){}}};
     },{type:'sample',samples:{[name]:['local']},prebake:true});
@@ -1262,7 +1283,7 @@ function fontTrigger(file,{drum=false,decay=false}={}){
     // release: at least a natural tail (real instruments shouldn't click off), longer for plucked/struck ones
     const rel=Math.max(decay?.35:.15,Number(value.release??(drum?1:decay?.6:.3))||.3);
     let end;
-    if(drum){end=t+z.buffer.duration;g.gain.value=1;}
+    if(drum){const dec=Number(value.decay);if(dec>0&&Number(value.sustain??1)===0){end=t+Math.min(z.buffer.duration,dec*2);g.gain.setValueAtTime(1,t);g.gain.setTargetAtTime(0,t+.005,dec/3);}else{end=t+z.buffer.duration;g.gain.value=1;}}
     else{
       // only sustained instruments loop; plucked/struck ones play their own natural decay
       if(!decay&&z.loopEnd>z.loopStart&&z.loopStart>0){src.loop=true;src.loopStart=z.loopStart/z.sampleRate;src.loopEnd=z.loopEnd/z.sampleRate;}
@@ -1626,11 +1647,11 @@ function renderTrack(t){
     h('span',{class:'badge'},t.type)
   );
   if(t.type==='drum'){
-    head.append(sel(drumOptions(),t.sound,v=>{t.sound=v;changed(true);},'Sound'));
+    head.append(soundPicker(drumOptions(),t.sound,v=>{t.sound=v;changed(true);},{title:'Drum sound',preview:v=>defaultPreview(v,{bank:kitBank(t.kit,v)})}));
     if(DRUMS.some(d=>d[0]===t.sound))head.append(sel(Object.entries(KITS).map(([k,v])=>[k,v.label+(v.has&&!v.has.includes(t.sound)?' (no '+t.sound+')':'')]),t.kit||'studio',v=>{t.kit=v;changed(true);},'Drum kit'));
     head.append(sel([[8,'8 steps'],[12,'12 steps'],[16,'16 steps']],t.steps,v=>{t.steps=+v;changed(true);},'Steps per cycle'));
   }else if(t.type==='synth'){
-    head.append(sel(soundOptions(),t.wave,v=>{t.wave=v;changed();},'Instrument / oscillator'));
+    head.append(soundPicker(soundOptions(),t.wave,v=>{t.wave=v;changed(true);},{title:'Instrument / oscillator'}));
     head.append(h('button',{class:'tbtn'+(holdsNotes(t)?' on':''),title:holdsNotes(t)?'Notes ring until the next note (click for short, staccato notes)':'Short notes (click to let notes ring until the next one)',onclick:()=>{t.hold=!holdsNotes(t);changed(true);}},holdsNotes(t)?'hold':'short'));
     head.append(sel(NOTE_NAMES.map(n=>[n,n]),t.root,v=>{t.root=v;changed(true);},'Root'));
     head.append(sel([1,2,3,4,5].map(o=>[o,'oct '+o]),t.octave,v=>{t.octave=+v;changed(true);},'Octave'));
@@ -1640,7 +1661,7 @@ function renderTrack(t){
     head.append(h('span',{class:'seg'},
       h('button',{class:t.mode==='s'?'on':'',title:'s("…") — the pattern names sounds',onclick:()=>{t.mode='s';changed(true);}},'s(…)'),
       h('button',{class:t.mode==='note'?'on':'',title:'note("…") — the pattern names notes',onclick:()=>{t.mode='note';changed(true);}},'note(…)')));
-    if(t.mode==='note')head.append(sel(soundOptions(),t.sound,v=>{t.sound=v;changed();},'Instrument / oscillator'));
+    if(t.mode==='note')head.append(soundPicker(soundOptions(),t.sound,v=>{t.sound=v;changed(true);},{title:'Instrument / oscillator'}));
     else head.append(sel(Object.entries(KITS).map(([k,v])=>[k,v.label]),t.kit||'studio',v=>{t.kit=v;changed();},'Drum kit (used when it has every sound in the pattern)'));
   }
   head.append(h('span',{class:'spacer',style:'flex:1'}));
@@ -1651,6 +1672,7 @@ function renderTrack(t){
   head.append(h('button',{class:'tbtn',title:'Duplicate',onclick:()=>{const c=JSON.parse(JSON.stringify(t));c.id=uid++;c.name+=' 2';c.color=COLORS[(COLORS.indexOf(t.color)+1)%COLORS.length];state.tracks.splice(state.tracks.indexOf(t)+1,0,c);changed(true);}},'⧉'));
   head.append(h('button',{class:'tbtn del',title:'Delete track',onclick:()=>{pushUndo(`delete track “${t.name}”`);state.tracks=state.tracks.filter(x=>x!==t);changed(true);toast(`Deleted “${t.name}”`,undoAction);}},'✕'));
   el.append(head);
+  el.append(basicsStrip(t));
 
   const body=h('div',{class:'tbody'});
   if(t.type==='drum')body.append(drumGrid(t));
@@ -1659,6 +1681,95 @@ function renderTrack(t){
   el.append(body);
   el.append(fxPanel(t));
   return el;
+}
+/* ---------- per-track basics: volume, pitch, tone, decay (+ synth: wave, attack, release) ---------- */
+const OSC=['sine','triangle','sawtooth','square'];
+const isOneShot=t=>t.type==='drum'||(t.type==='pattern'&&t.mode==='s');
+const trackSound=t=>t.type==='synth'?t.wave:t.type==='pattern'&&t.mode==='note'?t.sound:null;
+const isOsc=w=>SYNTHS.includes(w);
+function ctlDef(k){return Object.assign({min:0,max:1,default:0},(SETTINGS.controls||{})[k]||{});}
+function basicsStrip(t){
+  const F=t.fx,strip=h('div',{class:'basics'});
+  const add=(key,label,get,set,def,opt={})=>{
+    const d=ctlDef(key);const min=opt.min??d.min,max=opt.max??d.max,log=!!opt.log,step=opt.step??((max-min)/100);
+    const toS=v=>log?Math.round(1000*Math.log(Math.max(v,min)/min)/Math.log(max/min)):v,fromS=x=>log?min*Math.pow(max/min,x/1000):+x;
+    const out=h('output',{});const reset=h('button',{class:'rst',title:`Reset ${label.toLowerCase()} to default`},'↺');
+    const show=()=>{const v=get();out.textContent=opt.fmt?opt.fmt(v):f2(v);reset.classList.toggle('vis',Math.abs(v-def)>1e-6);};
+    const r=h('input',{type:'range',min:log?0:min,max:log?1000:max,step:log?1:step,value:toS(get()),'aria-label':label});
+    r.oninput=()=>{set(fromS(+r.value));show();changed();};
+    const doReset=()=>{set(def);r.value=toS(def);show();changed();};
+    reset.onclick=doReset;r.ondblclick=doReset;
+    show();
+    strip.append(h('label',{class:'bctl',title:opt.title||''},h('span',{class:'bl'},label,out),h('span',{class:'br'},r,reset)));
+  };
+  const synthOsc=t.type==='synth'&&isOsc(t.wave)||(t.type==='pattern'&&t.mode==='note'&&isOsc(t.sound));
+  add('volume','Volume',()=>F.gain,v=>F.gain=v,ctlDef('volume').default??1,{fmt:v=>Math.round(v*100)+'%'});
+  if(t.type==='drum'){
+    add('pitch','Pitch',()=>12*Math.log2(F.speed||1),v=>F.speed=Math.pow(2,v/12),0,{step:.5,fmt:v=>(v>0?'+':'')+(Math.round(v*2)/2)+' st',title:'Semitones (drum samples play faster/slower)'});
+  }else add('pitch','Pitch',()=>F.pitch||0,v=>F.pitch=Math.round(v),0,{step:1,fmt:v=>(v>0?'+':'')+Math.round(v)+' st',title:'Transpose in semitones'});
+  add('tone','Tone',()=>F.lpf,v=>F.lpf=v,20000,{log:true,fmt:v=>v>=19900?'bright':v<1000?Math.round(v)+' Hz':(v/1000).toFixed(1)+' kHz',title:'Dark ↔ bright (low-pass filter cutoff)'});
+  if(isOneShot(t))add('decay','Decay',()=>F.decay||ctlDef('decay').max,v=>F.decay=v>=ctlDef('decay').max-0.01?0:v,ctlDef('decay').max,{fmt:v=>v>=ctlDef('decay').max-0.01?'natural':Math.round(v*1000)+' ms',title:'Short ↔ long (shortens the sound)'});
+  else if(synthOsc){
+    const cur=t.type==='synth'?t.wave:t.sound;
+    strip.prepend(h('div',{class:'bctl wave',title:'Waveform'},h('span',{class:'bl'},'Wave'),h('span',{class:'seg'},...OSC.map(w=>h('button',{class:cur===w?'on':'',title:w,onclick:()=>{if(t.type==='synth')t.wave=w;else t.sound=w;changed(true);}},{sine:'∿ sin',triangle:'△ tri',sawtooth:'⩘ saw',square:'⊓ sqr'}[w])))));
+    add('attack','Attack',()=>F.attack,v=>F.attack=v,0,{fmt:v=>v<0.005?'instant':f2(v)+' s',title:'Instant ↔ gradual start'});
+    add('release','Release',()=>F.release,v=>F.release=v,0.1,{fmt:v=>f2(v)+' s',title:'Quick cutoff ↔ long fade'});
+  }else add('decay','Decay',()=>F.release,v=>F.release=v,0.1,{min:0.01,max:3,fmt:v=>f2(v)+' s',title:'Short ↔ long ring after each note'});
+  return strip;
+}
+/* ---------- sound picker: search + one-hit preview ---------- */
+let pickerEl=null;
+function closePicker(){pickerEl?.remove();pickerEl=null;}
+document.addEventListener('pointerdown',e=>{if(pickerEl&&!e.composedPath().includes(pickerEl)&&!e.target.closest('.spick'))closePicker();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePicker();});
+function optLabel(opts,v){for(const[k,l]of opts)if(k===v)return l;return v;}
+function soundPicker(opts,value,onPick,{title='Sound',preview}={}){
+  const btn=h('button',{class:'spick',title:title+' — click to search and preview'},h('span',{class:'sp-l'},optLabel(opts,value)),h('span',{class:'sp-c'},'▾'));
+  btn.onclick=e=>{e.stopPropagation();if(pickerEl&&pickerEl.__for===btn){closePicker();return;}openPicker(btn,opts,value,onPick,preview);};
+  return btn;
+}
+function openPicker(anchor,opts,value,onPick,preview){
+  closePicker();
+  const q=h('input',{class:'mini-in',placeholder:'search sounds…',spellcheck:'false'});
+  const list=h('div',{class:'pk-list'});
+  const box=h('div',{class:'picker'},q,list);box.__for=anchor;pickerEl=box;
+  const pick=v=>{closePicker();onPick(v);};
+  const draw=()=>{
+    const f=q.value.toLowerCase().trim();list.innerHTML='';let grp=null,shown=0;
+    for(const[v,l]of opts){
+      if(v==='--'){grp=l;continue;}
+      if(f&&!(String(v).toLowerCase().includes(f)||String(l).toLowerCase().includes(f)))continue;
+      if(grp){list.append(h('div',{class:'pk-grp'},grp));grp=null;}
+      list.append(h('div',{class:'pk-row'+(v===value?' cur':'')},
+        h('button',{class:'pk-play',title:'Preview',onclick:e=>{e.stopPropagation();(preview||defaultPreview)(v);}},'▶'),
+        h('button',{class:'pk-name',onclick:()=>pick(v)},l)));
+      shown++;
+    }
+    if(!shown)list.append(h('div',{class:'hint',style:'padding:8px'},'No sounds match'));
+  };
+  q.oninput=draw;
+  q.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter'){const first=list.querySelector('.pk-name');if(first)first.click();}if(e.key==='Escape')closePicker();};
+  draw();document.body.append(box);
+  const r=anchor.getBoundingClientRect(),W=innerWidth;
+  if(W<=700){Object.assign(box.style,{left:'8px',right:'8px',top:'auto',bottom:'8px'});}
+  else{const w=300;Object.assign(box.style,{left:Math.max(8,Math.min(r.left,W-w-8))+'px',top:Math.min(r.bottom+4,innerHeight-360)+'px',width:w+'px'});}
+  list.querySelector('.cur')?.scrollIntoView({block:'center'});
+  if(W>700)q.focus();
+}
+// play one hit of a sound right away (doesn't touch the groove)
+async function defaultPreview(name,{bank=null,note=null}={}){
+  if(!engineReady){toast('Engine still loading…');return;}
+  try{
+    await getAudioContext().resume();
+    if(!audioInited){audioInited=true;try{await initAudio();}catch(e){}}
+    const s=bank?bank+'_'+name:name;
+    await ensureSounds(bank?`.bank("${bank}")`+' '+name:name);
+    const pitched=SYNTHS.includes(name)||!!INSTR[name]||SAMPLED_SET.has(name);
+    const v={s,gain:.8,duration:pitched?.6:.5};if(pitched)v.note=note??(INSTR[name]&&/bass/.test(name)?40:SYNTHS.includes(name)?57:60);
+    const ac=getAudioContext();
+    if(!INSTR[s]&&!SYNTHS.includes(s)&&!/^acoustic_/.test(s))await superdough({...v,gain:0},ac.currentTime+.01,.05);
+    await superdough(v,ac.currentTime+.03,v.duration);
+  }catch(e){toast('Could not play '+name+': '+(e.message||e));}
 }
 function renderTrackHeadBtn(el,t){el.querySelectorAll('.thead .tbtn').forEach(b=>{if(b.textContent==='FX')b.classList.toggle('on',t.fxOpen);});}
 function sel(opts,val,on,title){const s=h('select',{title,onchange:e=>on(e.target.value)});let grp=s,found=false;for(const[v,l]of opts){if(v==='--'){grp=h('optgroup',{label:l});s.append(grp);continue;}const o=h('option',{value:v},l);if(String(v)===String(val)){o.selected=true;found=true;}grp.append(o);}if(!found&&val){const o=h('option',{value:val},String(val));o.selected=true;s.prepend(o);}return s;}
@@ -1779,19 +1890,15 @@ function fxPanel(t){
 
   p.append(h('div',{class:'sect'},'sound'));
   const g1=h('div',{class:'fxgrid'});
-  g1.append(slider('gain','volume',F.gain,0,1.5,0.01,v=>F.gain=v));
   g1.append(slider('pan','L ↔ R',F.pan,0,1,0.01,v=>F.pan=v));
-  if(t.type==='drum')g1.append(slider('speed','pitch',F.speed,0.25,2.5,0.01,v=>F.speed=v));
   if(t.type!=='drum'){
-    g1.append(slider('attack','fade in (s)',F.attack,0,2,0.01,v=>F.attack=v));
-    g1.append(slider('release','fade out (s)',F.release,0.01,3,0.01,v=>F.release=v));
+    if(!isOsc(trackSound(t))){g1.append(slider('attack','fade in (s)',F.attack,0,2,0.01,v=>F.attack=v));}
     g1.append(slider('fm','FM brightness',F.fm,0,8,0.1,v=>F.fm=v));
   }
   p.append(g1);
 
-  p.append(h('div',{class:'sect'},'filter'));
+  p.append(h('div',{class:'sect'},'filter (cutoff = Tone above)'));
   const g2=h('div',{class:'fxgrid'});
-  g2.append(slider('lpf','low-pass Hz',F.lpf,50,20000,1,v=>F.lpf=v,true));
   g2.append(slider('lpq','resonance',F.lpq,0,20,0.1,v=>F.lpq=v));
   g2.append(h('div',{class:'ctl'},h('div',{class:'lab'},h('span',{},'LFO sweep'),h('code',{},'sine.range()')),h('div',{class:'toggles'},
     h('button',{class:'tog'+(F.lfo?' on':''),onclick:e=>{F.lfo=!F.lfo;e.target.classList.toggle('on',F.lfo);changed();}},F.lfo?'on':'off'),
