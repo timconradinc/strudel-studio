@@ -898,6 +898,8 @@ function updateVersion(sec){
   if(sec.ver&&!fam.some(x=>x.ver===sec.ver))return;                                    // still the only one with this name
   const used=new Set(fam.map(x=>x.ver));let v='m',k=1;while(used.has(v))v='m'+k++;sec.ver=v; // split off: next free version
 }
+// a preset / 🎲 on a section with no copies starts a new original; with copies it counts as an edit (Bm)
+function freshOriginal(sec){if(!state.sections.some(x=>x!==sec&&x.fam===sec.fam)){sec.famSig=secSig(sec);sec.ver=null;}}
 const isModified=(sec)=>!sec.renamed&&!!sec.ver;
 function ensureSections(s){
   if(!Array.isArray(s.sections)||!s.sections.length)s.sections=[{id:'s'+Date.now().toString(36),name:'A',repeat:4,prog:s.prog,tracks:s.tracks||[]}];
@@ -1771,7 +1773,7 @@ function applyPreset(k){
   }else p=presetList()[k]();
   state.tracks=p.tracks;state.prog=p.prog;state.style=p.style;
   if(!multi){state.bpm=p.bpm;state.swing=p.swing;state.key=p.key;} // tempo & swing are song-wide: only taken from the preset for a one-section song
-  syncSection();
+  syncSection();freshOriginal(state.sections[state.cur]);
   customCode=false;document.getElementById('banner').classList.remove('show');
   changed(true);syncPresetSel();
   toast(multi?`Loaded “${k}” into section ${secName} — other sections kept`:`Loaded “${k}”`);
@@ -1785,7 +1787,7 @@ function randomize(){
   const name=state.style&&STYLES[state.style]?state.style:randomStyleName();
   if(state.sections&&state.sections.length>1){ // re-roll just this section, in the song's key and tempo
     const k=currentCtx();const g=genStyle(name,(Math.random()*2**32)>>>0,{root:k.root,scale:k.scale});
-    state.tracks=g.tracks;state.prog=g.prog;syncSection();changed(true);toast(`🎲 New ${name} groove for section ${secLabels(state.sections)[state.cur]}`);return;
+    state.tracks=g.tracks;state.prog=g.prog;syncSection();freshOriginal(state.sections[state.cur]);changed(true);toast(`🎲 New ${name} groove for section ${secLabels(state.sections)[state.cur]}`);return;
   }
   applyNewState(genStyle(name,(Math.random()*2**32)>>>0),'🎲 New '+name+' groove');
 }
