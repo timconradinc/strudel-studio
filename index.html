@@ -225,6 +225,7 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
     <div id="savesPanel" class="saves-panel" hidden>
       <div class="saves-new">
         <input id="saveName" class="mini-in" maxlength="40" placeholder="Name this groove…">
+        <button id="rerollName" class="btn" title="Suggest another name">🎲</button>
         <button id="saveNew" class="btn primary">Save</button>
       </div>
       <div id="savesHint" class="hint"></div>
@@ -1465,17 +1466,30 @@ const SAVES_KEY='strudel-studio-saves',MAX_SAVES=15;
 function getSaves(){try{const a=JSON.parse(localStorage.getItem(SAVES_KEY));return Array.isArray(a)?a:[];}catch(e){return[];}}
 function putSaves(a){try{localStorage.setItem(SAVES_KEY,JSON.stringify(a));return true;}catch(e){toast('Could not save — browser storage is full');return false;}}
 function snapshot(name){return{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,savedAt:Date.now(),state:JSON.parse(JSON.stringify(state)),code:customCode?codeEl.value:null};}
-function defaultSaveName(){const st=state.style||'Groove';const n=getSaves().filter(x=>x.name.startsWith(st)).length+1;return `${st} ${n}`;}
+// friendly, hand-picked words for suggested names
+const NAME_ADJ=['Amber','Breezy','Bright','Cosmic','Cozy','Crystal','Dancing','Dreamy','Electric','Floating','Fuzzy','Gentle','Golden','Happy','Hazy','Humble','Lucky','Lunar','Mellow','Midnight','Misty','Neon','Velvet','Quiet','Rolling','Rosy','Shiny','Silver','Sleepy','Smooth','Solar','Sparkly','Starry','Sunny','Swift','Tidal','Twilight','Warm','Wandering','Whistling'];
+const NAME_NOUN=['Badger','Balloon','Banjo','Beacon','Biscuit','Breeze','Cactus','Canyon','Comet','Compass','Cloud','Coral','Daisy','Dolphin','Ember','Falcon','Fern','Firefly','Garden','Harbor','Island','Kite','Lagoon','Lantern','Maple','Meadow','Mountain','Nebula','Orchard','Otter','Pebble','Penguin','Pine','Planet','Pocket','Rainbow','River','Robot','Sailboat','Sparrow','Teapot','Tiger','Trolley','Tulip','Turtle','Volcano','Walrus','Willow'];
+function suggestName(){
+  const taken=new Set(getSaves().map(x=>x.name));
+  for(let i=0;i<20;i++){
+    const words=[pick(NAME_ADJ),pick(NAME_NOUN)];if(Math.random()<.5)words.push(pick(NAME_NOUN.filter(w=>w!==words[1])));
+    const n=words.join(' ');if(!taken.has(n))return n;
+  }
+  return pick(NAME_ADJ)+' '+pick(NAME_NOUN)+' '+(getSaves().length+1);
+}
+// put a fresh suggestion in the name box, selected, so typing replaces it
+function offerName(){const el=document.getElementById('saveName');if(document.getElementById('saveNew').disabled){el.value='';return;}el.value=suggestName();el.focus();el.select();}
+function defaultSaveName(){return suggestName();}
 function saveNew(){
   const saves=getSaves();if(saves.length>=MAX_SAVES){toast(`All ${MAX_SAVES} slots are used — overwrite or delete one`);return;}
   const name=(document.getElementById('saveName').value.trim()||defaultSaveName()).slice(0,40);
-  saves.unshift(snapshot(name));if(putSaves(saves)){document.getElementById('saveName').value='';renderSaves();toast(`Saved “${name}”`);}
+  saves.unshift(snapshot(name));if(putSaves(saves)){renderSaves();offerName();toast(`Saved “${name}”`);}
 }
 function overwriteSave(id){const saves=getSaves();const i=saves.findIndex(x=>x.id===id);if(i<0)return;const snap=snapshot(saves[i].name);snap.id=id;saves.splice(i,1);saves.unshift(snap);if(putSaves(saves)){renderSaves();toast(`Updated “${snap.name}”`);}}
 function deleteSave(id){
   const row=document.querySelector(`.save-row[data-id="${id}"]`);
   if(row&&!row.classList.contains('confirm')){row.classList.add('confirm');row.querySelector('.del').textContent='sure?';setTimeout(()=>{if(row.isConnected){row.classList.remove('confirm');row.querySelector('.del').textContent='✕';}},2500);return;}
-  const saves=getSaves().filter(x=>x.id!==id);putSaves(saves);renderSaves();toast('Deleted');
+  const saves=getSaves().filter(x=>x.id!==id);const wasFull=getSaves().length>=MAX_SAVES;putSaves(saves);renderSaves();if(wasFull)offerName();toast('Deleted');
 }
 function renameSave(id,el){
   const saves=getSaves();const sv=saves.find(x=>x.id===id);if(!sv)return;
@@ -1497,7 +1511,7 @@ function renderSaves(){
   const saves=getSaves(),list=document.getElementById('savesList');
   document.getElementById('savesCount').textContent=`${saves.length}/${MAX_SAVES}`;
   const full=saves.length>=MAX_SAVES;
-  document.getElementById('saveNew').disabled=full;document.getElementById('saveName').placeholder=full?'All slots used':defaultSaveName();
+  document.getElementById('saveNew').disabled=full;document.getElementById('saveName').placeholder=full?'All slots used':'Name this groove…';document.getElementById('saveName').disabled=full;document.getElementById('rerollName').disabled=full;
   document.getElementById('savesHint').textContent=full?`All ${MAX_SAVES} slots used — overwrite (⤓) or delete (✕) one to save another.`:saves.length?'Click a name to load it.':'Nothing saved yet. Saves keep every change, including hand-edited code.';
   list.innerHTML='';
   for(const sv of saves){
@@ -1511,7 +1525,8 @@ function renderSaves(){
   }
 }
 const savesPanel=document.getElementById('savesPanel');
-document.getElementById('savesBtn').onclick=e=>{e.stopPropagation();savesPanel.hidden=!savesPanel.hidden;if(!savesPanel.hidden){renderSaves();document.getElementById('saveName').focus();}};
+document.getElementById('savesBtn').onclick=e=>{e.stopPropagation();savesPanel.hidden=!savesPanel.hidden;if(!savesPanel.hidden){renderSaves();offerName();}};
+document.getElementById('rerollName').onclick=offerName;
 document.addEventListener('click',e=>{if(!savesPanel.hidden&&!e.composedPath().includes(savesPanel))savesPanel.hidden=true;});
 document.getElementById('saveNew').onclick=saveNew;
 document.getElementById('saveName').onkeydown=e=>{if(e.key==='Enter')saveNew();e.stopPropagation();};
