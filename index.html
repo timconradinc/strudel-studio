@@ -2263,7 +2263,7 @@ function syncPresetSel(){presetEl.value=state.style&&STYLES[state.style]?state.s
 function applyNewState(s,msg){state=ensureSections(s);customCode=false;document.getElementById('banner').classList.remove('show');changed(true);syncPresetSel();toast(msg);}
 
 /* ---------- My grooves: up to 15 named saves, including hand-edited code ---------- */
-const SAVES_KEY='strudel-studio-saves';let MAX_SAVES=SETTINGS.maxSaves||15;settingsHooks.push(()=>{MAX_SAVES=SETTINGS.maxSaves||15;renderSaves();});
+const SAVES_KEY='strudel-studio-saves';let MAX_SAVES=SETTINGS.maxSaves||15;settingsHooks.push(()=>{MAX_SAVES=SETTINGS.maxSaves||15;try{renderSaves();}catch(e){}});
 function getSaves(){try{const a=JSON.parse(localStorage.getItem(SAVES_KEY));return Array.isArray(a)?a:[];}catch(e){return[];}}
 function putSaves(a){try{localStorage.setItem(SAVES_KEY,JSON.stringify(a));return true;}catch(e){toast('Could not save — browser storage is full');return false;}}
 function snapshot(name){return{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,savedAt:Date.now(),state:JSON.parse(serializeState()),code:customCode?codeEl.value:null};}
@@ -2350,7 +2350,6 @@ document.getElementById('rerollName').onclick=()=>offerName(true);
 document.addEventListener('click',e=>{const p=e.composedPath();if(!savesPanel.hidden&&!p.includes(savesPanel))savesPanel.hidden=true;if(!savePanel.hidden&&!p.includes(savePanel))savePanel.hidden=true;});
 document.getElementById('saveNew').onclick=saveNew;
 document.getElementById('saveName').onkeydown=e=>{if(e.key==='Enter')saveNew();e.stopPropagation();};
-renderSaves();
 // A preset replaces only the section being edited; the rest of the song stays.
 function applyPreset(k){
   pushUndo(`load preset “${k}”`);
