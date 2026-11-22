@@ -245,6 +245,9 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
   .toast{bottom:88px}
   .hint{font-size:9px}
 }
+.chk{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--dim);cursor:pointer;white-space:nowrap;padding:0 4px}
+.chk input{accent-color:var(--accent);width:16px;height:16px;cursor:pointer}
+.chk:hover{color:var(--text)}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(80px);background:#24242c;border:1px solid var(--line2);padding:9px 14px;border-radius:10px;transition:transform .2s;z-index:50;font-size:12px}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .empty{color:var(--dim);text-align:center;padding:30px;border:1px dashed var(--line);border-radius:12px}
@@ -266,6 +269,7 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
     <div style="display:flex;gap:6px">
       <select id="preset" class="ui"></select>
       <button id="randomize" class="btn" title="Roll a new groove in the current style (R)">🎲 Randomize</button>
+      <label class="chk" title="New grooves, presets and added tracks use synth sounds and drum machines instead of real instruments"><input type="checkbox" id="preferSynth"> prefer synths</label>
     </div>
   </div>
   <div class="field" style="position:relative"><label>My grooves</label>
@@ -376,6 +380,20 @@ const SAMPLED=[
 const SAMPLED_SET=new Set(SAMPLED.map(x=>x[0]));
 const isSoundName=w=>SYNTHS.includes(w)||!!INSTR[w]||SAMPLED_SET.has(w);
 const isRealSound=w=>!!w&&(w.startsWith('gm_')||SAMPLED_SET.has(w));
+// user preferences (kept separately from songs)
+const prefs=(()=>{try{return JSON.parse(localStorage.getItem('strudel-studio-prefs'))||{};}catch(e){return{};}})();
+function savePrefs(){try{localStorage.setItem('strudel-studio-prefs',JSON.stringify(prefs));}catch(e){}}
+// "prefer synths": electronic stand-ins for real instruments, by the part's job
+const isSynthish=w=>SYNTHS.includes(w)||/^gm_(synth_|lead_|pad_)/.test(w||'');
+const SYNTH_POOLS={
+  bass:['sawtooth','square','sine','gm_synth_bass_1','gm_synth_bass_2'],
+  lead:['square','sawtooth','pulse','gm_lead_1_square','gm_lead_2_sawtooth'],
+  arp:['square','pulse','triangle','sawtooth'],
+  chords:['supersaw','sawtooth','square','gm_synth_brass_1'],
+  power:['sawtooth','supersaw'],
+  pad:['supersaw','gm_synth_strings_1','gm_pad_warm','gm_pad_halo']
+};
+const ACOUSTIC_KITS=['acoustic','uzu','dirt'];
 function soundOptions(){return [['--','Synths']].concat(SYNTHS.map(s=>[s,'∿ '+s]),[['--','Instruments (General MIDI)']],INSTRUMENTS.map(([n,l])=>[n,'♪ '+l]),[['--','Sampled instruments']],SAMPLED.map(([n,l])=>[n,'◉ '+l]));}
 // Extra one-shot sounds for drum tracks (played as-is; the kit menu only affects the standard drums)
 const PERC=['conga','bongo','cajon','darbuka','framedrum','tambourine','clave','woodblock','agogo','cowbell','guiro','cabasa','triangles','sleighbells','vibraslap','slapstick','fingercymbal','sus_cymbal','gong','timpani','bassdrum1','clap','hihat'];
@@ -684,9 +702,25 @@ function genPartTrack(p,ctx){
 }
 // Kick sets the main kit; other drums often come from another kit the style uses.
 function kitHas(kit,snd){return kit==='studio'||!!KITS[kit]?.has?.includes(snd);}
+function styleKits(S){
+  const list=S?.kit||['studio'];if(!prefs.preferSynth)return list;
+  const machines=list.filter(k=>!ACOUSTIC_KITS.includes(k));return machines.length?machines:['tr909','tr808','linndrum','tr707'];
+}
+// swap real instruments / acoustic kits for synth ones when "prefer synths" is on
+function synthifyTracks(tracks,S){
+  if(!prefs.preferSynth)return tracks;
+  const machines=styleKits(S);
+  for(const t of tracks){
+    if(t.type==='synth'&&!isSynthish(t.wave)){t.wave=pick(SYNTH_POOLS[inferRole(t)]||SYNTH_POOLS.lead);}
+    else if(t.type==='pattern'&&t.mode==='note'&&!isSynthish(t.sound))t.sound=pick(['triangle','sine','square','supersaw']);
+    else if(t.type==='pattern'&&t.mode==='s'&&ACOUSTIC_KITS.includes(t.kit))t.kit=machines[0];
+    else if(t.type==='drum'&&ACOUSTIC_KITS.includes(t.kit))t.kit=machines.find(k=>kitHas(k,t.sound))||'studio';
+  }
+  return tracks;
+}
 function kitForDrum(S,main,snd){
   if(!DRUMS.some(d=>d[0]===snd))return 'studio';          // percussion one-shots aren't in kits
-  const options=[...new Set(S?.kit||['studio'])].filter(k=>kitHas(k,snd));
+  const options=[...new Set(styleKits(S))].filter(k=>kitHas(k,snd));
   const others=options.filter(k=>k!==main);
   if(others.length&&(['sd','cp','rim'].includes(snd)||(snd!=='bd'&&chance(.55))))return pick(others); // snare/clap always contrast with the kick
   return kitHas(main,snd)?main:(options[0]||'studio');
@@ -697,9 +731,10 @@ function genStyle(name,seed,key){
     const ctx={root:pick(NOTE_NAMES),scale:pick(S.scales),prog:pick(S.progs||PROGS)};
     if(key&&key.root&&key.scale){ctx.root=key.root;ctx.scale=key.scale;}
     const tracks=[];
-    const kit=S.kit?pick(S.kit):'studio';
+    const kit=pick(styleKits(S));
     for(const d of S.drums){if(d.opt&&!chance(d.opt))continue;const t=genDrumTrack(d);t.kit=kitForDrum(S,kit,t.sound);tracks.push(t);}
     for(const p of S.parts){if(p.opt&&!chance(p.opt))continue;const t=genPartTrack(p,{...ctx,real:false});if(t.type==='pattern'&&t.mode==='s')t.kit=kit;tracks.push(t);}
+    synthifyTracks(tracks,S);
     return{bpm:ri(S.bpm[0],S.bpm[1]),swing:Math.round(rnd(S.swing[0],S.swing[1])*100)/100,style:name,key:{root:ctx.root,scale:ctx.scale},prog:ctx.prog,tracks};
   }finally{R=prevR;}
 }
@@ -774,7 +809,7 @@ function currentCtx(){
   const real=state.tracks.some(t=>isRealSound(t.wave||t.sound))||!!S?.parts?.some(p=>(p.waves||[]).some(isRealSound));
   const kits=state.tracks.filter(x=>x.type==='drum'&&x.kit).map(x=>x.kit);
   const kit=kits.length?kits.sort((a,b)=>kits.filter(k=>k===b).length-kits.filter(k=>k===a).length)[0]:(S?.kit?.[0]||'studio');
-  return{root,scale,prog,real,kit,palette:S?.palette};
+  return{root,scale,prog,real:real&&!prefs.preferSynth,kit,palette:S?.palette};
 }
 function uniqueName(n){const names=new Set(state.tracks.map(t=>t.name));if(!names.has(n))return n;let i=2;while(names.has(`${n} ${i}`))i++;return `${n} ${i}`;}
 function newTrack(type){
@@ -813,6 +848,7 @@ function newTrack(type){
     t=genPartTrack(spec,ctx);
     if(t.mode==='s')t.kit=ctx.kit;
   }
+  synthifyTracks([t],S);
   t.name=uniqueName(t.name);
   return t;
 }
@@ -892,7 +928,7 @@ function presetList(){
   for(const name of Object.keys(STYLES))out[name]=()=>{
     if(!HANDMADE[name])return Object.assign(genStyle(name,hashStr(name)),{style:name});
     const st=Object.assign(HANDMADE[name](),{style:name});const S=STYLES[name],kit=S.kit?.[0]||'studio';
-    const prevR=R;R=rng(hashStr(name)+7);try{st.tracks.forEach(t=>{if(t.type==='drum')t.kit=kitForDrum(S,kit,t.sound);});}finally{R=prevR;}return st;};
+    const prevR=R;R=rng(hashStr(name)+7);try{st.tracks.forEach(t=>{if(t.type==='drum')t.kit=kitForDrum(S,kit,t.sound);});synthifyTracks(st.tracks,S);}finally{R=prevR;}return st;};
   out['Blank']=()=>({bpm:120,swing:0,tracks:[mkDrum('bd')]});
   return out;
 }
@@ -1846,6 +1882,8 @@ function randomize(){
   applyNewState(genStyle(name,(Math.random()*2**32)>>>0),'🎲 New '+name+' groove');
 }
 document.getElementById('randomize').onclick=randomize;
+const psEl=document.getElementById('preferSynth');psEl.checked=!!prefs.preferSynth;
+psEl.onchange=()=>{prefs.preferSynth=psEl.checked;savePrefs();toast(psEl.checked?'Synth sounds preferred — press 🎲 to hear it':'Real instruments allowed again — press 🎲 to hear it');};
 document.getElementById('libSearch').oninput=buildLibrary;
 buildLibrary();
 syncPresetSel();
