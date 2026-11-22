@@ -59,6 +59,7 @@ header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px
 .num input{width:52px;background:transparent;border:none;padding:6px 8px;font-family:var(--mono);font-size:14px;text-align:center;outline:none}
 .num button{background:none;border:none;color:var(--dim);padding:6px 8px}
 .num button:hover{color:var(--text);background:var(--panel2)}
+.num button.big{font-family:var(--mono);font-size:11px;padding:6px 7px}
 .hslider{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 10px}
 .hslider output{font-family:var(--mono);min-width:30px;text-align:right;color:var(--dim)}
 select.ui{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 8px;outline:none}
@@ -196,7 +197,7 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
   </button>
   <div class="field"><label>Tempo (BPM)</label>
-    <div class="num"><button data-bpm="-1">−</button><input id="bpm" type="number" min="30" max="300" value="120"><button data-bpm="1">+</button><button id="tap" title="Tap tempo">TAP</button></div>
+    <div class="num"><button data-bpm="-10" title="−10 BPM" class="big">−10</button><button data-bpm="-1" title="−1 BPM">−</button><input id="bpm" type="number" min="30" max="300" value="120"><button data-bpm="1" title="+1 BPM">+</button><button data-bpm="10" title="+10 BPM" class="big">+10</button><button id="tap" title="Tap tempo">TAP</button></div>
   </div>
   <div class="field"><label>Swing</label>
     <div class="hslider"><input id="swing" type="range" min="0" max="0.3" step="0.01" value="0" style="width:90px;--c:var(--accent)"><output id="swingOut">0</output></div>
@@ -329,6 +330,16 @@ const STYLES={
     parts:[
       {role:'bass',name:'Rumble',mode:['root'],p:['.ooo.ooo.ooo.ooo','.x.x.x.x.x.x.x.x'],oct:[1,2],waves:['sawtooth'],fx:{lpf:[300,600],lfo:true,lfoRate:[4,16],lpq:[6,12],shape:[.2,.4],release:.06}},
       {role:'lead',name:'Acid line',p:'o+o+o+o+o+o+o+o+',oct:3,waves:['square','sawtooth'],fx:{lpf:[1200,3500],lfo:true,lfoRate:[2,8],lpq:[12,18],delay:[.2,.4],release:.1,gain:.6}}]},
+  'Classic rock':{bpm:[112,140],swing:[0,0],scales:['major','mixolydian','minor'],progs:[[0,3,4,0],[0,6,3,3],[0,4,5,3],[0,0,3,4],[0,3,0,4],[0,6,3,0]],drums:[
+      {s:'bd',p:['x.....x.x.......','x.......x.x.....','x.....x.x.....-.']},
+      {s:'sd',p:['....x.......x...','....x.......x..-']},
+      {s:'hh',p:['x.x.x.x.x.x.x.x.','xoxoxoxoxoxoxoxo'],fx:{gain:[.45,.6]}},
+      {s:'oh',p:'x...............',opt:.6,fx:{gain:.55,room:.3}},
+      {s:'lt',p:'............-+o+',opt:.4,fx:{room:.3}}],
+    parts:[
+      {role:'power',name:'Rhythm guitar',p:['x..x..x.x..x..x.','x.x.x.x.x.x.x.x.','x.....x.x.....x.','xx.x.xx.xx.x.xx.'],oct:3,waves:['sawtooth','square'],fx:{shape:[.5,.75],lpf:[2200,4000],release:[.12,.25],room:[.2,.35],gain:.5}},
+      {role:'bass',name:'Bass',mode:['root','root','fifth','oct'],p:['x.x.x.x.x.x.x.x.','x..x..x.x..x..x.','x.xxx.x.x.xxx.x.'],oct:2,waves:['sawtooth','triangle'],fx:{lpf:[700,1200],release:.12,gain:.85}},
+      {role:'lead',name:'Lead guitar',p:'-.+.o.+.-.+.o+o.',oct:4,waves:['sawtooth','square'],opt:.6,fx:{shape:[.4,.6],lpf:[2500,4000],delay:[.2,.35],room:.4,release:.25,gain:.38}}]},
   'Boom bap':{bpm:[84,94],swing:[.1,.18],scales:['dorian','minor'],drums:[
       {s:'bd',p:['x.....x...x.....','x..-..x.-.x..-..','x.....x.-.x...-.']},
       {s:'sd',p:['....x.......x..-','....x.-.....x...']},
@@ -480,6 +491,8 @@ function genStyle(name,seed){
         if(p.role==='bass'){
           n=mode==='oct'?(k%2?r+7:r):mode==='fifth'?(chance(.3)?r+4:r):mode==='walk'?(k===0?r:pick([r,r,r+2,r+4,r+1,r+5])):r;
           notes[i]=[clampDeg(n)];
+        }else if(p.role==='power'){ // power chord: root + fifth (+ octave when it fits)
+          notes[i]=[...new Set([r,r+4].concat(r+7<=ROWS-1?[r+7]:[]).map(clampDeg))];
         }else if(p.role==='chords'||p.role==='pad'){
           notes[i]=triad(r,sev);
         }else if(p.role==='arp'){
