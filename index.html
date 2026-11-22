@@ -256,6 +256,10 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 <div id="toast" class="toast"></div>
 
 <script>
+// Own scope: Strudel writes its functions (hp, lp, h, euclid…) onto window,
+// which would otherwise overwrite this app's helpers of the same names.
+(function(){"use strict";
+
 /* =========================================================
    Constants
    ========================================================= */
@@ -785,6 +789,7 @@ let toastT;function toast(m){const t=document.getElementById('toast');t.textCont
 /* go */
 render();changed();
 boot();
+})();
 </script>
 </body>
 </html>
