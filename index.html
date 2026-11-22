@@ -1389,7 +1389,7 @@ requestAnimationFrame(frame);
 const tracksEl=document.getElementById('tracks');
 function h(tag,attrs={},...kids){const el=document.createElement(tag);for(const[k,v]of Object.entries(attrs)){if(k==='class')el.className=v;else if(k==='style')el.style.cssText=v;else if(k.startsWith('on'))el[k]=v;else if(v!==false&&v!=null)el.setAttribute(k,v===true?'':v);}for(const k of kids.flat()){if(k==null)continue;el.append(k.nodeType?k:document.createTextNode(k));}return el;}
 
-function selectSection(i){if(playing&&songMode())jumpTo=i;syncSection();state.cur=i;state.tracks=state.sections[i].tracks;state.prog=state.sections[i].prog||state.prog;changed(true);}
+function selectSection(i){if(playing&&songMode())jumpTo=i;syncSection();state.cur=i;state.tracks=state.sections[i].tracks;state.prog=state.sections[i].prog||state.prog;changed(true);if(jumpTo!=null){clearTimeout(evalTimer);runCode(false);}}
 function addSection(at){
   syncSection();
   const cur=state.sections[state.cur],ctx=currentCtx();
