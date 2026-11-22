@@ -524,6 +524,8 @@ function genDrumTrack(d){
   t.fx=resolveFx(d.fx);if(d.mods)t.mods=Object.assign(baseMods(),d.mods);
   return t;
 }
+const LEAD_RHYTHMS=['x.x.x...x.x.xx..','x..x..x.x.x.x...','xx.x..x.xx.x..x.','x...x.x.x...x.xx','..x.x.xx..x.x.x.','x.xxx...x.x.x...','x..x.x..x..x.xx.',
+  'x.x.x.x.x.x.x...','x...x...x.x.x.x.','x..x..x...x.x.x.','.x.x.x.x.x...x..','x.x..x.x.xx.x...','x..xx..xx..x.x..','x.....x.x.x.x...','xx..xx..x.x.x...','x.x.xx..x.+.x.o.'];
 // Build one melodic/pattern track from a part spec, in a key + chord progression (ctx)
 function genPartTrack(p,ctx){
   const{root,scale,prog}=ctx;
@@ -542,26 +544,69 @@ function genPartTrack(p,ctx){
   const hits=p.p?roll(val(Array.isArray(p.p)?p.p:[p.p])):Array.from({length:steps},(_,i)=>i===0||chordAt(i,steps)!==chordAt(i-1,steps));
   const notes=Array.from({length:16},()=>[]);
   const mode=val(p.mode||['root']),sev=chance(p.sev||0);
-  const arpShape=pick([[0,2,4,7],[0,4,2,7],[7,4,2,0],[0,2,4,2],[0,4,7,4]]);
-  let walk=ri(3,6),k=0;
-  for(let i=0;i<steps;i++){
-    if(!hits[i])continue;
-    const r=chordAt(i,steps);let n;
-    if(p.role==='bass'){
-      n=mode==='oct'?(k%2?r+7:r):mode==='fifth'?(chance(.3)?r+4:r):mode==='walk'?(k===0?r:pick([r,r,r+2,r+4,r+1,r+5])):r;
-      notes[i]=[clampDeg(n)];
-    }else if(p.role==='power'){ // power chord: root + fifth (+ octave when it fits)
-      notes[i]=[...new Set([r,r+4].concat(r+7<=ROWS-1?[r+7]:[]).map(clampDeg))];
-    }else if(p.role==='chords'||p.role==='pad'){
-      notes[i]=triad(r,sev);
-    }else if(p.role==='arp'){
-      notes[i]=[clampDeg(r+arpShape[k%arpShape.length])];
-    }else{ // lead: random walk, pulled toward chord tones
-      walk+=pick([-2,-1,-1,0,1,1,2,3,-3]);walk=Math.min(9,Math.max(1,walk));
-      if(chance(.35)){const ct=[r,r+2,r+4].map(clampDeg);walk=ct.reduce((a,b)=>Math.abs(b-walk)<Math.abs(a-walk)?b:a);}
-      notes[i]=[walk];
-    }
-    k++;
+  if(p.role==='lead'&&steps===16){ // leads: a phrase rhythm (style's own or a common one), at least 4 notes
+    const tpl=chance(.65)||!p.p?pick(LEAD_RHYTHMS):val(Array.isArray(p.p)?p.p:[p.p]);
+    const h=roll(tpl);let guard=0;while(h.filter(Boolean).length<4&&guard++<20)h[pick([0,2,4,6,8,10,12,14])]=true;
+    for(let i=0;i<steps;i++)hits[i]=h[i];
+  }
+  const hitIdx=[];for(let i=0;i<steps;i++)if(hits[i])hitIdx.push(i);
+  const nextChord=i=>{const r=chordAt(i,steps);for(let j=i+1;j<steps;j++){const q=chordAt(j,steps);if(q!==r)return{step:j,root:q};}return null;};
+  if(p.role==='bass'){
+    // each bassline gets its own riff "cell" (offsets from the chord root), cycled within each chord
+    const CELLS={
+      root:[[0],[0,0,0,0]],
+      fifth:[[0,4],[0,0,4],[0,4,0,2],[0,0,4,4],[0,-3]],
+      oct:[[0,7],[0,7,0,5],[0,0,7,0],[0,7,4,7],[7,0,0,4]],
+      walk:[[0,1,2,4],[0,2,4,5],[0,4,2,1],[4,2,1,0],[0,2,1,-1]],
+      arp:[[0,2,4],[0,4,2],[0,2,4,2],[0,4,7,4],[0,2,4,7]],
+      riff:null
+    };
+    const m=chance(.35)?'riff':mode;
+    let cell=m==='riff'?Array.from({length:ri(3,5)},(_,j)=>j===0?0:pick([0,0,2,4,4,5,7,-1,-3,1])):pick(CELLS[m]||CELLS.root);
+    let k=0,prevR=null;
+    hitIdx.forEach((i,j)=>{
+      const r=chordAt(i,steps);if(r!==prevR){k=0;prevR=r;}
+      let n=r+cell[k%cell.length];
+      const nx=nextChord(i);const isLastBefore=nx&&hitIdx[j+1]!==undefined&&hitIdx[j+1]>=nx.step;
+      if(isLastBefore&&chance(.55))n=nx.root+pick([-1,1,-2,2]);   // approach note into the next chord
+      if(n<0)n+=7;notes[i]=[clampDeg(n)];k++;
+    });
+  }else if(p.role==='power'){
+    hitIdx.forEach(i=>{const r=chordAt(i,steps);notes[i]=[...new Set([r,r+4].concat(r+7<=ROWS-1?[r+7]:[]).map(clampDeg))];});
+  }else if(p.role==='chords'||p.role==='pad'){
+    // voicing per track: root position, inversions, spread or sus
+    const voice=pick(['root','root','first','second','spread','sus2','sus4']);
+    const VO={root:[0,2,4],first:[2,4,7],second:[4,7,9],spread:[0,4,9],sus2:[0,1,4],sus4:[0,3,4]};
+    hitIdx.forEach(i=>{const r=chordAt(i,steps);const v=VO[voice].concat(sev?[6]:[]);notes[i]=[...new Set(v.map(x=>clampDeg(r+x)))].sort((x,y)=>x-y);});
+  }else if(p.role==='arp'){
+    const tones=pick([[0,2,4],[0,2,4,7],[0,4,7],[0,2,4,6],[0,1,2,4],[0,4,5,7]]);
+    const dir=pick(['up','down','updown','downup','random','broken','pedal','skip']);
+    let seq;
+    if(dir==='up')seq=tones;else if(dir==='down')seq=[...tones].reverse();
+    else if(dir==='updown')seq=tones.concat([...tones].reverse().slice(1,-1));
+    else if(dir==='downup')seq=[...tones].reverse().concat(tones.slice(1,-1));
+    else if(dir==='random')seq=Array.from({length:ri(4,6)},()=>pick(tones));
+    else if(dir==='broken')seq=[tones[0],tones[2%tones.length],tones[1],tones[tones.length-1]];
+    else if(dir==='pedal')seq=tones.slice(1).flatMap(t=>[0,t]);
+    else seq=tones.filter((_,j)=>j%2===0).concat(tones.filter((_,j)=>j%2===1));
+    const lift=chance(.3)?2:0;let k=0;
+    hitIdx.forEach(i=>{const r=chordAt(i,steps);notes[i]=[clampDeg(r+lift+seq[k%seq.length])];k++;});
+  }else{ // lead melody: a contour or a developing motif, resolving to a chord tone
+    const H=hitIdx.length;const lo=ri(1,4),hi=Math.min(ROWS-1,lo+ri(4,6));
+    const shape=pick(['rise','fall','arch','valley','wave','qa','motif','motif']);
+    const target=x=>shape==='rise'?lo+(hi-lo)*x:shape==='fall'?hi-(hi-lo)*x:shape==='arch'?lo+(hi-lo)*Math.sin(Math.PI*x):shape==='valley'?hi-(hi-lo)*Math.sin(Math.PI*x):shape==='wave'?(lo+hi)/2+(hi-lo)/2*Math.sin(2*Math.PI*x*pick([1,1.5,2])):x<.5?lo+(hi-lo)*x*2:hi-(hi-lo)*(x-.5)*2;
+    const motif=Array.from({length:ri(2,4)},()=>pick([-2,-1,-1,1,1,2,2,3,-3,4,0]));
+    const seqStep=pick([0,1,-1,2,-2]);let start=ri(3,6),prev=null,same=0;
+    hitIdx.forEach((i,j)=>{
+      const r=chordAt(i,steps);let n;
+      if(shape==='motif'){const ph=Math.floor(j/motif.length),pos=j%motif.length;n=start+ph*seqStep+motif.slice(0,pos+1).reduce((a,b)=>a+b,0)-(pos===0?motif[0]:0);}
+      else n=Math.round(target(H>1?j/(H-1):.5))+pick([0,0,0,1,-1]);
+      if((i%4===0&&chance(.5))||j===H-1){const ct=[r,r+2,r+4,r+7].map(clampDeg);n=ct.reduce((a,b)=>Math.abs(b-n)<Math.abs(a-n)?b:a);} // land on chord tones on strong beats + at the end
+      if(prev!==null&&Math.abs(n-prev)>4&&chance(.8))n=prev+Math.sign(n-prev)*pick([1,2,2,3]); // mostly steps, the odd leap
+      n=Math.max(0,Math.min(ROWS-1,n));
+      if(n===prev&&++same>=2){n=Math.max(0,Math.min(ROWS-1,n+pick([-1,1,2])));same=0;}else if(n!==prev)same=0;
+      notes[i]=[n];prev=n;
+    });
   }
   if(!notes.some(x=>x.length))notes[0]=p.role==='chords'||p.role==='pad'?triad(prog[0],sev):[prog[0]];
   const oct=Array.isArray(p.oct)?ri(p.oct[0],p.oct[1]):p.oct;
