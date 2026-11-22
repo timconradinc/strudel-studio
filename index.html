@@ -201,8 +201,11 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
   <div class="field"><label>Swing</label>
     <div class="hslider"><input id="swing" type="range" min="0" max="0.3" step="0.01" value="0" style="width:90px;--c:var(--accent)"><output id="swingOut">0</output></div>
   </div>
-  <div class="field"><label>Preset</label>
-    <select id="preset" class="ui"></select>
+  <div class="field"><label>Preset / style</label>
+    <div style="display:flex;gap:6px">
+      <select id="preset" class="ui"></select>
+      <button id="randomize" class="btn" title="Roll a new groove in the current style (R)">🎲 Randomize</button>
+    </div>
   </div>
   <div class="spacer"></div>
   <div id="status" class="status loading"><i></i><span>loading engine…</span></div>
@@ -232,7 +235,7 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
       <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
     </div>
     <div class="codefoot">
-      <span class="hint">Ctrl/⌘+Enter run · Space play/stop · the GUI writes real Strudel code — edit it freely</span>
+      <span class="hint">Ctrl/⌘+Enter run · Space play/stop · R randomize · the GUI writes real Strudel code — edit it freely</span>
     </div>
     <details class="cheat">
       <summary>Mini-notation cheat sheet</summary>
@@ -287,7 +290,219 @@ function mkPattern(opts={}){const t={id:uid++,type:'pattern',name:'Pattern',mode
 function pad(a){const r=Array(16).fill(false);a.forEach((v,i)=>{if(i<16)r[i]=!!v});return r;}
 const X=s=>[...s.replace(/\s/g,'')].map(c=>c==='x');
 
-function presetList(){return{
+/* =========================================================
+   Styles — each preset is a style with rules for generating
+   a fresh groove. Loading a preset gives its fixed version;
+   🎲 Randomize rolls a new groove in the current style.
+   ========================================================= */
+function rng(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+let R=Math.random;
+const rnd=(a,b)=>a+R()*(b-a), ri=(a,b)=>Math.floor(rnd(a,b+1)), pick=a=>a[Math.floor(R()*a.length)], chance=p=>R()<p;
+const hashStr=s=>{let x=2166136261;for(const c of s)x=Math.imul(x^c.charCodeAt(0),16777619);return x>>>0;};
+// rhythm templates: x = always, o = 75%, + = 40%, - = 15%, . = never
+const PROB={x:1,o:.75,'+':.4,'-':.15};
+function roll(tpl){const s=[...tpl.replace(/\s/g,'')];const r=s.map(c=>chance(PROB[c]||0));
+  if(!r.some(Boolean)){const i=s.findIndex(c=>c!=='.');if(i>=0)r[i]=true;}return r;}
+const val=v=>Array.isArray(v)?(typeof v[0]==='number'&&v.length===2?rnd(v[0],v[1]):pick(v)):v;
+function resolveFx(fx={}){const o={};for(const[k,v]of Object.entries(fx))o[k]=k==='crush'?Math.round(val(v)):k==='lfoRate'&&Array.isArray(v)?pick([1,2,4,8,16].filter(x=>x>=v[0]&&x<=v[v.length-1])):val(v);return Object.assign(baseFx(),o);}
+const clampDeg=n=>{while(n>ROWS-1)n-=7;return Math.max(0,n);};
+const triad=(r,sev)=>[...new Set([r,r+2,r+4].concat(sev?[r+6]:[]).map(clampDeg))];
+function scaleNote(root,scale,deg,oct){const iv=SCALES[scale];const s=NOTE_NAMES.indexOf(root)+iv[deg%iv.length];return NOTE_NAMES[s%12].toLowerCase()+(oct+Math.floor(deg/iv.length)+Math.floor(s/12));}
+const PROGS=[[0,0,0,0],[0,0,5,5],[0,5,3,4],[0,3,4,0],[0,5,2,6],[0,3,0,4],[0,6,5,6],[0,2,3,4],[0,4,5,3],[0,0,3,3]];
+
+const STYLES={
+  'House groove':{bpm:[120,126],swing:[0,.05],scales:['minor','dorian'],drums:[
+      {s:'bd',p:'x...x...x...x...'},
+      {s:'cp',p:['....x.......x...','....x.......x..-']},
+      {s:'hh',p:['..x...x...x...x.','-.x.-.x.-.x.-.xo'],fx:{gain:[.6,.85]}},
+      {s:'oh',p:'......o.......o.',fx:{gain:.6}},
+      {s:'sh',p:'-+-+-+-+-+-+-+-+',opt:.5,fx:{gain:.4,pan:[.3,.7]}}],
+    parts:[
+      {role:'bass',name:'Bass',mode:['oct','root','fifth'],p:['..o...o+..o...o+','x..o..x...o..x..','o.o.o.o.o.o.o.o.'],oct:2,waves:['sawtooth','square'],fx:{lpf:[600,1200],lfo:true,lfoRate:[4,8],lpq:[5,12],release:.08,gain:.9}},
+      {role:'chords',name:'Stabs',p:['...-..o.-..+..o.','..o...o...o...o.','o..o..o...o..o..'],oct:4,waves:['supersaw','square','sawtooth'],fx:{lpf:[2000,4000],room:[.3,.6],delay:[.2,.4],gain:.55}}]},
+  'Techno':{bpm:[128,136],swing:[0,0],scales:['minor','phrygian'],progs:[[0,0,0,0],[0,0,1,0],[0,0,0,5]],drums:[
+      {s:'bd',p:'x...x...x...x...',fx:{shape:[0,.3]}},
+      {s:'hh',p:'..x...x...x...x.',fx:{gain:.7}},
+      {s:'rim',p:'-.+..-.+.-..+.-.',fx:{delay:[.2,.4],gain:.6}},
+      {s:'cp',p:'....-.......x...',opt:.6,fx:{room:.4,gain:.6}},
+      {s:'sh',p:'xoxoxoxoxoxoxoxo',opt:.5,fx:{gain:.35}}],
+    parts:[
+      {role:'bass',name:'Rumble',mode:['root'],p:['.ooo.ooo.ooo.ooo','.x.x.x.x.x.x.x.x'],oct:[1,2],waves:['sawtooth'],fx:{lpf:[300,600],lfo:true,lfoRate:[4,16],lpq:[6,12],shape:[.2,.4],release:.06}},
+      {role:'lead',name:'Acid line',p:'o+o+o+o+o+o+o+o+',oct:3,waves:['square','sawtooth'],fx:{lpf:[1200,3500],lfo:true,lfoRate:[2,8],lpq:[12,18],delay:[.2,.4],release:.1,gain:.6}}]},
+  'Boom bap':{bpm:[84,94],swing:[.1,.18],scales:['dorian','minor'],drums:[
+      {s:'bd',p:['x.....x...x.....','x..-..x.-.x..-..','x.....x.-.x...-.']},
+      {s:'sd',p:['....x.......x..-','....x.-.....x...']},
+      {s:'hh',p:['x.x.x.x.x.x.x.x.','x+x.x+x.x+x.x+x.'],fx:{gain:[.55,.75]}},
+      {s:'rim',p:'-.......-.......',opt:.4,fx:{gain:.5}}],
+    parts:[
+      {role:'pad',name:'Keys',p:'x.......x.......',oct:3,waves:['triangle','sine'],sev:.6,fx:{room:[.4,.7],lpf:[1800,3000],release:[.3,.6],attack:.01}},
+      {role:'bass',name:'Bass',mode:['root','walk'],p:['x.....o...o.....','x.....x...o..-..'],oct:2,waves:['sine','triangle'],fx:{release:.25,gain:.9}}]},
+  'Trap':{bpm:[136,150],swing:[0,0],scales:['minor','harmonic:minor','phrygian'],progs:[[0,0,5,5],[0,0,3,4],[0,5,0,6]],drums:[
+      {s:'bd',p:['x.....-+..o...-.','x......x..x.....','x..-....-.o....-']},
+      {s:'cp',p:'........x.......',fx:{room:[.2,.4]}},
+      {s:'oh',p:'..............-.',opt:.5,fx:{gain:.5}}],
+    parts:[
+      {role:'hats',name:'Hat rolls',gain:[.5,.7]},
+      {role:'bass',name:'808',mode:['root','fifth'],p:['x.....-+..o.....','x......x..x...-.'],oct:[1,2],waves:['sine'],fx:{release:[.6,1],shape:[.3,.5],gain:.9}},
+      {role:'lead',name:'Bell lead',p:'o.-.+.-.o.-.+.-.',oct:4,waves:['triangle','square','sine'],fx:{room:[.4,.7],delay:[.3,.5],fm:[0,3],release:.3,gain:.45}}]},
+  'Drum & bass':{bpm:[170,176],swing:[0,0],scales:['minor','dorian'],drums:[
+      {s:'bd',p:['x.........x.....','x.........o..-..','x.-.......x.....']},
+      {s:'sd',p:['....x..-....x...','....x.......x..-']},
+      {s:'hh',p:['x+x+x+x+x+x+x+x+','xoxoxoxoxoxoxoxo'],fx:{gain:.55}},
+      {s:'sh',p:'-+-+-+-+-+-+-+-+',opt:.4,fx:{gain:.35}}],
+    parts:[
+      {role:'bass',name:'Reese',mode:['root'],p:['x.......o.......','x.....o...x.....'],oct:[1,2],waves:['supersaw','sawtooth'],fx:{lpf:[400,900],lfo:true,lfoRate:[2,8],lpq:[4,10],release:[.4,.8],gain:.8}},
+      {role:'pad',name:'Pad',oct:4,waves:['supersaw','triangle'],sev:.5,fx:{attack:[.2,.5],release:[1,2],room:[.6,.9],lpf:[1500,3000],gain:.4}}]},
+  'Lo-fi chill':{bpm:[70,85],swing:[.15,.22],scales:['dorian','major','minor'],progs:[[0,3,1,4],[0,5,1,4],[1,4,0,0],[0,3,2,5]],drums:[
+      {s:'bd',p:['x......-..x.....','x.....-...x..-..']},
+      {s:'sd',p:'....x.......x...',fx:{room:.3}},
+      {s:'hh',p:['x+x+x+x+x+x+x+x+','x.x.x.x.x.x.x.x.'],fx:{gain:.45,crush:[6,9]}},
+      {s:'sh',p:'..-...-...-...-.',opt:.5,fx:{gain:.4}}],
+    parts:[
+      {role:'pad',name:'Rhodes',oct:3,waves:['triangle','sine'],sev:1,fx:{room:[.5,.8],lpf:[1200,2000],attack:.02,release:[.6,1],crush:[0,8],gain:.6}},
+      {role:'lead',name:'Melody',p:'o.-.+.-.-.+.-...',oct:4,waves:['sine','triangle'],fx:{delay:[.3,.6],room:.5,release:.3,gain:.45}},
+      {role:'bass',name:'Bass',mode:['root','walk'],p:'x.....-...x.....',oct:2,waves:['sine'],fx:{release:.4,gain:.8}}]},
+  'Synthwave':{bpm:[96,110],swing:[0,0],scales:['minor','dorian'],progs:[[0,5,2,6],[0,5,3,4],[0,3,5,4]],drums:[
+      {s:'bd',p:'x...x...x...x...'},
+      {s:'sd',p:'....x.......x...',fx:{room:[.3,.5]}},
+      {s:'hh',p:'x.x.x.x.x.x.x.x.',fx:{gain:.5}},
+      {s:'ht',p:'..............-o',opt:.4,fx:{room:.4}}],
+    parts:[
+      {role:'bass',name:'Bass',mode:['root','oct'],p:'x.x.x.x.x.x.x.x.',oct:2,waves:['sawtooth','pulse'],fx:{lpf:[700,1400],release:.1,gain:.8}},
+      {role:'arp',name:'Arp',p:'xxxxxxxxxxxxxxxx',oct:4,waves:['square','sawtooth','pulse'],fx:{delay:[.3,.5],lpf:[2000,4000],release:.08,gain:.4}},
+      {role:'pad',name:'Pad',oct:3,waves:['supersaw'],fx:{attack:[.2,.4],release:[1,1.6],room:[.6,.9],lpf:[1500,2500],gain:.45}}]},
+  'Reggaeton':{bpm:[90,98],swing:[0,0],scales:['minor','harmonic:minor'],progs:[[0,5,2,6],[0,3,4,0],[0,5,3,4]],drums:[
+      {s:'bd',p:'x...x...x...x...'},
+      {s:'sd',p:['...x..x....x..x.','...x..x....x..-.']},
+      {s:'hh',p:'x.x.x.x.x.x.x.x.',fx:{gain:.45}},
+      {s:'rim',p:'...-..-....-..-.',opt:.5,fx:{gain:.5}}],
+    parts:[
+      {role:'bass',name:'Bass',mode:['root'],p:'x...x...x...x...',oct:2,waves:['sine','triangle'],fx:{release:.3,gain:.9}},
+      {role:'chords',name:'Pluck',p:['..o...o...o...o.','o..o..o.o..o..o.'],oct:4,waves:['triangle','square'],fx:{release:.15,room:.4,delay:[.1,.3],gain:.5}}]},
+  'Afrobeat':{bpm:[100,112],swing:[.03,.08],scales:['dorian','mixolydian','major:pentatonic'],drums:[
+      {s:'bd',p:['x.....x...x.....','x..-..x...x..-..']},
+      {s:'rim',p:['x..x..x...x.x...','x..x...x..x.x...'],fx:{gain:.6}},
+      {s:'sh',p:'xoxoxoxoxoxoxoxo',fx:{gain:.4}},
+      {s:'cb',p:'..+...+...+...+.',opt:.7,fx:{gain:.45}},
+      {s:'lt',p:'.......-.....-o.',opt:.5}],
+    parts:[
+      {role:'bass',name:'Bass',mode:['walk','fifth'],p:['x..o..x.o.x..o..','x.o..o..x.o..o..'],oct:2,waves:['triangle','sawtooth'],fx:{lpf:[900,1600],release:.12,gain:.85}},
+      {role:'chords',name:'Guitar',p:['o.+.o.+.o.+.o.+.','.o.o.o.o.o.o.o.o'],oct:4,waves:['square','triangle'],fx:{release:.06,lpf:[2000,3500],pan:[.3,.7],gain:.4}},
+      {role:'lead',name:'Horns',p:'o.-.-.o.-...o.-.',oct:4,waves:['sawtooth','supersaw'],opt:.6,fx:{lpf:[1500,2500],room:.4,release:.15,gain:.4}}]},
+  'Disco funk':{bpm:[112,120],swing:[0,.06],scales:['dorian','mixolydian','major'],drums:[
+      {s:'bd',p:'x...x...x...x...'},
+      {s:'sd',p:['....x.......x...','....x..-....x...']},
+      {s:'oh',p:'..x...x...x...x.',fx:{gain:.55}},
+      {s:'hh',p:'xoxoxoxoxoxoxoxo',fx:{gain:.4}},
+      {s:'cb',p:'-...-...-...-...',opt:.3,fx:{gain:.45}}],
+    parts:[
+      {role:'bass',name:'Octave bass',mode:['oct'],p:['x.ox.ox.x.ox.ox.','xox.xox.xox.xox.'],oct:2,waves:['sawtooth','square'],fx:{lpf:[900,1500],release:.08,gain:.85}},
+      {role:'chords',name:'Stabs',p:['o..o..+.o..o..+.','.o.+.o...o.+.o..'],oct:4,waves:['sawtooth','supersaw','square'],sev:.5,fx:{lpf:[2500,4500],release:.08,room:.3,gain:.45}}]},
+  'UK garage':{bpm:[130,134],swing:[.12,.2],scales:['minor','dorian'],drums:[
+      {s:'bd',p:['x.....+...x..-..','x.........x.....','x......x..-.....']},
+      {s:'sd',p:'....x.......x...'},
+      {s:'hh',p:'..x...x...x...x.',fx:{gain:.6}},
+      {s:'sh',p:'-o-o-o-o-o-o-o-o',fx:{gain:.35}},
+      {s:'rim',p:'.......-......-.',opt:.5,fx:{gain:.5}}],
+    parts:[
+      {role:'bass',name:'Sub',mode:['root','fifth'],p:['x..+..o...x..+..','x.....o.+.x.....'],oct:2,waves:['sine'],fx:{release:.3,gain:.9}},
+      {role:'chords',name:'Organ',p:['...o..+....o..+.','..o..o.....o..o.'],oct:4,waves:['square','triangle'],sev:.7,fx:{release:.12,room:.4,lpf:[2000,3500],gain:.45}}]},
+  'Dub':{bpm:[70,80],swing:[.05,.12],scales:['minor','major'],progs:[[0,0,3,3],[0,3,0,4],[0,0,5,4]],drums:[
+      {s:'bd',p:['........x.......','x.......x.......']},
+      {s:'rim',p:'....x.......x...',fx:{delay:[.5,.7],room:.5}},
+      {s:'hh',p:'x.+.x.+.x.+.x.+.',fx:{gain:.4}}],
+    parts:[
+      {role:'bass',name:'Bass',mode:['walk','root'],p:['x..o..x.o...x...','x...o.x...x.o...'],oct:2,waves:['sine','triangle'],fx:{release:.3,lpf:800,gain:.95}},
+      {role:'chords',name:'Skank',p:'..x...x...x...x.',oct:4,waves:['triangle','square'],fx:{release:.06,delay:[.4,.6],room:[.4,.6],gain:.4}}]},
+  'Ambient drift':{bpm:[60,76],swing:[0,0],scales:['lydian','major','dorian','major:pentatonic'],progs:[[0,0,3,3],[0,0,5,5],[0,4,3,0]],drums:[
+      {s:'sh',p:'..+...+.+..+..+.',mods:{degrade:.4},fx:{gain:.45,pan:[.2,.8],room:.4}}],
+    parts:[
+      {role:'pad',name:'Pad',oct:3,waves:['supersaw','triangle'],sev:.7,mods:{rate:.5},fx:{lpf:[1200,2200],lfo:true,lfoRate:[8,16],attack:[.4,.8],release:[1.2,2],room:[.8,.95],gain:.6}},
+      {role:'bells',name:'Bells',gain:[.4,.55]}]},
+  'Breakbeat':{bpm:[125,135],swing:[0,.08],scales:['minor','dorian'],drums:[
+      {s:'bd',p:['x.........x.-...','x.x.......x.....','x.........-.x...']},
+      {s:'sd',p:['....x..-.x..x...','....x.......x..+','....x..x.-..x...']},
+      {s:'hh',p:'x+x+x+x+x+x+x+x+',fx:{gain:.5}},
+      {s:'oh',p:'..............o.',opt:.5,fx:{gain:.5}}],
+    parts:[
+      {role:'bass',name:'Bass',mode:['root','walk'],p:['x..+..x...o..+..','x.....x.o.....+.'],oct:2,waves:['sawtooth','square'],fx:{lpf:[600,1200],lpq:[4,10],release:.1,gain:.85}},
+      {role:'lead',name:'Lead',p:'o.+.-.+.o.-.+.-.',oct:4,waves:['square','sawtooth'],fx:{delay:[.2,.4],lpf:[2000,4000],release:.12,gain:.45}}]},
+  'Chiptune':{bpm:[140,160],swing:[0,0],scales:['major','major:pentatonic','minor'],progs:[[0,5,3,4],[0,3,4,0],[0,4,5,3]],drums:[
+      {s:'bd',p:'x...x...x...x...',fx:{crush:[3,5]}},
+      {s:'sd',p:'....x.......x..-',fx:{crush:[3,5]}},
+      {s:'hh',p:'x.x.x.x.x.x.x.x.',fx:{crush:[4,6],gain:.5}}],
+    parts:[
+      {role:'bass',name:'Bass',mode:['oct'],p:'xxxxxxxxxxxxxxxx',oct:2,waves:['square','triangle'],fx:{release:.05,gain:.6}},
+      {role:'lead',name:'Lead',p:'oooo+o+ooooo+o+o',oct:4,waves:['pulse','square'],fx:{release:.06,gain:.45}},
+      {role:'arp',name:'Arp',p:'x+x+x+x+x+x+x+x+',oct:5,waves:['square'],opt:.6,fx:{release:.04,gain:.25,delay:.2}}]},
+  'Polyrhythm 4:3':{bpm:[100,118],swing:[0,0],scales:['minor:pentatonic','major:pentatonic','dorian'],progs:[[0,0,0,0],[0,0,3,3]],drums:[
+      {s:'bd',p:'x...x...x...x...'},
+      {s:'rim',p:['x..x..x..x..','x..x..o..x.+','x.+x..x.+x..']}],
+    parts:[
+      {role:'arp',name:'Arp (12 steps)',p:'xxxxxxxxxxxx',steps:12,oct:4,waves:['square','triangle'],fx:{lpf:[1500,3000],delay:[.3,.5],room:.3,gain:.5,release:.1}},
+      {role:'mini',name:'Euclid toms',gen:()=>`lt(${ri(3,5)},8) ht(${ri(3,7)},16,${ri(0,3)})`,fx:{gain:.8,room:.2}}]}
+};
+
+function genStyle(name,seed){
+  const S=STYLES[name];const prevR=R;R=rng(seed);
+  try{
+    const root=pick(NOTE_NAMES),scale=pick(S.scales),prog=pick(S.progs||PROGS);
+    const chordAt=(i,steps)=>prog[Math.floor(i/steps*prog.length)];
+    const tracks=[];
+    for(const d of S.drums){
+      if(d.opt&&!chance(d.opt))continue;
+      const tpl=val(Array.isArray(d.p)?d.p:[d.p]).replace(/\s/g,'');
+      const t=mkDrum(d.s,roll(tpl));if(tpl.length!==16)t.steps=tpl.length;
+      t.fx=resolveFx(d.fx);if(d.mods)t.mods=Object.assign(baseMods(),d.mods);
+      tracks.push(t);
+    }
+    for(const p of S.parts){
+      if(p.opt&&!chance(p.opt))continue;
+      const fx=resolveFx(p.fx),mods=Object.assign(baseMods(),p.mods||{});
+      if(p.role==='hats'){
+        const tok=Array.from({length:8},()=>pick(['hh','hh','hh','hh*2','hh*2','hh*3','[hh hh*2]','[~ hh]','hh*4']));
+        tracks.push(mkPattern({name:p.name,mode:'s',mini:tok.join(' '),fx:resolveFx({gain:p.gain})}));continue;
+      }
+      if(p.role==='bells'){
+        const n=ri(4,6),notes=Array.from({length:n},()=>scaleNote(root,scale,ri(0,6),5));
+        tracks.push(mkPattern({name:p.name,mode:'note',mini:`<${notes.join(' ')}>*${pick([2,4,4,8])}?`,sound:pick(['sine','triangle']),mods:Object.assign(baseMods(),{jux:true}),fx:resolveFx({delay:[.4,.7],room:[.7,.9],gain:p.gain,fm:[0,3],release:.6})}));continue;
+      }
+      if(p.role==='mini'){tracks.push(mkPattern({name:p.name,mini:p.gen(),fx,mods}));continue;}
+      const steps=p.steps||16;
+      const hits=p.p?roll(val(Array.isArray(p.p)?p.p:[p.p])):Array.from({length:steps},(_,i)=>i===0||chordAt(i,steps)!==chordAt(i-1,steps));
+      const notes=Array.from({length:16},()=>[]);
+      const mode=val(p.mode||['root']),sev=chance(p.sev||0);
+      const arpShape=pick([[0,2,4,7],[0,4,2,7],[7,4,2,0],[0,2,4,2],[0,4,7,4]]);
+      let walk=ri(3,6),k=0;
+      for(let i=0;i<steps;i++){
+        if(!hits[i])continue;
+        const r=chordAt(i,steps);let n;
+        if(p.role==='bass'){
+          n=mode==='oct'?(k%2?r+7:r):mode==='fifth'?(chance(.3)?r+4:r):mode==='walk'?(k===0?r:pick([r,r,r+2,r+4,r+1,r+5])):r;
+          notes[i]=[clampDeg(n)];
+        }else if(p.role==='chords'||p.role==='pad'){
+          notes[i]=triad(r,sev);
+        }else if(p.role==='arp'){
+          notes[i]=[clampDeg(r+arpShape[k%arpShape.length])];
+        }else{ // lead: random walk, pulled toward chord tones
+          walk+=pick([-2,-1,-1,0,1,1,2,3,-3]);walk=Math.min(9,Math.max(1,walk));
+          if(chance(.35)){const ct=[r,r+2,r+4].map(clampDeg);walk=ct.reduce((a,b)=>Math.abs(b-walk)<Math.abs(a-walk)?b:a);}
+          notes[i]=[walk];
+        }
+        k++;
+      }
+      if(!notes.some(x=>x.length))notes[0]=p.role==='chords'||p.role==='pad'?triad(prog[0],sev):[prog[0]];
+      const oct=Array.isArray(p.oct)?ri(p.oct[0],p.oct[1]):p.oct;
+      const waves=p.waves.filter(w=>SYNTHS.includes(w));
+      tracks.push(mkSynth({name:p.name,wave:pick(waves.length?waves:SYNTHS),root,octave:oct,scale,steps,notes,fx,mods}));
+    }
+    return{bpm:ri(S.bpm[0],S.bpm[1]),swing:Math.round(rnd(S.swing[0],S.swing[1])*100)/100,style:name,tracks};
+  }finally{R=prevR;}
+}
+function randomStyleName(){const k=Object.keys(STYLES);return k[Math.floor(Math.random()*k.length)];}
+
+// Hand-made versions of the original presets; the rest come from their style at a fixed seed.
+const HANDMADE={
   'House groove':()=>({bpm:124,swing:0,tracks:[
     mkDrum('bd',X('x...x...x...x...')),
     mkDrum('cp',X('....x.......x...')),
@@ -310,8 +525,13 @@ function presetList(){return{
     mkPattern({name:'Bells',mode:'note',mini:'<c5 e5 g5 b5 d6>*4?',sound:'sine',mods:Object.assign(baseMods(),{jux:true}),fx:{delay:.6,room:.8,gain:.5,fm:2,release:.6}}),
     Object.assign(mkDrum('sh',X('..x...x.x..x..x.')),{mods:Object.assign(baseMods(),{degrade:.4}),fx:Object.assign(baseFx(),{gain:.5,pan:.3,room:.4})})
   ]}),
-  'Blank':()=>({bpm:120,swing:0,tracks:[mkDrum('bd')]})
-};}
+};
+function presetList(){
+  const out={};
+  for(const name of Object.keys(STYLES))out[name]=()=>Object.assign(HANDMADE[name]?HANDMADE[name]():genStyle(name,hashStr(name)),{style:name});
+  out['Blank']=()=>({bpm:120,swing:0,tracks:[mkDrum('bd')]});
+  return out;
+}
 
 let state;
 function loadState(){
@@ -791,9 +1011,19 @@ document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{
 const presetEl=document.getElementById('preset');
 presetEl.append(h('option',{value:''},'Load preset…'));
 Object.keys(presetList()).forEach(k=>presetEl.append(h('option',{value:k},k)));
-presetEl.onchange=()=>{const k=presetEl.value;if(!k)return;state=presetList()[k]();customCode=false;document.getElementById('banner').classList.remove('show');presetEl.value='';changed(true);toast('Loaded “'+k+'”');};
+function syncPresetSel(){presetEl.value=state.style&&STYLES[state.style]?state.style:'';}
+function applyNewState(s,msg){state=s;customCode=false;document.getElementById('banner').classList.remove('show');changed(true);syncPresetSel();toast(msg);}
+presetEl.onchange=()=>{const k=presetEl.value;if(!k)return;applyNewState(presetList()[k](),'Loaded “'+k+'”');};
+function randomize(){
+  const name=state.style&&STYLES[state.style]?state.style:randomStyleName();
+  applyNewState(genStyle(name,(Math.random()*2**32)>>>0),'🎲 New '+name+' groove');
+}
+document.getElementById('randomize').onclick=randomize;
+syncPresetSel();
 document.addEventListener('keydown',e=>{
-  if(e.code==='Space'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();playing?stop():runCode(true);}
+  if(/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)||e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.code==='Space'){e.preventDefault();playing?stop():runCode(true);}
+  else if(e.key==='r'||e.key==='R'){e.preventDefault();randomize();}
 });
 let toastT;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1800);}
 
