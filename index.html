@@ -68,7 +68,7 @@ header{position:sticky;top:5px;z-index:20;display:flex;align-items:center;gap:14
 .hslider output{font-family:var(--mono);min-width:30px;text-align:right;color:var(--dim)}
 select.ui{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 8px;outline:none}
 .spacer{flex:1}
-.logo{order:0}#play{order:1}#playStart{order:1}#pauseBtn{order:1}.play-start:disabled{opacity:.35;cursor:default}.np-field{order:1}header>.field,header>.spacer,header>.status,header>#openStrudel,header>.hdr-rest{order:3}
+.logo{order:0}#play{order:1}#playStart{order:1}#pauseBtn{order:1}.play-start:disabled{opacity:.35;cursor:default}header>.np-field{order:1}header>.field,header>.spacer,header>.status,header>#openStrudel,header>.hdr-rest{order:3}
 .btn{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 12px;display:inline-flex;gap:6px;align-items:center;text-decoration:none;color:var(--text);white-space:nowrap}
 .btn:hover{border-color:var(--line2);background:var(--panel2)}
 .btn.primary{background:#ff8a3d1a;border-color:#ff8a3d66;color:#ffc59c}
@@ -328,7 +328,7 @@ header .field>div{flex-wrap:wrap;align-items:center}
 .now-playing.on{animation:npJitter 2.4s infinite steps(1)}
 @keyframes npGlitch{0%,86%,100%{transform:none;clip-path:none}88%{transform:translateX(-3px) skewX(-8deg)}90%{transform:translateX(2px);clip-path:inset(30% 0 20% 0)}92%{transform:none}}
 @keyframes npJitter{0%,93%,100%{transform:none}95%{transform:translate(1px,-1px)}97%{transform:translate(-1px,0)}}
-@media (max-width:700px){.np-field{order:5;flex-basis:100%}.now-playing{max-width:none;width:100%}}
+@media (max-width:700px){header>.np-field{order:5;flex-basis:100%}.now-playing{max-width:none;width:100%}}
 .top-metro{position:fixed;left:0;right:0;top:0;height:5px;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;z-index:200;pointer-events:none}
 .top-metro i{background:color-mix(in srgb,var(--bc) 22%,#0000);transition:background .05s}.top-metro i.on{background:var(--bc);box-shadow:0 0 8px var(--bc)}
 body{padding-top:5px}
