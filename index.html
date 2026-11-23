@@ -1204,7 +1204,7 @@ const PART_BARS={
 function partBars(style,part,mode){
   const T=PART_BARS[STYLE_FEEL[style]||'groove'];const ch=T[part]||T._;
   if(mode==='simple'){if(part==='Intro')return STYLE_FEEL[style]==='dance'?4:1; // a count-in, then straight in
-    if(part==='Ending')return Math.min(2,ch[0]);if(part==='Bridge')return 4;return ch[0];}
+    if(part==='Ending')return STYLE_FEEL[style]==='dance'?ch[0]:Math.min(2,ch[0]);if(part==='Bridge')return 4;return ch[0];}
   return mode==='complex'?ch[ch.length-1]:pick(ch);
 }
 const SIMPLE_FORM=['Intro','Verse','Chorus','Verse','Chorus','Bridge','Chorus','Ending']; // the modern pop shape: V C V C B C
