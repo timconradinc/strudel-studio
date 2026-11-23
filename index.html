@@ -407,9 +407,6 @@ body{padding-top:5px}
   <div class="field"><label>Tempo (BPM)</label>
     <div class="num"><button data-bpm="-10" title="−10 BPM" class="big">−10</button><button data-bpm="-1" title="−1 BPM">−</button><input id="bpm" type="number" min="30" max="300" value="120"><button data-bpm="1" title="+1 BPM">+</button><button data-bpm="10" title="+10 BPM" class="big">+10</button><button id="tap" title="Tap tempo">TAP</button></div>
   </div>
-  <div class="field"><label>Swing</label>
-    <div class="hslider"><input id="swing" type="range" min="0" max="0.3" step="0.01" value="0" style="width:90px;--c:var(--accent)"><output id="swingOut">0</output></div>
-  </div>
   <div class="hdr-break" aria-hidden="true"></div>
   <div class="field"><label>Preset / style <span class="hint">(this section)</span></label>
     <div style="display:flex;gap:6px">
@@ -419,6 +416,9 @@ body{padding-top:5px}
       <button id="undo" class="btn" title="Nothing to undo" disabled>↶ Undo</button>
       <label class="chk" title="New grooves, presets and added tracks use synth sounds and drum machines instead of real instruments"><input type="checkbox" id="preferSynth"> prefer synths</label>
     </div>
+  </div>
+  <div class="field"><label>Swing</label>
+    <div class="hslider"><input id="swing" type="range" min="0" max="0.3" step="0.01" value="0" style="width:90px;--c:var(--accent)"><output id="swingOut">0</output></div>
   </div>
   <div class="hdr-row2">
   <div class="field" style="position:relative"><label>My grooves &amp; examples <span id="savesCount" class="hint"></span></label>
@@ -1863,6 +1863,7 @@ function stop(){
   playing=false;syncPlayBtn();clearPlayheads();
 }
 function syncPlayBtn(){
+  if(!playing)try{updateNowPlaying(null);}catch(e){}
   for(const id of['pauseBtn','fabPause','runPause']){const b=document.getElementById(id);if(b){b.disabled=!playing;b.classList.toggle('paused',!!pausedAt&&!playing);}}
   const fab=document.getElementById('fab');if(fab){fab.classList.toggle('on',playing);fab.innerHTML=playing?'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>':'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';}
   const run=document.getElementById('run');if(run){run.textContent=playing?'■ Stop':'▶ Run code';run.title=playing?'Stop playback':'Play the code below (Ctrl/⌘+Enter)';run.classList.toggle('stop',playing);}
