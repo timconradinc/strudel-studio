@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Strudel Studio</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script>
@@ -381,8 +382,7 @@ header .field>div{flex-wrap:wrap;align-items:center}
   <div class="field"><label>Preset / style</label>
     <div style="display:flex;gap:6px">
       <select id="preset" class="ui"></select>
-      <button id="newSection" class="btn primary" title="Add a new section after the one you're editing: same sounds, a variation of the melodies">➕ New section</button>
-      <button id="newSong" class="btn" title="A new song in a random genre, built with that genre's rules: tempo, instruments, rhythms, chords and song structure">🆕 New random song</button>
+      <button id="newSong" class="btn" title="A new randomized song: a random genre, built with that genre's rules for tempo, instruments, rhythms, chords and song structure">🆕 New song</button>
       <button id="randomize" class="btn" title="Roll a new groove in the current style (R)">🎲 Randomize</button>
       <button id="undo" class="btn" title="Nothing to undo" disabled>↶ Undo</button>
       <label class="chk" title="New grooves, presets and added tracks use synth sounds and drum machines instead of real instruments"><input type="checkbox" id="preferSynth"> prefer synths</label>
@@ -2251,7 +2251,7 @@ function recordHit(pad){
     t=tracks.find(x=>x.type==='synth'&&x.wave===pad.sound);
     if(!t){const ctx=currentCtx();t=mkSynth({name:(INSTR[pad.sound]?.label||SAMPLED.find(x=>x[0]===pad.sound)?.[1]||pad.sound).replace(/^./,m=>m.toUpperCase()),wave:pad.sound,root:ctx.root,octave:padOctave(ty),scale:ctx.scale,steps:16,notes:Array.from({length:16},()=>[])});t.role=ty==='bass'?'bass':ty==='keys'?'chords':'lead';t.color=COLORS[tracks.length%COLORS.length];tracks.push(t);}
   }
-  const steps=t.steps||16;const step=((Math.round((cs-Math.floor(cs))*steps))%steps+steps)%steps;
+  const steps=t.steps||16;const step=((Math.floor((cs-Math.floor(cs))*steps+1e-6))%steps+steps)%steps; // any tap while a step is sounding counts for that step
   if(t.type==='drum')t.hits[step]=true;
   else{const d=pad.degree||0;for(const x of(pad.chord?[d,d+2,d+4]:[d]))if(!t.notes[step].includes(x))t.notes[step].push(x);}
   if(si!==state.cur)updateVersion(sec);
@@ -2845,8 +2845,6 @@ function randomize(force){
   applyNewState(genStyle(name,(Math.random()*2**32)>>>0),'🎲 New '+name+' groove');
   toast('🎲 New '+name+' groove',undoAction);
 }
-document.getElementById('newSection').onclick=()=>{pushUndo('new section');addSection();};
-setTimeout(()=>document.getElementById('newSection')?.focus({preventScroll:true}),0); // the default action on load
 document.getElementById('newSong').onclick=()=>{
   pushUndo('new song');const g=randomStyleName();const st=genSong(g);applyNewState(st,'');
   toast(`🆕 New ${g} song “${st.name}”: ${st.arrangement.map(id=>st.parts.find(p=>p.id===id).name).join(' → ')}`,undoAction);
