@@ -412,7 +412,7 @@ body{padding-top:5px}
 .ask-pop{padding:12px}.ask-pop p{margin:0 0 10px;font-size:13px;line-height:1.4}.ask-btns{display:flex;gap:6px;flex-wrap:wrap}
 .pdot{width:10px;height:10px;border-radius:3px;flex:0 0 auto;margin-left:6px}
 .part-menu{max-height:420px;overflow:auto}
-#viewChords{--c:var(--accent)}#viewChords.on{background:var(--accent);color:#170c03;border-color:var(--accent)}
+#viewChords,#wrapBtn{--c:var(--accent)}#viewChords.on,#wrapBtn.on{background:var(--accent);color:#170c03;border-color:var(--accent)}
 .view-seg{display:inline-flex}.view-seg .tog{border-radius:0}.view-seg .tog:first-child{border-radius:8px 0 0 8px}.view-seg .tog:last-child{border-radius:0 8px 8px 0;border-left:none}.view-seg .tog.on{background:var(--accent);color:#170c03;border-color:var(--accent)}
 #codeCol.chords .srcline,#codeCol.chords .editor,#codeCol.chords .codefoot,#codeCol.chords #wrapBtn,#codeCol.chords #copy{display:none}
 .chords-view{padding:8px 2px}.chords-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
@@ -550,7 +550,7 @@ body{padding-top:5px}
       <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
     </div>
     <div class="codefoot">
-      <span class="hint">Ctrl/⌘+Enter run · Space play/stop · R randomize · the GUI writes real Strudel code — edit it freely</span>
+      <span class="hint">Ctrl/⌘+Enter run · Space play/stop · R regenerate section · the GUI writes real Strudel code — edit it freely</span>
     </div>
     <details class="cheat" id="library">
       <summary>Sound library</summary>
