@@ -2794,7 +2794,7 @@ function renderArrangement(labels){
     const chip=h('div',{class:'arr-chip'+(pid===curPart?' sel':''),'data-occ':occ,style:`--pc:${pt.color}`,title:`${pt.name} — ${partInfo(pt.name)}\n${n} section${n>1?'s':''}, ${bars} bars · click to edit · drag to reorder · double-click the name to rename`,
       onclick:()=>{if(chip.__dragged)return;selectPart(pid,occ);}},
       nm,h('span',{class:'ab'},`${bars} bars`),h('span',{class:'bar'}),h('span',{class:'aprog'}),
-      state.arrangement.length>1?h('button',{class:'ax',title:'Remove from the song (the part is kept in “+ part”)',onclick:e=>{e.stopPropagation();pushUndo('remove part from song');state.arrangement.splice(occ,1);changed(true);toast(`Removed ${pt.name} from the song`,undoAction);}},'✕'):null);
+      state.arrangement.length>1?h('button',{class:'ax',title:'Remove from the song (the part is kept in “+ add me”)',onclick:e=>{e.stopPropagation();pushUndo('remove part from song');state.arrangement.splice(occ,1);changed(true);toast(`Removed ${pt.name} from the song`,undoAction);}},'✕'):null);
     nm.onclick=e=>{if(pid!==curPart)return; e.stopPropagation();partTypeMenu(nm,pt);};
     nm.ondblclick=e=>{e.stopPropagation();const inp=h('input',{class:'small-in',value:pt.name,maxlength:20,style:'width:90px'});
       const done=()=>{const v=inp.value.trim();if(v)pt.name=v;changed(true);};inp.onkeydown=ev=>{ev.stopPropagation();if(ev.key==='Enter')done();if(ev.key==='Escape')renderSections();};inp.onblur=done;inp.onclick=ev=>ev.stopPropagation();nm.replaceWith(inp);inp.focus();inp.select();};
