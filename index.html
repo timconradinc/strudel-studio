@@ -3032,7 +3032,7 @@ document.getElementById('actMenu').onclick=e=>{
 };
 syncTopAction();
 // Every visit starts with one fresh, randomly created bar (your last session is one Undo away; saves are in My grooves)
-(function freshStart(){
+setTimeout(function freshStart(){ // after the rest of the page script has set up (undo history etc.)
   try{
     pushUndo('your last session');
     const ks=Object.keys(STYLES);const name=chosenGenre()||ks[Math.floor(Math.random()*ks.length)];
@@ -3041,7 +3041,7 @@ syncTopAction();
     customCode=false;changed(true);syncPresetSel();
     setTimeout(()=>toast(`🥁 A fresh ${name} bar to start with — Undo brings back your last session`,undoAction),400);
   }catch(e){console.warn('fresh start',e);}
-})();
+},0);
 document.getElementById('randomize').onclick=e=>{e.stopPropagation();randomize();};
 renderSaves();
 document.getElementById('undo').onclick=undo;
