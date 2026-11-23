@@ -68,7 +68,7 @@ header{position:sticky;top:5px;z-index:20;display:flex;align-items:center;gap:14
 .hslider output{font-family:var(--mono);min-width:30px;text-align:right;color:var(--dim)}
 select.ui{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 8px;outline:none}
 .spacer{flex:1}
-.logo{order:0}#play{order:1}#playStart{order:1}#pauseBtn{order:1}.play-start:disabled{opacity:.35;cursor:default}#nowPlaying{order:2}header>.field,header>.spacer,header>.status,header>#openStrudel,header>.hdr-rest{order:3}
+.logo{order:0}#play{order:1}#playStart{order:1}#pauseBtn{order:1}.play-start:disabled{opacity:.35;cursor:default}.np-field{order:1}header>.field,header>.spacer,header>.status,header>#openStrudel,header>.hdr-rest{order:3}
 .btn{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 12px;display:inline-flex;gap:6px;align-items:center;text-decoration:none;color:var(--text);white-space:nowrap}
 .btn:hover{border-color:var(--line2);background:var(--panel2)}
 .btn.primary{background:#ff8a3d1a;border-color:#ff8a3d66;color:#ffc59c}
@@ -94,7 +94,7 @@ main{display:grid;grid-template-columns:minmax(0,1fr) var(--codew,440px);min-hei
 .tname:hover,.tname:focus{border-color:var(--line2);background:var(--bg)}
 .badge{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--c);border:1px solid color-mix(in srgb,var(--c) 40%,transparent);padding:2px 6px;border-radius:4px}
 .thead select{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:4px 6px;outline:none;font-size:12px}
-.tbtn{background:var(--bg);border:1px solid var(--line);border-radius:6px;min-width:28px;height:28px;padding:0 8px;font-weight:600;font-size:12px;color:var(--dim)}
+.tbtn{background:var(--panel);border:1px solid var(--line);border-radius:8px;min-width:28px;height:28px;padding:0 8px;font-weight:600;font-size:12px;color:var(--dim)}
 .tbtn:hover{color:var(--text);border-color:var(--line2)}
 .tbtn.on{color:#111;background:var(--c);border-color:var(--c)}
 .tbtn.solo.on{background:#ffd23f;border-color:#ffd23f}
@@ -162,7 +162,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
 .sect:first-child{margin-top:0}
 .sect::after{content:"";flex:1;height:1px;background:var(--line)}
 .toggles{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.tog{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 9px;font-family:var(--mono);font-size:11px;color:var(--dim)}
+.tog{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--text);display:inline-flex;gap:6px;align-items:center;white-space:nowrap}.tog:hover,.tbtn:hover{border-color:var(--line2);background:var(--panel2)}
 .tog.on{color:#111;background:var(--c);border-color:var(--c)}
 .tog:hover{border-color:var(--line2)}
 .small-in{width:46px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:4px 6px;font-family:var(--mono);outline:none}
@@ -253,7 +253,7 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 .sec-add{cursor:grab;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;border:1px dashed var(--line2);background:transparent;border-radius:10px;padding:7px 12px;color:var(--dim);text-align:left;min-width:150px}
 .sec-add:hover{color:var(--text);border-color:var(--accent);background:#ff8a3d0a}
 .sec-add b{display:block;color:var(--text)}.sec-add small{font-family:var(--mono);font-size:10px}
-.sec-loop{align-self:center;font-size:11px;--c:var(--accent)}
+.sec-loop{align-self:center;--c:var(--accent)}
 .sec-tools{margin-left:auto;display:flex;flex-direction:column;gap:6px;align-items:stretch;min-width:170px}.sec-tools .sec-loop{text-align:left;align-self:stretch;justify-content:flex-start}
 @media (max-width:700px){.sec-tools{margin-left:0;flex-basis:100%;width:100%;flex-direction:column}.sec-tools .sec-loop{font-size:12px;padding:8px 10px}}.sec-tools .sec-loop{text-align:left}.sec-tools .sec-del:not(:disabled):hover{color:var(--err);border-color:var(--err)}.sec-tools .sec-loop:disabled{opacity:.4;cursor:not-allowed}
 .so-part{border-radius:5px;padding:1px 3px;transition:background .15s}.so-part.now{background:var(--pc);color:#111;box-shadow:0 0 10px color-mix(in srgb,var(--pc) 60%,transparent)}.so-part.now b{color:#111}
@@ -261,6 +261,7 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 .song-order{flex-basis:100%;line-height:1.7;order:99;font-family:var(--mono);font-size:11px;color:var(--dim);padding:2px 2px 0}.song-order b{color:var(--text);font-weight:600}.sec-clear.confirm{color:#fff;background:var(--err);border-color:var(--err)}
 .fab{display:none}.fab-start{display:none}.fab-pause{display:none}
 .rew-btn{padding:7px 9px}.rew-btn svg{width:14px;height:14px}
+.quick-picks{display:flex;flex-wrap:wrap;gap:6px;padding:2px 6px 8px;border-bottom:1px solid var(--line);margin-bottom:4px}.quick-picks .qp{padding:5px 9px;font-size:12px}
 .genre-row{display:flex;align-items:center;gap:8px;padding:4px 6px 8px;border-bottom:1px solid var(--line);margin-bottom:4px}.genre-row .pk-grp{padding:0;margin:0}.genre-sel{flex:1}
 .split{display:inline-flex}.split #actMain,.split #randomize{border-radius:8px 0 0 8px}.split .split-caret{border-radius:0 8px 8px 0;border-left:none;padding:7px 9px;color:var(--dim)}
 .play-start{width:36px;height:36px;border-radius:50%;border:1px solid var(--line2);background:var(--panel2);color:var(--text);display:grid;place-items:center;cursor:pointer;padding:0;margin-left:-6px}.play-start:hover{border-color:var(--accent);color:var(--accent)}.play-start svg{width:16px;height:16px}
@@ -316,9 +317,18 @@ header .field>div{flex-wrap:wrap;align-items:center}
 .rec{font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:.1em;background:#2a2a2f;border:1px solid #3a3a40;color:#ff6b6b;border-radius:4px;padding:5px 10px;cursor:pointer}
 .rec.on{background:#e0333d;color:#fff;border-color:#e0333d;animation:recblink 1s steps(2) infinite}
 @keyframes recblink{50%{opacity:.6}}
-.now-playing{display:flex;align-items:center;gap:6px;font-size:12px;padding:5px 10px;border-radius:999px;background:color-mix(in srgb,var(--pc,#3dd6c5) 22%,var(--panel));border:1px solid var(--pc,#3dd6c5);max-width:330px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.now-playing b{color:var(--pc,#3dd6c5)}.now-playing .np-bar{font-family:var(--mono);font-size:11px;color:var(--dim)}
-@media (max-width:700px){.now-playing{position:fixed;left:10px;bottom:22px;z-index:60;max-width:calc(100vw - 100px);box-shadow:0 4px 14px #000a}}
+.now-playing{position:relative;display:flex;align-items:center;gap:7px;height:34px;min-width:230px;max-width:330px;padding:0 10px;border-radius:0;overflow:hidden;white-space:nowrap;cursor:pointer;
+  font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:#e8fbff;border:2px solid var(--pc,#ff2bd6);
+  background:linear-gradient(transparent 0 0),repeating-linear-gradient(90deg,#14e0ff22 0 1px,transparent 1px 16px),repeating-linear-gradient(0deg,#ff2bd61f 0 1px,transparent 1px 8px),linear-gradient(135deg,#130022,#001a2a);
+  box-shadow:0 0 0 1px #000,0 0 12px color-mix(in srgb,var(--pc,#ff2bd6) 55%,transparent),inset 0 0 14px #000c}
+.now-playing::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,#0000 0 2px,#0006 2px 3px);pointer-events:none;mix-blend-mode:multiply}
+.now-playing b{color:var(--pc,#14e0ff);text-shadow:-1px 0 #ff2bd6,1px 0 #14e0ff;text-transform:uppercase}
+.now-playing .np-bar{color:#9fefff;opacity:.85}
+.now-playing .np-idle{font-weight:800;letter-spacing:.22em;color:#fff;text-shadow:-2px 0 #ff2bd6,2px 0 #14e0ff;animation:npGlitch 3.2s infinite steps(1)}
+.now-playing.on{animation:npJitter 2.4s infinite steps(1)}
+@keyframes npGlitch{0%,86%,100%{transform:none;clip-path:none}88%{transform:translateX(-3px) skewX(-8deg)}90%{transform:translateX(2px);clip-path:inset(30% 0 20% 0)}92%{transform:none}}
+@keyframes npJitter{0%,93%,100%{transform:none}95%{transform:translate(1px,-1px)}97%{transform:translate(-1px,0)}}
+@media (max-width:700px){.np-field{order:5;flex-basis:100%}.now-playing{max-width:none;width:100%}}
 .top-metro{position:fixed;left:0;right:0;top:0;height:5px;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;z-index:200;pointer-events:none}
 .top-metro i{background:color-mix(in srgb,var(--bc) 22%,#0000);transition:background .05s}.top-metro i.on{background:var(--bc);box-shadow:0 0 8px var(--bc)}
 body{padding-top:5px}
@@ -337,6 +347,8 @@ body{padding-top:5px}
 .pad{position:relative;aspect-ratio:1;border:none;border-radius:4px;background:var(--pc);box-shadow:inset 0 -7px 0 #0000004a,inset 0 2px 0 #ffffff40,0 4px 0 #000a;display:grid;place-items:center;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;transition:transform .04s,filter .04s}
 .pad svg{width:48%;height:48%;pointer-events:none}
 .pad.hit{transform:translateY(3px);filter:brightness(1.3);box-shadow:inset 0 -3px 0 #0000004a,inset 0 2px 0 #ffffff40,0 1px 0 #000a}
+.pad::before{content:"";position:absolute;left:0;right:0;top:0;height:18%;border-radius:4px 4px 0 0;background:var(--partc,transparent);box-shadow:0 1px 0 #0004;pointer-events:none;transition:background .2s}
+.pad>*{position:relative}
 .pad.echo{animation:padEcho .22s ease-out}
 @keyframes padEcho{0%{filter:brightness(1.55) saturate(1.2);box-shadow:inset 0 -7px 0 #0000004a,inset 0 2px 0 #ffffff40,0 0 18px var(--pc),0 4px 0 #000a}100%{filter:none}}
 .pad.rec-hit{outline:3px solid #ff4d57;outline-offset:2px}
@@ -384,11 +396,11 @@ body{padding-top:5px}
 <body>
 <div id="topMetro" class="top-metro" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <header>
-  <div class="logo"><div class="logo-name">strudel<b>/</b>studio</div><span class="logo-sub">generated by Claude · <span class="app-ver" title="Version (date + build number for that day)">v2026-11-22-08</span></span></div>
+  <div class="logo"><div class="logo-name">strudel<b>/</b>studio</div><span class="logo-sub">generated by Claude · <span class="app-ver" title="Version (date + build number for that day)">v2026-11-22-09</span></span></div>
+  <div class="field np-field"><label>Now playing</label><div id="nowPlaying" class="now-playing" title="What's playing now — click to show it in the song"><span class="np-idle">NOW PLAYING</span></div></div>
   <button id="play" title="Play / stop (Space)" aria-label="Play">
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
   </button>
-  <div id="nowPlaying" class="now-playing" hidden></div>
   <button id="pauseBtn" class="play-start" title="Pause — press play to carry on from the same bar" aria-label="Pause" disabled><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4.2" height="14" rx="1"/><rect x="13.8" y="5" width="4.2" height="14" rx="1"/></svg></button>
   <button id="playStart" class="play-start" title="Rewind to the beginning of the song" aria-label="Rewind to the beginning"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="5" width="2.6" height="14" rx="1"/><path d="M8 12l11-7v14z"/></svg></button>
   <div class="field"><label>Tempo (BPM)</label>
@@ -423,7 +435,7 @@ body{padding-top:5px}
       <div class="saves-new">
         <input id="saveName" class="mini-in" maxlength="40" placeholder="Name this groove…">
         <button id="rerollName" class="btn" title="Suggest another name">🎲</button>
-        <button id="saveNew" class="btn primary">Save</button>
+        <button id="saveNew" class="btn primary">💾 Save</button>
       </div>
       <div id="saveHint" class="hint"></div>
     </div>
@@ -476,15 +488,15 @@ body{padding-top:5px}
     </details>
     <div class="codehead">
       <h2>Strudel code</h2><span class="spacer"></span>
-      <button class="tog" id="wrapBtn" title="Wrap long lines">wrap</button>
-      <button class="btn" id="copy">Copy</button>
+      <button class="tog" id="wrapBtn" title="Wrap long lines">↩ wrap</button>
+      <button class="btn" id="copy" title="Copy the code">⧉ Copy</button>
       <button class="btn rew-btn" id="runPause" title="Pause" aria-label="Pause"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4.2" height="14" rx="1"/><rect x="13.8" y="5" width="4.2" height="14" rx="1"/></svg></button>
       <button class="btn rew-btn" id="runStart" title="Rewind to the beginning" aria-label="Rewind to the beginning"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="5" width="2.6" height="14" rx="1"/><path d="M8 12l11-7v14z"/></svg></button>
       <button class="btn primary" id="run">▶ Run code</button>
       <button class="btn" id="hideCode" title="Hide the code panel to give the tracks more room">⇥</button>
     </div>
     <div class="srcline">Plays: <b id="src">the sequencer</b></div>
-    <div id="banner" class="banner"><span>You're hearing <b>your hand-edited code</b>. Track changes are kept, but you won't hear them until you go back to the sequencer (your edits here will be replaced).</span> <button class="btn" id="resync">Back to the sequencer</button></div>
+    <div id="banner" class="banner"><span>You're hearing <b>your hand-edited code</b>. Track changes are kept, but you won't hear them until you go back to the sequencer (your edits here will be replaced).</span> <button class="btn" id="resync">↩ Back to the sequencer</button></div>
     <div id="errbox" class="errbox"></div>
     <div class="editor">
       <pre id="hl" aria-hidden="true"></pre>
@@ -518,7 +530,7 @@ body{padding-top:5px}
     </details>
   </aside>
 </main>
-<button id="showCode" class="show-code" title="Show the Strudel code">‹ code</button>
+<button id="showCode" class="show-code" title="Show the Strudel code">‹ ⌨ code</button>
 <div id="toast" class="toast"></div>
 <button id="fabStart" class="fab-start" aria-label="Rewind to the beginning" title="Rewind to the beginning of the song"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="5" width="2.6" height="14" rx="1"/><path d="M8 12l11-7v14z"/></svg></button>
 <button id="fabPause" class="fab-pause" aria-label="Pause" title="Pause"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4.2" height="14" rx="1"/><rect x="13.8" y="5" width="4.2" height="14" rx="1"/></svg></button>
@@ -572,7 +584,7 @@ const deepMerge=(a,b)=>{for(const[k,v]of Object.entries(b||{})){a[k]=v&&typeof v
 const settingsHooks=[];
 fetch('settings.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(j=>{if(!j)return;SETTINGS=deepMerge(JSON.parse(JSON.stringify(SETTINGS_DEFAULT)),j);settingsHooks.forEach(f=>{try{f();}catch(e){console.warn(e);}});}).catch(()=>{});
 // user preferences (kept separately from songs)
-const APP_VERSION='2026-11-22-08'; // date + build counter for that day; bump on every release
+const APP_VERSION='2026-11-22-09'; // date + build counter for that day; bump on every release
 const prefs=(()=>{try{return JSON.parse(localStorage.getItem('strudel-studio-prefs'))||{};}catch(e){return{};}})();
 const followOn=()=>playing&&songMode();
 if(!prefs.clickOff){prefs.metroVol=0;prefs.metroSolo=false;prefs.clickOff=true;try{localStorage.setItem('strudel-studio-prefs',JSON.stringify(prefs));}catch(e){}} // the click starts off; turning it on starts at 25%
@@ -704,6 +716,13 @@ const STYLES={
       {role:'chords',name:'Acoustic guitar',p:['x.x.x.xxx.x.x.xx','x.xx.xx.x.xx.xx.','..x...x...x...x.'],oct:3,waves:['gm_acoustic_guitar_steel','gm_acoustic_guitar_nylon'],fx:{release:.25,room:.25,gain:.6}},
       {role:'arp',name:'Banjo',p:['xxxxxxxxxxxxxxxx','x+x+x+x+x+x+x+x+'],oct:4,waves:['gm_banjo'],opt:.6,fx:{release:.1,gain:.45}},
       {role:'lead',name:'Fiddle',pent:true,p:['o.+.o.+.o+o.-.+.','o+o+o.o.o+o+o...'],oct:4,waves:['gm_violin','gm_harmonica','gm_electric_guitar_clean'],opt:.7,fx:{room:.3,release:.25,gain:.5}}]},
+  'Classical':{palette:['gm_violin','gm_cello','gm_string_ensemble_1','gm_harpsichord','piano','gm_flute','gm_oboe','gm_clarinet','gm_french_horn','gm_orchestral_harp','gm_pizzicato_strings'],kit:['studio'],bpm:[66,120],swing:[0,0],scales:['major','major','minor','harmonic:minor'],
+    progs:[[0,3,4,0],[0,5,3,4],[0,1,4,0],[0,4,5,3],[0,3,1,4],[5,1,4,0]],form:['Intro','Theme','Variation','Theme','Ending'],drums:[],
+    parts:[
+      {role:'bass',name:'Cello',mode:['root','fifth','walk'],p:['x.......x.......','x...x...x...x...','x.......x...x...'],oct:2,waves:['gm_cello','gm_cello','gm_pizzicato_strings'],fx:{release:.5,room:.35,gain:.7}},
+      {role:'arp',name:'Harpsichord',p:['x.x.x.x.x.x.x.x.','xxxxxxxxxxxxxxxx'],oct:[3,4],waves:['gm_harpsichord','piano','gm_orchestral_harp'],opt:.8,fx:{room:.3,release:.2,gain:.42}},
+      {role:'pad',name:'Strings',oct:3,waves:['gm_string_ensemble_1','gm_choir_aahs','gm_french_horn'],opt:.65,fx:{attack:.25,release:1,room:.5,gain:.35}},
+      {role:'lead',name:'Melody',p:['o.+.o.+.o.+.o...','x.x.xxx.x.x.x...','o+o+o.o.o+o+o...'],oct:4,waves:['gm_violin','gm_flute','gm_oboe','gm_clarinet','piano'],fx:{room:.4,release:.35,gain:.6}}]},
   'Boom bap':{form:['Intro','Verse','Chorus','Verse','Chorus','Ending'],palette:['piano','piano1','gm_epiano1', 'gm_piano', 'gm_vibraphone', 'gm_string_ensemble_1', 'gm_acoustic_bass', 'gm_muted_trumpet', 'gm_flute', 'gm_electric_guitar_jazz'],kit:['sp12','mpc60','acoustic','dirt'],bpm:[85,95],swing:[.1,.18],scales:['dorian','minor'],drums:[
       {s:'bd',p:['x.....x...x.....','x..-..x.-.x..-..','x.....x.-.x...-.']},
       {s:'sd',p:['....x.......x..-','....x.-.....x...']},
@@ -1202,12 +1221,13 @@ function fullForm(form){
 // dance music moves in 8/16-bar blocks, rock intros can be 2 bars, hip-hop verses are 16, ambient takes its time.
 const STYLE_FEEL={'House groove':'dance','Techno':'dance','Drum & bass':'dance','UK garage':'dance','Breakbeat':'dance',
   'Classic rock':'rock','Heavy metal':'rock','Synthwave':'rock','Chiptune':'rock','Country':'rock',
-  'Boom bap':'hiphop','Trap':'hiphop','Lo-fi chill':'hiphop','Reggaeton':'groove','Afrobeat':'groove','Disco funk':'groove','Dub':'groove','Polyrhythm 4:3':'groove','Ambient drift':'ambient'};
+  'Boom bap':'hiphop','Classical':'classical','Trap':'hiphop','Lo-fi chill':'hiphop','Reggaeton':'groove','Afrobeat':'groove','Disco funk':'groove','Dub':'groove','Polyrhythm 4:3':'groove','Ambient drift':'ambient'};
 const PART_BARS={
   dance:  {Intro:[8,16],Build:[8,16],Drop:[16,32],Break:[8,16],Verse:[16],Chorus:[16],Ending:[8,16],_:[8,16]},
   rock:   {Intro:[2,4,4,8],Verse:[8,16],'Pre-chorus':[4],Chorus:[8],Bridge:[4,8],Solo:[8,16],Interlude:[2,4],Break:[2,4],Ending:[2,4,8],_:[4,8]},
   hiphop: {Intro:[2,4,8],Verse:[16],Chorus:[8],'Pre-chorus':[4],Bridge:[8],Break:[4],Ending:[4,8],_:[4,8]},
   groove: {Intro:[4,8],Verse:[8,16],Chorus:[8,16],'Pre-chorus':[4],Break:[4,8],Bridge:[8],Interlude:[4],Ending:[4,8],_:[8]},
+  classical:{Intro:[2,4],Theme:[8],Variation:[8],Development:[8],Ending:[2,4],_:[4,8]},
   ambient:{Intro:[8,16],Verse:[16],Chorus:[16],Bridge:[8,16],Ending:[8,16],_:[8,16]}
 };
 function partBars(style,part,mode){
@@ -1225,8 +1245,9 @@ function genSong(name,opts={}){
   const mode=opts.mode||null; // null | 'simple' (Ramones: few parts, short, the same chords) | 'complex' (Rush: many parts, odd-meter bridge, more changes)
   const dance=(S.form||[]).includes('Drop');
   let form=opts.full?fullForm(S.form||DEFAULT_FORM):(S.form||DEFAULT_FORM);
-  if(mode==='simple')form=dance?['Intro','Build','Drop','Break','Build','Drop','Ending']:STYLE_FEEL[name]==='hiphop'?SIMPLE_HIPHOP:SIMPLE_FORM;
-  if(mode==='complex')form=dance?['Intro','Build','Drop','Break','Interlude','Build','Drop','Bridge','Drop','Ending']:COMPLEX_FORM;
+  if(name==='Classical'){form=mode==='simple'?['Intro','Theme','Theme','Ending']:mode==='complex'?['Intro','Theme','Variation','Theme','Development','Variation','Theme','Ending']:form;}
+  else if(mode==='simple')form=dance?['Intro','Build','Drop','Break','Build','Drop','Ending']:STYLE_FEEL[name]==='hiphop'?SIMPLE_HIPHOP:SIMPLE_FORM;
+  else if(mode==='complex')form=dance?['Intro','Build','Drop','Break','Interlude','Build','Drop','Bridge','Drop','Ending']:COMPLEX_FORM;
   // simple songs: strip back to drums, bass and one chord part
   let baseTracks=base.tracks;
   if(mode==='simple'){let chords=false;baseTracks=base.tracks.filter(t=>{if(t.type!=='synth')return t.type==='drum';const r=inferRole(t);if(r==='bass')return true;if(!chords&&['chords','power','pad'].includes(r)){chords=true;return true;}return false;});if(baseTracks.length<2)baseTracks=base.tracks;}
@@ -1239,7 +1260,7 @@ function genSong(name,opts={}){
     if(mode==='complex'&&!a.prog&&pn!=='Intro'&&pn!=='Ending'){a.prog=relatedProg(ctx.prog);a.tracks=varySection(a.tracks,ctx,a.prog);}
     const total=partBars(name,pn,mode);
     // verses and choruses (and drops) get more than one section: same sounds, developed melodies
-    const n=(pn==='Verse'||pn==='Chorus'||pn==='Drop')&&total>=8&&mode!=='simple'?(mode==='complex'&&total>=16?3:2):1;
+    const n=(pn==='Verse'||pn==='Chorus'||pn==='Drop'||pn==='Theme')&&total>=8&&mode!=='simple'?(mode==='complex'&&total>=16?3:2):1;
     const lens=n===3?[total/4,total/4,total/2]:Array(n).fill(total/n); // 16 bars in three sections = 4+4+8
     let prev={tracks:a.tracks,prog:a.prog||ctx.prog};
     for(let k=0;k<n;k++){
@@ -1339,6 +1360,7 @@ const isModified=(sec)=>!sec.renamed&&!!sec.ver;
 // Song parts: every section belongs to a part (Intro, Verse, Chorus…); the song plays state.arrangement,
 // a list of part ids in order (a part can appear more than once).
 const PART_NAMES=['Intro','Verse','Pre-chorus','Chorus','Bridge','Solo','Interlude','Break','Build','Drop','Ending'];
+// (classical parts — Theme, Variation, Development… — are explained in PART_INFO too)
 // what each part does — shown on hover, in the part menus and in the FAQ
 const PART_INFO={
   'Intro':'Opens the song and sets the mood. Usually lighter, with fewer instruments.',
@@ -1352,7 +1374,7 @@ const PART_INFO={
   'Build':'Rising tension — drums thin out or speed up — leading into a drop.',
   'Drop':'In electronic music, the payoff after a build: full beat and bass come back in.',
   'Ending':'The outro: winds the song down or stops on a final hit.',
-  'Theme':'The main melody of a classical piece.','Middle':'A contrasting middle passage before the theme returns.',
+  'Theme':'The main melody of a classical piece.','Development':'The theme taken apart and moved through new keys and chords.','Middle':'A contrasting middle passage before the theme returns.',
   'Variation':'The theme again, changed — new rhythm, harmony or instruments.','Ground':'A repeating bass line that the other parts are built over.',
   'Minuet':'A stately dance in 3, the main part of the piece.','Trio':'A gentler contrasting section, originally for three players.',
   'Episode':'A passage between returns of the main theme.','Motif':'A short, recognisable musical idea the piece is built from.',
@@ -1926,13 +1948,13 @@ function quieter(code){
 // metronome bar above the pads: 4 beat lights, bar number, optional click
 function updateNowPlaying(c){
   const el=document.getElementById('nowPlaying');if(!el)return;
-  if(c==null||!playing){el.hidden=true;return;}
-  el.hidden=false;
+  el.onclick=()=>document.getElementById('arrangement')?.scrollIntoView({behavior:'smooth',block:'center'});
+  if(c==null||!playing){if(!el.querySelector('.np-idle')){el.classList.remove('on');el.style.removeProperty('--pc');el.innerHTML='<span class="np-idle">NOW PLAYING</span>';}return;}
+  el.classList.add('on');
   if(customCode){el.innerHTML='▶ <b>your code</b>';return;}
   const ps=playingSection(c);const sec=state.sections[ps.i];const pt=partOf(sec);const lab=secLabels(state.sections)[ps.i];
-  el.style.setProperty('--pc',pt?.color||'#3dd6c5');
-  el.innerHTML='';el.append('▶ ',h('b',{},pt?pt.name:'Section'),` · ${lab}${secStyle(sec)?' · '+secStyle(sec):''} `,h('span',{class:'np-bar'},`bar ${ps.bar+1}/${ps.of}`));
-  el.title='Playing now — click to show it';el.onclick=()=>document.getElementById('arrangement')?.scrollIntoView({behavior:'smooth',block:'center'});
+  el.style.setProperty('--pc',pt?.color||'#14e0ff');
+  el.innerHTML='';el.append('▶ ',h('b',{},pt?pt.name:'Section'),` ${lab} `,h('span',{class:'np-bar'},`${ps.bar+1}/${ps.of}`));
 }
 function metroTick(c){
   const beat=c==null?-1:Math.floor(((c%1)+1)%1*4);
@@ -1964,7 +1986,7 @@ function frame(){
     if(mark&&followOn()){const ps=JSON.parse(mark);if(ps.i!==state.cur&&!document.querySelector('#sections input,#arrangement input,.dragging')){syncSection();state.cur=ps.i;state.tracks=state.sections[ps.i].tracks;state.prog=state.sections[ps.i].prog;render();lastSecMark=mark;}}
     document.querySelectorAll('.sec,.arr-chip').forEach(el=>{el.classList.remove('playing');const b=el.querySelector('.bar');if(b)b.textContent='';});
     if(mark){const ps=JSON.parse(mark);const el=document.querySelector(`.sec[data-i="${ps.i}"]`);if(el){el.classList.add('playing');el.querySelector('.bar').textContent=`▶ ${ps.bar+1}/${ps.of}`;}
-      document.querySelector(`.arr-chip[data-occ="${ps.occ}"]`)?.classList.add('playing');}
+      document.querySelector(`.arr-chip[data-occ="${ps.occ}"]`)?.classList.add('playing');setPadPart(partOf(state.sections[ps.i])?.color);}
     document.querySelectorAll('.so-part.now,.so-sec.now').forEach(x=>x.classList.remove('now'));
     if(mark){const ps=JSON.parse(mark);document.querySelector(`.so-part[data-occ="${ps.occ}"]`)?.classList.add('now');document.querySelector(`.so-sec[data-occ="${ps.occ}"][data-i="${ps.i}"]`)?.classList.add('now');}}
   const showSteps=c!=null&&(customCode||playingSection(c).i===state.cur);
@@ -2126,7 +2148,7 @@ function renderSections(){
     h('button',{class:'tog sec-loop sec-del',disabled:secs.length<2,title:secs.length<2?'A song needs at least one section — use Clear groove to empty it':`Remove section ${labels[state.cur]} from the song (you can undo)`,onclick:()=>deleteGroove()},'🗑 Delete groove')));
 }
 function render(){
-  renderSections();try{syncPresetSel();}catch(e){}
+  renderSections();try{syncPresetSel();setPadPart(partOf(state.sections[state.cur])?.color);}catch(e){}
   tracksEl.innerHTML='';
   if(!state.tracks.length)tracksEl.append(h('div',{class:'empty'},'No tracks yet — add one below.'));
   state.tracks.forEach((t,i)=>{
@@ -2152,7 +2174,7 @@ function renderTrack(t){
     head.append(sel([[8,'8 steps'],[12,'12 steps'],[16,'16 steps']],t.steps,v=>{t.steps=+v;changed(true);},'Steps per cycle'));
   }else if(t.type==='synth'){
     head.append(soundPicker(soundOptions(),t.wave,v=>{t.wave=v;changed(true);},{title:'Instrument / oscillator'}));
-    head.append(h('button',{class:'tbtn'+(holdsNotes(t)?' on':''),title:holdsNotes(t)?'Notes ring until the next note (click for short, staccato notes)':'Short notes (click to let notes ring until the next one)',onclick:()=>{t.hold=!holdsNotes(t);changed(true);}},holdsNotes(t)?'hold':'short'));
+    head.append(h('button',{class:'tbtn'+(holdsNotes(t)?' on':''),title:holdsNotes(t)?'Notes ring until the next note (click for short, staccato notes)':'Short notes (click to let notes ring until the next one)',onclick:()=>{t.hold=!holdsNotes(t);changed(true);}},holdsNotes(t)?'〰 hold':'· short'));
     if(['lead','arp'].includes(inferRole(t)))head.append(sel([['','1-bar loop'],['answer','2-bar call & answer'],['aaba','4-bar phrase (AABA)']],t.phrase||'',v=>{t.phrase=v||null;changed(true);},'Phrase: play this bar as written, or develop it into a longer phrase'));
     head.append(sel(NOTE_NAMES.map(n=>[n,n]),t.root,v=>{t.root=v;changed(true);},'Root'));
     head.append(sel([1,2,3,4,5].map(o=>[o,'oct '+o]),t.octave,v=>{t.octave=+v;changed(true);},'Octave'));
@@ -2166,10 +2188,10 @@ function renderTrack(t){
     else head.append(sel(Object.entries(KITS).map(([k,v])=>[k,v.label]),t.kit||'studio',v=>{t.kit=v;changed();},'Drum kit (used when it has every sound in the pattern)'));
   }
   head.append(h('span',{class:'spacer',style:'flex:1'}));
-  head.append(h('button',{class:'tbtn'+(t.muted?' on':''),title:'Mute',onclick:()=>{t.muted=!t.muted;changed(true);}},'M'));
-  head.append(h('button',{class:'tbtn solo'+(t.solo?' on':''),title:'Solo',onclick:()=>{t.solo=!t.solo;changed(true);}},'S'));
-  head.append(h('button',{class:'tbtn',title:'Randomize this track (new pattern / notes; sound, kit and effects stay)',onclick:()=>{rerollTrack(t);changed(true);toast('🎲 New '+t.name.toLowerCase());}},'rnd'));
-  head.append(h('button',{class:'tbtn'+(t.fxOpen?' on':''),title:'Effects & transforms',onclick:()=>{t.fxOpen=!t.fxOpen;el.classList.toggle('fxopen',t.fxOpen);save();renderTrackHeadBtn(el,t);}},'FX'));
+  head.append(h('button',{class:'tbtn'+(t.muted?' on':''),title:'Mute',onclick:()=>{t.muted=!t.muted;changed(true);}},'🔇'));
+  head.append(h('button',{class:'tbtn solo'+(t.solo?' on':''),title:'Solo (hear only this track)',onclick:()=>{t.solo=!t.solo;changed(true);}},'🎧'));
+  head.append(h('button',{class:'tbtn',title:'Randomize this track (new pattern / notes; sound, kit and effects stay)',onclick:()=>{rerollTrack(t);changed(true);toast('🎲 New '+t.name.toLowerCase());}},'🎲'));
+  head.append(h('button',{class:'tbtn'+(t.fxOpen?' on':''),title:'Effects & transforms',onclick:()=>{t.fxOpen=!t.fxOpen;el.classList.toggle('fxopen',t.fxOpen);save();renderTrackHeadBtn(el,t);}},'🎛'));
   head.append(h('button',{class:'tbtn',title:'Duplicate',onclick:()=>{const c=JSON.parse(JSON.stringify(t));c.id=uid++;c.name+=' 2';c.color=COLORS[(COLORS.indexOf(t.color)+1)%COLORS.length];state.tracks.splice(state.tracks.indexOf(t)+1,0,c);changed(true);}},'⧉'));
   head.append(h('button',{class:'tbtn del',title:'Delete track',onclick:()=>{pushUndo(`delete track “${t.name}”`);state.tracks=state.tracks.filter(x=>x!==t);changed(true);toast(`Deleted “${t.name}”`,undoAction);}},'✕'));
   el.append(head);
@@ -2366,6 +2388,7 @@ function padEcho(t,step){
     b.classList.remove('echo');void b.offsetWidth;b.classList.add('echo');
   });
 }
+function setPadPart(color){const el=document.getElementById('pads');if(el&&color)el.style.setProperty('--partc',color);}
 function renderPads(){
   const box=document.getElementById('padsBox'),el=document.getElementById('pads');if(!el)return;
   const open=padsOpen;box.classList.toggle('closed',!open);const caret=document.getElementById('padsToggle');caret.setAttribute('aria-expanded',open);caret.title=open?'Close the pads':'Open the pads';
@@ -2399,7 +2422,7 @@ document.getElementById('recBtn').onclick=()=>{
 };
 let padLayoutKey='';addEventListener('resize',()=>{const k=JSON.stringify(padLayout());if(k!==padLayoutKey){padLayoutKey=k;renderPads();}});
 settingsHooks.push(renderPads);
-function renderTrackHeadBtn(el,t){el.querySelectorAll('.thead .tbtn').forEach(b=>{if(b.textContent==='FX')b.classList.toggle('on',t.fxOpen);});}
+function renderTrackHeadBtn(el,t){el.querySelectorAll('.thead .tbtn').forEach(b=>{if(b.textContent==='🎛')b.classList.toggle('on',t.fxOpen);});}
 function sel(opts,val,on,title){const s=h('select',{title,onchange:e=>on(e.target.value)});let grp=s,found=false;for(const[v,l]of opts){if(v==='--'){grp=h('optgroup',{label:l});s.append(grp);continue;}const o=h('option',{value:v},l);if(String(v)===String(val)){o.selected=true;found=true;}grp.append(o);}if(!found&&val){const o=h('option',{value:val},String(val));o.selected=true;s.prepend(o);}return s;}
 
 // drag-to-paint helper
@@ -2506,15 +2529,15 @@ function fxPanel(t){
     const k=h('input',{class:'small-in',type:'number',min:0,max:t.steps,value:Math.min(5,t.steps),title:'hits'});
     const r=h('input',{class:'small-in',type:'number',min:0,max:t.steps-1,value:0,title:'rotation'});
     eu.append(h('div',{class:'toggles'},k,h('span',{style:'color:var(--dim)'},'hits ↻'),r,
-      h('button',{class:'tog',onclick:()=>{const e=euclid(+k.value,t.steps,+r.value);t.hits=pad(e);changed(true);}},'Apply'),
+      h('button',{class:'tog',onclick:()=>{const e=euclid(+k.value,t.steps,+r.value);t.hits=pad(e);changed(true);}},'✓ Apply'),
       h('button',{class:'tog',title:'Randomize',onclick:()=>{t.hits=pad(Array.from({length:t.steps},()=>Math.random()<.3));changed(true);}},'Rnd'),
-      h('button',{class:'tog',onclick:()=>{t.hits=Array(16).fill(false);changed(true);}},'Clear')));
+      h('button',{class:'tog',onclick:()=>{t.hits=Array(16).fill(false);changed(true);}},'🧹 Clear')));
     g0.append(eu);
   }
   if(t.type==='synth'){
     g0.append(h('div',{class:'ctl'},h('div',{class:'lab'},h('span',{},'Notes')),h('div',{class:'toggles'},
       h('button',{class:'tog',onclick:()=>{const L=SCALES[t.scale].length;t.notes=Array.from({length:16},(_,i)=>i<t.steps&&Math.random()<.45?[Math.floor(Math.random()*Math.min(ROWS,L+3))]:[]);changed(true);}},'Random melody'),
-      h('button',{class:'tog',onclick:()=>{t.notes=Array.from({length:16},()=>[]);changed(true);}},'Clear'))));
+      h('button',{class:'tog',onclick:()=>{t.notes=Array.from({length:16},()=>[]);changed(true);}},'🧹 Clear'))));
   }
   p.append(g0);
 
@@ -2930,6 +2953,7 @@ function completeSong(){
   toast(`🎲 Complete ${g} song “${st.name}”: ${st.arrangement.map(id=>st.parts.find(p=>p.id===id).name).join(' → ')}`,undoAction);
 }
 const chosenGenre=()=>prefs.newGenre&&STYLES[prefs.newGenre]?prefs.newGenre:null;
+function newBeatIn(g){const keep=prefs.newGenre;prefs.newGenre=g;try{newBasicSong();}finally{prefs.newGenre=keep;}}
 function newBasicSong(){
   pushUndo('new beat');
   // a new beat in the chosen type of music, or a new random one; the Preset / style menu switches to it
@@ -3022,6 +3046,11 @@ document.getElementById('actMenu').onclick=e=>{
   const gs=h('select',{class:'ui genre-sel',title:'Type of music for New beat and the New song options — each follows that genre\'s rules'},h('option',{value:''},'🎲 Any (random)'),...Object.keys(STYLES).map(k=>h('option',{value:k},k)));
   gs.value=chosenGenre()||'';gs.onchange=()=>{prefs.newGenre=gs.value||null;savePrefs();syncTopAction();};gs.onclick=ev=>ev.stopPropagation();
   box.append(h('div',{class:'genre-row'},h('span',{class:'pk-grp'},'Type of music'),gs));
+  // quick picks: Classical plus four random genres, reshuffled every time the menu opens
+  const others=Object.keys(STYLES).filter(k=>k!=='Classical').sort(()=>Math.random()-.5).slice(0,4);
+  const qp=h('div',{class:'quick-picks'});
+  for(const g of ['Classical',...others])qp.append(h('button',{class:'btn qp',title:`A new randomized ${g} groove, following ${g}'s rules`,onclick:()=>{closePicker();newBeatIn(g);}},`${g==='Classical'?'🎻':'🥁'} ${g}`));
+  box.append(h('div',{class:'pk-grp'},'Quick picks — new beat in…'),qp);
   for(const a of TOP_ACTIONS){
     if(a.sep){box.append(h('div',{class:'pk-grp'},'More'));continue;}
     box.append(h('div',{class:'pk-row'+(a.id===cur?' cur':''),title:a.info},h('button',{class:'pk-name part-opt',onclick:()=>{closePicker();a.run();}},h('b',{},a.label),h('small',{},a.info))));
