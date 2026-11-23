@@ -2961,7 +2961,7 @@ function randomize(){
 }// Top action button: runs the chosen action (New beat by default); ▾ lists the other song actions
 // re-roll every section, keeping the song's parts, order, lengths, key, tempo and name
 function randomizeAll(){
-  pushUndo('🎲 Randomize all');
+  pushUndo('🎲 Randomize current song');
   const name=state.style&&STYLES[state.style]?state.style:randomStyleName();const S=STYLES[name];
   const k=currentCtx();const base=genStyle(name,(Math.random()*2**32)>>>0,{root:k.root,scale:k.scale});
   const ctx={root:k.root,scale:k.scale,prog:base.prog,real:false,style:name};
@@ -2980,7 +2980,7 @@ function randomizeAll(){
 document.getElementById('randMenu').onclick=e=>{
   e.stopPropagation();const anchor=document.getElementById('randSplit');closePicker();
   const box=h('div',{class:'picker part-menu act-menu'});box.__for=anchor;pickerEl=box;
-  for(const a of [{label:'🎲 Randomize current',info:'Re-roll only the section you are editing (the button)',run:()=>randomize()},{label:'🎲 Randomize current song',info:'Re-roll every section; the parts, their order and lengths, key, tempo and name stay',run:()=>randomizeAll()}])
+  for(const a of [{label:'🎲 Randomize current',info:'Re-roll only the section you are editing ',run:()=>randomize()},{label:'🎲 Randomize current song',info:'Re-roll every section; the parts, their order and lengths, key, tempo and name stay',run:()=>randomizeAll()}])
     box.append(h('div',{class:'pk-row',title:a.info},h('button',{class:'pk-name part-opt',onclick:()=>{closePicker();a.run();}},h('b',{},a.label),h('small',{},a.info))));
   document.body.append(box);const r=anchor.getBoundingClientRect(),W=innerWidth;
   if(W<=700)Object.assign(box.style,{left:'8px',right:'8px',bottom:'8px'});
