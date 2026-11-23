@@ -1279,7 +1279,7 @@ const SECTION_BARS={
   ambient:  [[2,1],[4,4],[8,3],[12,1]]
 };
 function sectionBars(style,mode){
-  const T=SECTION_BARS[STYLE_FEEL[style]||'groove'].filter(([b])=>mode==='simple'?b<=4:true).map(([b,w])=>[b,mode==='complex'&&b>=8?w*1.6:w]);
+  const T=SECTION_BARS[STYLE_FEEL[style]||'groove'].filter(([b])=>mode==='simple'?b===2||b===4:true).map(([b,w])=>[b,mode==='complex'&&b>=8?w*1.6:w]);
   let r=Math.random()*T.reduce((a,[,w])=>a+w,0);for(const[b,w]of T){if((r-=w)<=0)return b;}return T[T.length-1][0];
 }
 function partBars(style,part,mode){
