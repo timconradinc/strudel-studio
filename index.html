@@ -2030,6 +2030,12 @@ function renderChords(){
   const pt=sec?partOf(sec):null;
   info.textContent=`${pt?pt.name+' · ':''}${secLabels(state.sections)[state.cur]} · key ${key.root} ${key.scale.replace(':',' ')} · ${TUNING_NAMES[instr]}`;
   list.innerHTML='';list.style.setProperty('--pc',pt?.color||'var(--ok)');
+  if(sec&&secStyle(sec)==null&&prog.every(d=>d===prog[0])){ // classical examples are written note by note, without a chord progression
+    const ch=chordOf(rootPc,iv,prog[0]);
+    list.append(h('div',{class:'chord-card'},h('div',{class:'cn'},ch.name),h('div',{class:'cd'},'home chord')));list.lastChild.insertAdjacentHTML('beforeend',chordSVG(ch,instr));
+    list.append(h('div',{class:'hint',style:'grid-column:1/-1'},'This example is written note by note, so it has no chord progression to show — only its home key. Generated songs and beats show their real chords.'));
+    return;
+  }
   prog.forEach((d,k)=>{const ch=chordOf(rootPc,iv,d);
     list.append(h('div',{class:'chord-card','data-k':k,title:`${ch.name}: ${ch.pcs.map(p=>NOTE_NAMES[p]).join(' ')} — beat ${k+1}`},h('div',{class:'cn'},ch.name),h('div',{class:'cd'},ch.pcs.map(p=>NOTE_NAMES[p]).join(' '))));
     list.lastChild.insertAdjacentHTML('beforeend',chordSVG(ch,instr));});
