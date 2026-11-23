@@ -1250,7 +1250,7 @@ function genSong(name,opts={}){
   else if(mode==='complex')form=dance?['Intro','Build','Drop','Break','Interlude','Build','Drop','Bridge','Drop','Ending']:COMPLEX_FORM;
   // simple songs: strip back to drums, bass and one chord part
   let baseTracks=base.tracks;
-  if(mode==='simple'){let chords=false;baseTracks=base.tracks.filter(t=>{if(t.type!=='synth')return t.type==='drum';const r=inferRole(t);if(r==='bass')return true;if(!chords&&['chords','power','pad'].includes(r)){chords=true;return true;}return false;});if(baseTracks.length<2)baseTracks=base.tracks;}
+  if(mode==='simple'){let chords=false;baseTracks=base.tracks.filter(t=>{if(t.type!=='synth')return t.type==='drum';const r=inferRole(t);if(r==='bass'||(name==='Classical'&&r==='lead'))return true;if(!chords&&['chords','power','pad'].includes(r)){chords=true;return true;}return false;});if(baseTracks.length<2)baseTracks=base.tracks;}
   const parts=[],sections=[],pid={};let num=1;
   for(const pn of form){
     if(pid[pn])continue;
