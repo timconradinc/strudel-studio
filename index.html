@@ -44,7 +44,7 @@ button{cursor:pointer}
 ::selection{background:#ff8a3d55}
 
 /* ---------- top bar ---------- */
-header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+header{position:sticky;top:5px;z-index:20;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
   padding:12px 18px;background:linear-gradient(#111116,#0f0f13);border-bottom:1px solid var(--line)}
 .logo{display:flex;flex-direction:column;gap:1px;font-weight:800;letter-spacing:-.02em;font-size:18px;margin-right:6px;line-height:1.1}
 .logo b{color:var(--accent);margin:0 6px}
@@ -261,7 +261,7 @@ details.cheat summary{cursor:pointer;font-size:12px;text-transform:uppercase;let
 .song-order{flex-basis:100%;line-height:1.7;order:99;font-family:var(--mono);font-size:11px;color:var(--dim);padding:2px 2px 0}.song-order b{color:var(--text);font-weight:600}.sec-clear.confirm{color:#fff;background:var(--err);border-color:var(--err)}
 .fab{display:none}.fab-start{display:none}
 .rew-btn{padding:7px 9px}.rew-btn svg{width:14px;height:14px}
-.split{display:inline-flex}.split #actMain{border-radius:8px 0 0 8px}.split .split-caret{border-radius:0 8px 8px 0;border-left:none;padding:7px 9px;color:var(--dim)}
+.split{display:inline-flex}.split #actMain,.split #randomize{border-radius:8px 0 0 8px}.split .split-caret{border-radius:0 8px 8px 0;border-left:none;padding:7px 9px;color:var(--dim)}
 .play-start{width:36px;height:36px;border-radius:50%;border:1px solid var(--line2);background:var(--panel2);color:var(--text);display:grid;place-items:center;cursor:pointer;padding:0;margin-left:-6px}.play-start:hover{border-color:var(--accent);color:var(--accent)}.play-start svg{width:16px;height:16px}
 @media (max-width:700px){
   header{position:static;padding:10px 12px;gap:10px 12px}
@@ -314,11 +314,16 @@ header .field>div{flex-wrap:wrap;align-items:center}
 .rec{font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:.1em;background:#2a2a2f;border:1px solid #3a3a40;color:#ff6b6b;border-radius:4px;padding:5px 10px;cursor:pointer}
 .rec.on{background:#e0333d;color:#fff;border-color:#e0333d;animation:recblink 1s steps(2) infinite}
 @keyframes recblink{50%{opacity:.6}}
+.top-metro{position:fixed;left:0;right:0;top:0;height:5px;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;z-index:200;pointer-events:none}
+.top-metro i{background:color-mix(in srgb,var(--bc) 22%,#0000);transition:background .05s}.top-metro i.on{background:var(--bc);box-shadow:0 0 8px var(--bc)}
+body{padding-top:5px}
 .metro{display:flex;align-items:center;gap:8px;max-width:460px;margin:6px 0 8px}
 .metro-beats{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .metro-beats i{height:10px;border-radius:5px;background:var(--panel2);border:1px solid var(--line);transition:background .06s}
-.metro-beats i.on{background:var(--ok);border-color:var(--ok);box-shadow:0 0 10px var(--ok)}
-.metro-beats i.on:first-child{background:#f2b417;border-color:#f2b417;box-shadow:0 0 10px #f2b417}
+.metro-beats i:nth-child(1),.sec-metro .mb i:nth-child(1),.top-metro i:nth-child(1){--bc:#f2b417}.metro-beats i:nth-child(2),.sec-metro .mb i:nth-child(2),.top-metro i:nth-child(2){--bc:#14e0ff}
+.metro-beats i:nth-child(3),.sec-metro .mb i:nth-child(3),.top-metro i:nth-child(3){--bc:#ff6b5a}.metro-beats i:nth-child(4),.sec-metro .mb i:nth-child(4),.top-metro i:nth-child(4){--bc:#a46bff}
+.metro-beats i{border-color:color-mix(in srgb,var(--bc) 40%,var(--line))}
+.metro-beats i.on{background:var(--bc);border-color:var(--bc);box-shadow:0 0 10px var(--bc)}
 .metro-pos{font-family:var(--mono);font-size:11px;color:var(--dim);min-width:44px;text-align:right}
 .metro-vol{background:var(--panel);border:1px solid var(--line);border-radius:6px;color:var(--dim);height:24px;font-size:11px;padding:0 4px}.metro-vol.on{color:var(--text);border-color:var(--accent)}
 .metro-click{background:none;border:1px solid var(--line);border-radius:6px;color:var(--dim);cursor:pointer;height:24px;padding:0 6px}.metro-click.on{color:var(--text);border-color:var(--accent)}
@@ -355,7 +360,7 @@ header .field>div{flex-wrap:wrap;align-items:center}
 .arr-chip{overflow:hidden}.arr-chip .aprog{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--ok);transition:width .12s linear}
 .sec-metro{display:flex;align-items:center;gap:6px;margin:4px 0 2px}
 .sec-metro .mb{display:flex;gap:3px}.sec-metro .mb i{width:8px;height:8px;border-radius:50%;background:var(--panel2);border:1px solid var(--line)}
-.sec-metro .mb i.on{background:var(--ok);border-color:var(--ok);box-shadow:0 0 6px var(--ok)}.sec-metro .mb i.on:first-child{background:#f2b417;border-color:#f2b417;box-shadow:0 0 6px #f2b417}
+.sec-metro .mb i.on{background:var(--bc);border-color:var(--bc);box-shadow:0 0 6px var(--bc)}
 .sec-metro .mp{display:flex;gap:2px;flex-wrap:wrap;max-width:110px}.sec-metro .mp i{width:6px;height:4px;border-radius:2px;background:var(--line)}
 .sec-metro .mp i.on{background:var(--sc,var(--ok))}
 .arr-add{background:transparent;border:1px dashed var(--line2);border-radius:8px;padding:6px 10px;color:var(--dim);cursor:pointer}.arr-add:hover{color:var(--text);border-color:var(--accent)}
@@ -372,8 +377,9 @@ header .field>div{flex-wrap:wrap;align-items:center}
 </style>
 </head>
 <body>
+<div id="topMetro" class="top-metro" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <header>
-  <div class="logo"><div class="logo-name">strudel<b>/</b>studio</div><span class="logo-sub">generated by Claude · <span class="app-ver" title="Version (date + build number for that day)">v2026-11-22-04</span></span></div>
+  <div class="logo"><div class="logo-name">strudel<b>/</b>studio</div><span class="logo-sub">generated by Claude · <span class="app-ver" title="Version (date + build number for that day)">v2026-11-22-05</span></span></div>
   <button id="play" title="Play / stop (Space)" aria-label="Play">
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
   </button>
@@ -388,7 +394,7 @@ header .field>div{flex-wrap:wrap;align-items:center}
     <div style="display:flex;gap:6px">
       <select id="preset" class="ui"></select>
       <div class="split" id="actSplit"><button id="actMain" class="btn"></button><button id="actMenu" class="btn split-caret" title="More: new song, clear or delete groove, …" aria-label="More actions">▾</button></div>
-      <button id="randomize" class="btn" title="Re-roll only the section you're editing, in the current style (R) — the rest of the song stays">🎲 Randomize current</button>
+      <div class="split" id="randSplit"><button id="randomize" class="btn" title="Re-roll only the section you're editing, in the current style (R) — the rest of the song stays">🎲 Randomize current</button><button id="randMenu" class="btn split-caret" title="Randomize current or the whole song" aria-label="Randomize options">▾</button></div>
       <button id="undo" class="btn" title="Nothing to undo" disabled>↶ Undo</button>
       <label class="chk" title="New grooves, presets and added tracks use synth sounds and drum machines instead of real instruments"><input type="checkbox" id="preferSynth"> prefer synths</label>
     </div>
@@ -557,7 +563,7 @@ const deepMerge=(a,b)=>{for(const[k,v]of Object.entries(b||{})){a[k]=v&&typeof v
 const settingsHooks=[];
 fetch('settings.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(j=>{if(!j)return;SETTINGS=deepMerge(JSON.parse(JSON.stringify(SETTINGS_DEFAULT)),j);settingsHooks.forEach(f=>{try{f();}catch(e){console.warn(e);}});}).catch(()=>{});
 // user preferences (kept separately from songs)
-const APP_VERSION='2026-11-22-04'; // date + build counter for that day; bump on every release
+const APP_VERSION='2026-11-22-05'; // date + build counter for that day; bump on every release
 const prefs=(()=>{try{return JSON.parse(localStorage.getItem('strudel-studio-prefs'))||{};}catch(e){return{};}})();
 const followOn=()=>playing&&songMode();
 if(prefs.metroVol==null)prefs.metroVol=prefs.metroClick?25:0; // older setting: on/off
@@ -1197,9 +1203,12 @@ const PART_BARS={
 };
 function partBars(style,part,mode){
   const T=PART_BARS[STYLE_FEEL[style]||'groove'];const ch=T[part]||T._;
-  return mode==='simple'?ch[0]:mode==='complex'?ch[ch.length-1]:pick(ch);
+  if(mode==='simple'){if(part==='Intro')return STYLE_FEEL[style]==='dance'?4:1; // a count-in, then straight in
+    if(part==='Ending')return Math.min(2,ch[0]);if(part==='Bridge')return 4;return ch[0];}
+  return mode==='complex'?ch[ch.length-1]:pick(ch);
 }
-const SIMPLE_FORM=['Intro','Verse','Chorus','Verse','Chorus','Ending'];
+const SIMPLE_FORM=['Intro','Verse','Chorus','Verse','Chorus','Bridge','Chorus','Ending']; // the modern pop shape: V C V C B C
+const SIMPLE_HIPHOP=['Intro','Chorus','Verse','Chorus','Verse','Chorus','Ending']; // hook first
 const COMPLEX_FORM=['Intro','Verse','Pre-chorus','Chorus','Interlude','Verse','Pre-chorus','Chorus','Solo','Bridge','Chorus','Ending'];
 function genSong(name,opts={}){
   const S=STYLES[name];const base=genStyle(name,(Math.random()*2**32)>>>0);
@@ -1207,7 +1216,7 @@ function genSong(name,opts={}){
   const mode=opts.mode||null; // null | 'simple' (Ramones: few parts, short, the same chords) | 'complex' (Rush: many parts, odd-meter bridge, more changes)
   const dance=(S.form||[]).includes('Drop');
   let form=opts.full?fullForm(S.form||DEFAULT_FORM):(S.form||DEFAULT_FORM);
-  if(mode==='simple')form=dance?['Intro','Drop','Break','Drop','Ending']:SIMPLE_FORM;
+  if(mode==='simple')form=dance?['Intro','Build','Drop','Break','Build','Drop','Ending']:STYLE_FEEL[name]==='hiphop'?SIMPLE_HIPHOP:SIMPLE_FORM;
   if(mode==='complex')form=dance?['Intro','Build','Drop','Break','Interlude','Build','Drop','Bridge','Drop','Ending']:COMPLEX_FORM;
   // simple songs: strip back to drums, bass and one chord part
   let baseTracks=base.tracks;
@@ -1905,7 +1914,7 @@ function metroTick(c){
     if(ps.occ>=0){const order=playOrder();let done=0,tot=0;order.forEach((o,k)=>{if(o.occ!==ps.occ)return;const r=state.sections[o.i].repeat;tot+=r;if(k<ps.k)done+=r;});
       const chip=document.querySelector(`.arr-chip[data-occ="${ps.occ}"] .aprog`);if(chip&&tot)chip.style.width=((done+ps.bar+(beat+1)/4)/tot*100)+'%';}
   }
-  document.querySelectorAll('.metro-beats i').forEach((el,i)=>el.classList.toggle('on',i===beat));
+  document.querySelectorAll('.metro-beats i,#topMetro i').forEach(el=>el.classList.toggle('on',[...el.parentNode.children].indexOf(el)===beat));
   const pos=document.getElementById('metroPos');
   if(pos){let bar=Math.floor(c??0);try{if(!customCode&&state.sections){const tot=songMode()?playOrder().reduce((a,o)=>a+state.sections[o.i].repeat,0):(state.sections[state.cur].repeat||1);bar=((bar%tot)+tot)%tot;}}catch(e){}
     pos.textContent=c==null?'–':`bar ${bar+1} · ${beat+1}`;}
@@ -2911,6 +2920,33 @@ function randomize(){
   changed(true);syncPresetSel();
   toast(`🎲 New ${name} groove for section ${secLabels(state.sections)[state.cur]}`,undoAction);
 }// Top action button: runs the chosen action (New beat by default); ▾ lists the other song actions
+// re-roll every section, keeping the song's parts, order, lengths, key, tempo and name
+function randomizeAll(){
+  pushUndo('🎲 Randomize all');
+  const name=state.style&&STYLES[state.style]?state.style:randomStyleName();const S=STYLES[name];
+  const k=currentCtx();const base=genStyle(name,(Math.random()*2**32)>>>0,{root:k.root,scale:k.scale});
+  const ctx={root:k.root,scale:k.scale,prog:base.prog,real:false,style:name};
+  syncSection();
+  for(const pt of state.parts){
+    const secs=state.sections.filter(x=>x.part===pt.id);if(!secs.length)continue;
+    const a=partTracks(PART_NAMES.includes(pt.name)?pt.name:'Verse',base.tracks,ctx,S);
+    let prev={tracks:a.tracks,prog:a.prog||ctx.prog};
+    secs.forEach((sec,j)=>{sec.tracks=j===0?a.tracks:varySection(prev.tracks,{...ctx,prog:prev.prog},null);sec.prog=prev.prog;sec.famSig=secSig(sec);sec.ver=null;prev=sec;});
+  }
+  state.style=name;state.tracks=state.sections[state.cur].tracks;state.prog=state.sections[state.cur].prog;
+  if(['preset','example'].includes(state.source?.kind)){state.name=suggestName();state.source={kind:'new'};}
+  changed(true);syncPresetSel();goToStart();
+  toast(`🎲 Every section re-rolled in ${name} — same parts and lengths`,undoAction);
+}
+document.getElementById('randMenu').onclick=e=>{
+  e.stopPropagation();const anchor=document.getElementById('randSplit');closePicker();
+  const box=h('div',{class:'picker part-menu act-menu'});box.__for=anchor;pickerEl=box;
+  for(const a of [{label:'🎲 Randomize current',info:'Re-roll only the section you are editing (the button)',run:()=>randomize()},{label:'🎲 Randomize all',info:'Re-roll every section; the parts, their order and lengths, key, tempo and name stay',run:()=>randomizeAll()}])
+    box.append(h('div',{class:'pk-row',title:a.info},h('button',{class:'pk-name part-opt',onclick:()=>{closePicker();a.run();}},h('b',{},a.label),h('small',{},a.info))));
+  document.body.append(box);const r=anchor.getBoundingClientRect(),W=innerWidth;
+  if(W<=700)Object.assign(box.style,{left:'8px',right:'8px',bottom:'8px'});
+  else Object.assign(box.style,{left:Math.max(8,Math.min(r.left,W-308))+'px',top:(r.bottom+4)+'px',width:'300px'});
+};
 function newShapedSong(mode){
   pushUndo(mode+' song');
   // simple songs lean to rock and groove styles, complex ones to rock and anything with room to stretch
@@ -2926,10 +2962,11 @@ function newRandomSong(){
 const TOP_ACTIONS=[
   {id:'beat',label:'🥁 New beat',info:'A new randomized one-section groove in a new genre (the Preset / style menu follows)',run:()=>newBasicSong(),sticky:true},
   {id:'song',label:'🆕 New song',info:'A new randomized song: random genre, with its usual parts',run:()=>newRandomSong(),sticky:true},
-  {id:'simple',label:'🎸 Randomize simple song',info:'Short and direct, like the Ramones: intro, verse, chorus, verse, chorus, end — few instruments, the same chords throughout',run:()=>newShapedSong('simple')},
+  {id:'simple',label:'🎸 Randomize simple song',info:'Short and direct, like the Ramones: a 1-bar count-in, then verse, chorus, verse, chorus, bridge, chorus, end — few instruments, the same chords',run:()=>newShapedSong('simple')},
   {id:'complex',label:'🎼 Randomize complex song',info:'Long and winding, like Rush: pre-choruses, an interlude, a solo, an odd-meter bridge and changing chords',run:()=>newShapedSong('complex')},
   {sep:true},
   {id:'rand',label:'🎲 Randomize current',info:'Re-roll only the section you are editing; the rest of the song stays',run:()=>randomize()},
+  {id:'randall',label:'🎲 Randomize all',info:'Re-roll every section, keeping the parts and their lengths',run:()=>randomizeAll()},
   {id:'groove',label:'✨ Start a new groove',info:'A whole new song in this style',run:()=>clearSong()},
   {id:'empty',label:'🆕 New empty song',info:'One empty section to build from scratch',run:()=>newEmptySong()},
   {id:'section',label:'➕ New section',info:'Add a section after this one: same sounds, varied melodies',run:()=>{pushUndo('new section');addSection();}},
