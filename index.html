@@ -2376,7 +2376,7 @@ function renderSections(){
     h('button',{class:'tog sec-loop sec-del',disabled:secs.length<2,title:secs.length<2?'A song needs at least one section — use Clear section to empty it':`Remove section ${labels[state.cur]} from the song (you can undo)`,onclick:()=>deleteGroove()},'🗑 Delete section')));
 }
 function render(){
-  renderSections();try{renderChords();}catch(e){console.warn(e);}try{syncPresetSel();setPadPart(partOf(state.sections[state.cur])?.color);}catch(e){}
+  renderSections();if(!playing)try{updateNowPlaying(null);}catch(e){}try{renderChords();}catch(e){console.warn(e);}try{syncPresetSel();setPadPart(partOf(state.sections[state.cur])?.color);}catch(e){}
   tracksEl.innerHTML='';
   if(!state.tracks.length)tracksEl.append(h('div',{class:'empty'},'No tracks yet — add one below.'));
   state.tracks.forEach((t,i)=>{
