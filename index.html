@@ -2284,7 +2284,7 @@ function frame(){
   metroTick(c);tempoTick(c);checkSongEnd(c);
   const mark=c==null||customCode?'':JSON.stringify(playingSection(c));
   if(mark!==lastSecMark){lastSecMark=mark;
-    if(mark&&followOn()){const ps=JSON.parse(mark);if(openPart&&ps.i!==state.cur)openPart=state.sections[ps.i]?.part||openPart;if(ps.i!==state.cur&&!document.querySelector('#sections input:not([type=checkbox]),#arrangement input:not([type=checkbox]),.dragging')){syncSection();state.cur=ps.i;state.tracks=state.sections[ps.i].tracks;state.prog=state.sections[ps.i].prog;render();lastSecMark=mark;}}
+    if(mark&&followOn()){const ps=JSON.parse(mark);if(openPart&&ps.i!==state.cur)openPart=state.sections[ps.i]?.part||openPart;if(ps.i!==state.cur&&!document.querySelector('.dragging')&&!(document.activeElement?.matches?.('input:not([type=checkbox]),textarea,select')&&document.activeElement.closest('#arrangement,#sections'))){syncSection();state.cur=ps.i;state.tracks=state.sections[ps.i].tracks;state.prog=state.sections[ps.i].prog;render();lastSecMark=mark;}}
     document.querySelectorAll('.sec,.arr-chip').forEach(el=>{el.classList.remove('playing');const b=el.querySelector('.bar');if(b)b.textContent='';});
     if(mark){const ps=JSON.parse(mark);const el=document.querySelector(`.sec[data-i="${ps.i}"]`);if(el){el.classList.add('playing');el.querySelector('.bar').textContent=`▶ ${ps.bar+1}/${ps.of}`;}
       document.querySelector(`.arr-chip[data-occ="${ps.occ}"]`)?.classList.add('playing');setPadPart(partOf(state.sections[ps.i])?.color);}
