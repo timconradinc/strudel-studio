@@ -4,6 +4,16 @@ A graphical studio for [Strudel](https://strudel.cc): step sequencer, piano roll
 
 Live: https://timconradinc.github.io/strudel-studio/
 
+## Workflow
+
+- **New Groove** — one click, a one-bar groove in a random style.
+- **New Song** — pick a Genre, Generated or Empty, then **Create Song** (Song shape and Number of parts are under More options).
+- **Instrument set** — swaps the sounds in the current song; notes, rhythms, arrangement and tempo stay.
+- **Randomize section** sits beside the section, with an Undo right after it.
+- **+ Add Part** — New Part, Duplicate Part (independent copy) or Repeat Existing Part (a linked repeat: edits apply to every occurrence, marked 🔗). Each part's ⋯ menu has Move Up / Move Down; on a laptop you can also drag.
+- **My Grooves** opens saved songs and the classical Examples; **Save** sits beside it. The menu shows the song title — a green **New:** for an unsaved generated song, and **Unsaved changes** after editing a saved one.
+- **Phones** get a bottom dock with Rewind, Play/Stop, Tempo, My Grooves and Save, plus full-width **Tracks / Pads / Chords / Code** views (Record stays in Pads, Run Code in Code). Laptops show the same controls side by side, with keyboard shortcuts (Space play/stop, R randomize section, Ctrl/⌘+Enter run code, Ctrl/⌘+Z undo).
+
 ## Settings
 
 App defaults live in [`settings.json`](settings.json), which the app reads when it starts (the same defaults are built into `index.html` as a fallback). It covers:
@@ -16,7 +26,7 @@ App defaults live in [`settings.json`](settings.json), which the app reads when 
 
 Your own choices (pad sounds, code panel size, "prefer synths", saved grooves) are kept in the browser.
 
-Generated with Claude Opus 5.5. Version: 2026-11-23-25 (date + build number for that day, shown under the logo and in the generated code).
+Generated with Claude Opus 5.5. Version: 2026-11-23-26 (date + build number for that day, shown under the logo and in the generated code).
 
 ## Disclaimer
 
