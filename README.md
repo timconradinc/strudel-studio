@@ -16,4 +16,8 @@ App defaults live in [`settings.json`](settings.json), which the app reads when 
 
 Your own choices (pad sounds, code panel size, "prefer synths", saved grooves) are kept in the browser.
 
-Generated with Claude Opus 5.5. Version: 2026-11-23-09 (date + build number for that day, shown under the logo and in the generated code).
+Generated with Claude Opus 5.5. Version: 2026-11-23-10 (date + build number for that day, shown under the logo and in the generated code).
+
+## Disclaimer
+
+Strudel Studio is vibe-coded: the whole app was written by Claude (Anthropic's AI) from plain-language requests. Generated music only follows general ideas about each genre (typical tempos, instruments, rhythms and chord moves) and is largely random, so treat it as a starting point, not a faithful example of the style.
