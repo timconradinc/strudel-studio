@@ -85,7 +85,7 @@ header{position:sticky;top:5px;z-index:20;display:flex;align-items:center;gap:10
 .hslider output{font-family:var(--mono);min-width:30px;text-align:right;color:var(--dim)}
 select.ui{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 8px;outline:none}
 .spacer{flex:1}
-.logo{order:0}#newGrooveBtn{order:1}#newSongBtn{order:1}#play{order:1}#playStart{order:1}#pauseBtn{order:1}.play-start:disabled{opacity:.35;cursor:default}header>.field.np-field{order:2}header>.field,header>.spacer,header>.status,header>#openStrudel,header>.hdr-rest{order:3}
+.logo{order:0}#newGrooveBtn{order:1}#newSongBtn{order:1}#play{order:1}#playStart{order:1}#repeatBtn{order:1}#pauseBtn{order:1}.play-start:disabled{opacity:.35;cursor:default}header>.field.np-field{order:2}header>.field,header>.spacer,header>.status,header>#openStrudel,header>.hdr-rest{order:3}
 .btn{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 12px;display:inline-flex;gap:6px;align-items:center;text-decoration:none;color:var(--text);white-space:nowrap}
 .btn:hover{border-color:var(--line2);background:var(--panel2)}
 .btn.primary{background:#ff8a3d1a;border-color:#ff8a3d66;color:#ffc59c}
@@ -434,9 +434,9 @@ body{padding-top:5px}
 .arr-chip .ax{background:none;border:none;color:var(--dim);font-size:11px;cursor:pointer;padding:0 2px}.arr-chip .ax:hover{color:var(--err)}
 .ab-step{display:inline-flex;align-items:center;gap:2px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:0 2px;font-family:var(--mono);font-size:11px}
 .ab-step b{min-width:14px;text-align:center}.abs-b{background:none;border:none;color:var(--dim);cursor:pointer;font-size:12px;padding:1px 4px;line-height:1}.abs-b:hover:not(:disabled){color:var(--text)}.abs-b:disabled{opacity:.3;cursor:default}
-.arrangement{flex-direction:column;align-items:stretch;gap:3px}.arrangement>.arr-chip,.arrangement>.arr-add,.arrangement>.repeat-chk{max-width:720px}.arrangement .arr-label{align-self:flex-start}
-.arr-chip{width:100%;flex-wrap:wrap}.arr-chip .an{flex:1}.arr-arrow{align-self:center;transform:rotate(90deg);line-height:1;font-size:11px}.arr-add,.repeat-chk{align-self:flex-start}
-  .arr-chip{width:100%;flex-wrap:wrap}.arr-chip .an{flex:1}.arr-arrow{align-self:center;transform:rotate(90deg);line-height:1}.arr-add,.repeat-chk{align-self:flex-start}}
+.arrangement{flex-direction:column;align-items:stretch;gap:3px}.arrangement>.arr-chip,.arrangement>.arr-add,.arrangement>.repeat-bar{max-width:none;width:100%}.arrangement .arr-label{align-self:flex-start}
+.arr-chip{width:100%;flex-wrap:wrap}.arr-chip .an{flex:1}.arr-arrow{align-self:center;transform:rotate(90deg);line-height:1;font-size:11px}.arr-add,.repeat-bar{align-self:stretch}
+  .arr-chip{width:100%;flex-wrap:wrap}.arr-chip .an{flex:1}.arr-arrow{align-self:center;transform:rotate(90deg);line-height:1}.arr-add,.repeat-bar{align-self:stretch}}
 .arr-arrow{color:var(--faint)}
 .a-open{color:var(--dim);font-size:11px;width:12px}.a-inst{opacity:.8}
 .part-body{border-left:4px solid var(--pc,var(--accent));margin:0 0 4px 10px;padding:8px 0 8px 12px;display:flex;flex-direction:column;gap:10px}
@@ -451,7 +451,11 @@ body{padding-top:5px}
 .style-now.flash,.now-playing.flash{animation:flashSel 1.2s ease-out;border-radius:4px}.now-playing.flash{border-radius:18px 18px 8px 8px}
 .style-now{color:var(--accent);font-weight:700;letter-spacing:.06em}
 .repeat-chk{margin-left:8px;font-size:12px;color:var(--dim);display:inline-flex;align-items:center;gap:4px;cursor:pointer}.repeat-chk input{accent-color:var(--accent)}
-.arr-add{background:transparent;border:1px dashed var(--line2);border-radius:8px;padding:6px 10px;color:var(--dim);cursor:pointer}.arr-add:hover{color:var(--text);border-color:var(--accent)}
+.arr-add{background:transparent;border:1px dashed var(--line2);border-radius:8px;padding:10px 14px;min-height:44px;color:var(--dim);cursor:pointer;font-weight:700;font-size:13px;letter-spacing:.02em;text-align:center;margin-top:6px}.arr-add:hover{color:var(--text);border-color:var(--accent);background:#ff8a3d0d}
+.repeat-bar{display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);border-left:5px solid var(--line2);background:var(--panel);color:var(--dim);cursor:pointer;font-size:13px;font-weight:700;text-align:left}
+.repeat-bar svg{width:18px;height:18px;flex:0 0 auto}.repeat-bar .rb-state{margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.12em;padding:2px 8px;border-radius:5px;border:1px solid var(--line2)}.repeat-bar small{font-weight:400;color:var(--dim)}
+.repeat-bar:hover{border-color:var(--line2);color:var(--text)}.repeat-bar.on{border-left-color:var(--ok);color:var(--text);background:color-mix(in srgb,var(--ok) 8%,var(--panel))}.repeat-bar.on .rb-state{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 50%,transparent)}
+#repeatBtn.jbx{width:44px;height:60px;color:#8a6a4a;margin-left:-4px;display:grid;place-items:center;padding:0}#repeatBtn.jbx svg{width:22px;height:22px}#repeatBtn.jbx.on{color:#c6f432;box-shadow:0 0 0 1px #3a1a08,0 0 16px #c6f43255,inset 0 0 12px #c6f43233}
 .part-opt{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:1px}.part-opt small{color:var(--dim);font-size:11px;line-height:1.25}
 .pk-row.cur{background:color-mix(in srgb,var(--accent) 14%,transparent);border-radius:6px}
 .arr-chip .an{cursor:pointer}.arr-chip .acaret{font-size:9px;color:var(--dim);margin-left:3px}.arr-chip:not(.sel) .acaret{display:none}
@@ -524,7 +528,7 @@ body{padding-top:5px}
   body[data-view=chords] #tracksCol,body[data-view=code] #tracksCol{display:none!important}
   body[data-view=chords] #codeCol,body[data-view=code] #codeCol{display:block!important;padding-top:10px;position:static!important;top:auto;height:auto}
   body[data-view=code] .editor{height:calc(100vh - 330px - env(safe-area-inset-bottom));min-height:260px}
-  .arr-add{min-height:42px;padding:8px 14px}.arr-chip .ax{min-height:38px;min-width:40px}.abs-b{min-width:32px;min-height:32px}.repeat-chk{min-height:40px}
+  .arr-add{min-height:42px;padding:8px 14px}.arr-chip .ax{min-height:38px;min-width:40px}.abs-b{min-width:32px;min-height:32px}.dock-row #repeatBtn.jbx{width:40px;height:50px;margin-left:0}
   #tracksCol{padding-bottom:16px}
   body[data-view=chords] #codeCol>*:not(#chordsBox){display:none!important}
   body[data-view=code] #chordsBox,body[data-view=code] #faq,body[data-view=code] #hideCode,body[data-view=code] #codeResize{display:none!important}
@@ -537,7 +541,7 @@ body{padding-top:5px}
 <body>
 <div id="topMetro" class="top-metro" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <header>
-  <div class="logo"><div class="logo-name">strudel<b>/</b>studio</div><span class="logo-sub">generated by Claude <span class="app-ver" title="Version (date + build number for that day)">v2026-11-23-28</span></span></div>
+  <div class="logo"><div class="logo-name">strudel<b>/</b>studio</div><span class="logo-sub">generated by Claude <span class="app-ver" title="Version (date + build number for that day)">v2026-11-23-29</span></span></div>
   <div class="field np-field"><label>Now playing</label><div id="nowPlaying" class="now-playing" title="What's playing now — click to show it in the song"><div class="np-l1"><span class="np-state">PAUSED</span><span class="np-bar"></span></div><div class="np-l2"></div><div class="np-l3"></div></div></div>
   <button id="newGrooveBtn" class="new-song-btn jbx" title="New Groove: one click makes a one-bar groove in a random style, with random instruments (you can undo)">🎲 New <br>groove</button>
   <button id="newSongBtn" class="new-song-btn jbx" aria-haspopup="menu" aria-expanded="false" title="New Song: pick a genre, generated or empty, then Create Song">✚ New <br>song</button>
@@ -545,6 +549,7 @@ body{padding-top:5px}
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
   </button>
   <button id="playStart" class="play-start jbx" title="Rewind to the beginning of the song" aria-label="Rewind to the beginning"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="5" width="2.6" height="14" rx="1"/><path d="M8 12l11-7v14z"/></svg></button>
+  <button id="repeatBtn" class="jbx" aria-pressed="false" title="Repeat song: off — the song stops at the end" aria-label="Repeat song"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12"/><path d="M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></svg></button>
   <div class="field tempo-field"><label>Tempo</label>
     <div class="tempo-box jbx">
       <div class="tb-col"><button data-bpm="-1" title="−1 BPM" aria-label="Slower by 1">−</button><button data-bpm="-10" title="−10 BPM" aria-label="Slower by 10" class="tb-small">−10</button></div>
@@ -636,7 +641,7 @@ body{padding-top:5px}
       <details class="faq-q"><summary>What do names like Bob-M2-M1 mean?</summary><p>Copies of a section share its name. When you change a copy it becomes a modified version: Bob-M1, then Bob-M2 for the next one. Change a copy of Bob-M2 and it becomes Bob-M2-M1.</p></details>
       <details class="faq-q"><summary>Starting a song</summary><p>🎲 <b>New Groove</b> makes a one-bar groove in a random style with one click. ✚ <b>New Song</b> makes a whole song: pick a Genre, choose Generated (music written for you) or Empty (the genre's parts and instruments, silent), and press <b>Create Song</b>; Song shape and Number of parts are under More options. <b>Instrument set</b> swaps the sounds in the current song to another genre's instruments — notes, rhythms, arrangement and tempo stay. To change one section, use 🎲 <b>Randomize section</b> beside it; an Undo button appears right there. Open saved songs and the classical examples from <b>My Grooves</b>, and keep your work with <b>Save</b>.</p></details>
       <details class="faq-q"><summary>How many grooves can I save?</summary><p>As many as you like. Grooves are saved in this browser, so there's no fixed limit — only your browser's storage. They don't sync to other devices.</p></details>
-      <details class="faq-q"><summary>Why does the song stop at the end?</summary><p>Songs play once and stop. Tick 🔁 repeat song (next to + Add Part) to loop them. Single beats and 🔁 loop this section always loop.</p></details><details class="faq-q"><summary>Why does the editor jump between sections?</summary><p>While the song plays, the editor always shows the section that is playing, and the Song line highlights where you are. To work on one section while hearing it, use 🔁 loop this section.</p></details>
+      <details class="faq-q"><summary>Why does the song stop at the end?</summary><p>Songs play once and stop. Turn on 🔁 Repeat song (the bar under + Add Part, or the loop button next to Play) to loop them. Single beats and 🔁 loop this section always loop.</p></details><details class="faq-q"><summary>Why does the editor jump between sections?</summary><p>While the song plays, the editor always shows the section that is playing, and the Song line highlights where you are. To work on one section while hearing it, use 🔁 loop this section.</p></details>
       <details class="faq-q"><summary>The metronome</summary><p>The bar above the pads shows the beat (yellow = beat 1). The small dots in each section show the beat and how many bars of that section have played; the green line under a part shows its progress. Pick a click volume (default 25%); the music drops to half volume while the click is on, and “click only” mutes the instruments.</p></details>
       <details class="faq-q"><summary>Can I edit the code?</summary><p>Yes — edit it and press ▶ Run code. Your hand-edited code plays until you go back to the sequencer.</p></details>
     </details>
@@ -755,7 +760,8 @@ const deepMerge=(a,b)=>{for(const[k,v]of Object.entries(b||{})){a[k]=v&&typeof v
 const settingsHooks=[];
 fetch('settings.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(j=>{if(!j)return;SETTINGS=deepMerge(JSON.parse(JSON.stringify(SETTINGS_DEFAULT)),j);settingsHooks.forEach(f=>{try{f();}catch(e){console.warn(e);}});}).catch(()=>{});
 // user preferences (kept separately from songs)
-const APP_VERSION='2026-11-23-28'; // date + build counter for that day; bump on every release
+const LOOP_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12"/><path d="M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></svg>';
+const APP_VERSION='2026-11-23-29'; // date + build counter for that day; bump on every release
 const prefs=(()=>{try{return JSON.parse(localStorage.getItem('strudel-studio-prefs'))||{};}catch(e){return{};}})();
 const followOn=()=>playing&&songMode();
 prefs.metroVol=0;prefs.metroSolo=false;try{localStorage.setItem('strudel-studio-prefs',JSON.stringify(prefs));}catch(e){} // the click always starts off // the click starts off; turning it on starts at 25%
@@ -3364,7 +3370,11 @@ function newPart(name){
   state.cur=state.sections.length-1;state.tracks=sec.tracks;state.prog=sec.prog;
   changed(true);toast(`Added part ${name} — same sounds, a variation of the melodies`,undoAction);
 }
-let openPart=null; // the song part opened to show its sections and instruments
+let openPart=null;
+function setRepeatSong(v){prefs.repeatSong=!!v;savePrefs();syncRepeat();toast(v?'🔁 Repeat song is on — the song loops':'Repeat song is off — the song stops at the end');}
+function syncRepeat(){const on=!!prefs.repeatSong;const b=document.getElementById('repeatBtn');if(b){b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);b.title=on?'Repeat song: on — the song loops':'Repeat song: off — the song stops at the end';}
+  document.querySelectorAll('.repeat-bar').forEach(rb=>{rb.classList.toggle('on',on);rb.setAttribute('aria-pressed',on);rb.querySelector('small').textContent=on?'— loops back to the start':'— stops at the end';rb.querySelector('.rb-state').textContent=on?'ON':'OFF';});}
+document.getElementById('repeatBtn').onclick=()=>setRepeatSong(!prefs.repeatSong); // the song part opened to show its sections and instruments
 function selectPart(pid,occ){const i=state.sections.findIndex(x=>x.part===pid);if(i>=0)selectSection(i,occ);}
 function partBodyNodes(){return[document.getElementById('sections'),document.getElementById('tracks'),document.querySelector('#tracksCol .addrow')].filter(Boolean);}
 function renderArrangement(labels){
@@ -3403,9 +3413,9 @@ function renderArrangement(labels){
   const add=h('button',{class:'arr-add','aria-haspopup':'menu',title:'Add Part: a New Part, a Duplicate Part, or Repeat an Existing Part'},'+ Add Part');
   add.onclick=e=>{e.stopPropagation();partMenu(add);};
   el.append(add);
-  const rep=h('label',{class:'chk repeat-chk',title:'Loop the whole song instead of stopping at the end'},h('input',{type:'checkbox'}),' 🔁 repeat song');
-  const cb=rep.querySelector('input');cb.checked=!!prefs.repeatSong;cb.onchange=()=>{prefs.repeatSong=cb.checked;savePrefs();toast(cb.checked?'🔁 The song will loop':'The song stops at the end');};
-  el.append(rep);
+  const rb=h('button',{class:'repeat-bar',title:'Loop the whole song instead of stopping at the end',onclick:()=>setRepeatSong(!prefs.repeatSong)});
+  rb.innerHTML=`${LOOP_SVG}<span>Repeat song <small></small></span><span class="rb-state"></span>`;
+  el.append(rb);syncRepeat();
 }
 // drag arrangement chips to reorder the song
 function startChipDrag(e,chip,occ){
@@ -3694,12 +3704,12 @@ const undoAction={label:'Undo',fn:()=>undo()};
 /* ---------- phone dock + views; laptop keeps the same controls in the header ---------- */
 {
   const dockRow=document.getElementById('dockRow');
-  const moving=[document.getElementById('playStart'),document.getElementById('play'),document.querySelector('.tempo-field'),document.getElementById('savesBtn'),document.getElementById('saveBtn')];
+  const moving=[document.getElementById('playStart'),document.getElementById('play'),document.getElementById('repeatBtn'),document.querySelector('.tempo-field'),document.getElementById('savesBtn'),document.getElementById('saveBtn')];
   const homes=moving.map(el=>{const m=document.createComment('home');el.before(m);return m;});
   const mq=matchMedia('(max-width:700px)');
   const panels=[savesPanel,savePanel],pHome=document.getElementById('saveBtn').parentElement.parentElement;
   const dockFile=document.getElementById('dockFile');
-  const place=()=>{if(mq.matches){dockRow.append(...moving.slice(0,3));dockFile.append(...moving.slice(3));document.body.append(...panels);}else{moving.forEach((el,i)=>homes[i].after(el));pHome.append(...panels);}savesPanel.hidden=true;savePanel.hidden=true;};
+  const place=()=>{if(mq.matches){dockRow.append(...moving.slice(0,4));dockFile.append(...moving.slice(4));document.body.append(...panels);}else{moving.forEach((el,i)=>homes[i].after(el));pHome.append(...panels);}savesPanel.hidden=true;savePanel.hidden=true;};
   mq.addEventListener?mq.addEventListener('change',place):mq.addListener(place);place();
   const setView=v=>{
     document.body.dataset.view=v;
