@@ -333,13 +333,16 @@ header .field>div{flex-wrap:wrap;align-items:center}
 .rec{font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:.1em;background:#2a2a2f;border:1px solid #3a3a40;color:#ff6b6b;border-radius:4px;padding:5px 10px;cursor:pointer}
 .rec.on{background:#e0333d;color:#fff;border-color:#e0333d;animation:recblink 1s steps(2) infinite}
 @keyframes recblink{50%{opacity:.6}}
-.now-playing{position:relative;display:flex;align-items:center;gap:7px;height:36px;min-width:230px;max-width:330px;padding:0 14px;border-radius:18px 18px 8px 8px;overflow:hidden;white-space:nowrap;cursor:pointer;
+.now-playing{position:relative;display:flex;align-items:center;gap:7px;height:36px;min-width:260px;max-width:400px;padding:0 14px;border-radius:18px 18px 8px 8px;overflow:hidden;white-space:nowrap;cursor:pointer;
   font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:#fff4e0;border:3px solid transparent;
   background:linear-gradient(180deg,#2a1206,#160a05) padding-box,linear-gradient(180deg,#fff1c9,#ffb347 30%,#ff7a2f 60%,#c2410c) border-box;
   box-shadow:0 0 0 1px #3a1a08,0 0 14px #ff8a3d66,inset 0 0 12px #000c,inset 0 1px 0 #ffd79a55}
 .now-playing::before{content:"";position:absolute;left:8px;right:8px;top:3px;height:6px;border-radius:6px 6px 2px 2px;background:linear-gradient(90deg,#ffd23f,#ff8a3d,#ff6b5a,#ff8a3d,#ffd23f);opacity:.35;filter:blur(1px)}
 .now-playing::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,#0000 0 2px,#0006 2px 3px);pointer-events:none;mix-blend-mode:multiply}
 .now-playing b{color:#ffd23f;text-shadow:0 0 6px #ff8a3daa,-1px 0 #ff6b5a;text-transform:uppercase}
+#listenBpm.on{color:#ff6b5a}
+.ico{display:inline-block;width:1.05em;height:1.05em;vertical-align:-.16em;margin-right:.18em}.ico svg{width:100%;height:100%;display:block}.ico-t{display:none}
+.now-playing .np-genre{margin-left:auto;padding-left:10px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#ffb347;text-shadow:0 0 6px #ff8a3d88;overflow:hidden;text-overflow:ellipsis}
 .now-playing .np-bar{color:#ffcf9a;opacity:.85}
 .now-playing .np-idle{font-weight:800;letter-spacing:.22em;color:#ffe9c2;text-shadow:0 0 8px #ff8a3d,-1px 0 #ff6b5a,1px 0 #ffd23f;animation:npGlitch 3.2s infinite steps(1)}
 .now-playing.on{animation:npJitter 2.4s infinite steps(1)}
@@ -394,6 +397,8 @@ body{padding-top:5px}
 .arr-chip .ax{background:none;border:none;color:var(--dim);font-size:11px;cursor:pointer;padding:0 2px}.arr-chip .ax:hover{color:var(--err)}
 .ab-step{display:inline-flex;align-items:center;gap:2px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:0 2px;font-family:var(--mono);font-size:11px}
 .ab-step b{min-width:14px;text-align:center}.abs-b{background:none;border:none;color:var(--dim);cursor:pointer;font-size:12px;padding:1px 4px;line-height:1}.abs-b:hover:not(:disabled){color:var(--text)}.abs-b:disabled{opacity:.3;cursor:default}
+@media (max-width:700px){.arrangement{flex-direction:column;align-items:stretch;gap:4px}.arrangement .arr-label{align-self:flex-start}
+  .arr-chip{width:100%;flex-wrap:wrap}.arr-chip .an{flex:1}.arr-arrow{align-self:center;transform:rotate(90deg);line-height:1}.arr-add,.repeat-chk{align-self:flex-start}}
 .arr-arrow{color:var(--faint)}
 .arr-chip{overflow:hidden}.arr-chip .aprog{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--ok);transition:width .12s linear}
 .sec-metro{display:flex;align-items:center;gap:6px;margin:4px 0 2px}
@@ -414,8 +419,7 @@ body{padding-top:5px}
 .part-menu{max-height:420px;overflow:auto}
 #viewChords,#wrapBtn{--c:var(--accent)}#viewChords.on,#wrapBtn.on{background:var(--accent);color:#170c03;border-color:var(--accent)}
 .view-seg{display:inline-flex}.view-seg .tog{border-radius:0}.view-seg .tog:first-child{border-radius:8px 0 0 8px}.view-seg .tog:last-child{border-radius:0 8px 8px 0;border-left:none}.view-seg .tog.on{background:var(--accent);color:#170c03;border-color:var(--accent)}
-#codeCol.chords .srcline,#codeCol.chords .editor,#codeCol.chords .codefoot,#codeCol.chords #wrapBtn,#codeCol.chords #copy{display:none}
-.chords-view{padding:8px 2px}.chords-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.chords-view{padding:8px 10px 10px}.chords-box{margin-bottom:10px}.chords-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
 .chords-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
 .chord-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 4px 4px;text-align:center;transition:border-color .1s,box-shadow .1s}
 .chord-card.now{border-color:var(--pc,var(--ok));box-shadow:0 0 0 2px var(--pc,var(--ok)),0 0 14px color-mix(in srgb,var(--pc,var(--ok)) 50%,transparent)}
@@ -431,14 +435,14 @@ body{padding-top:5px}
 <body>
 <div id="topMetro" class="top-metro" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <header>
-  <div class="logo"><div class="logo-name">strudel<b>/</b>studio</div><span class="logo-sub">generated by Claude · <span class="app-ver" title="Version (date + build number for that day)">v2026-11-23-05</span></span></div>
+  <div class="logo"><div class="logo-name">strudel<b>/</b>studio</div><span class="logo-sub">generated by Claude · <span class="app-ver" title="Version (date + build number for that day)">v2026-11-23-06</span></span></div>
   <div class="field np-field"><label>Now playing</label><div id="nowPlaying" class="now-playing" title="What's playing now — click to show it in the song"><span class="np-idle">PAUSED</span></div></div>
   <button id="play" title="Play / stop (Space)" aria-label="Play">
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
   </button>
   <button id="playStart" class="play-start" title="Rewind to the beginning of the song" aria-label="Rewind to the beginning"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="5" width="2.6" height="14" rx="1"/><path d="M8 12l11-7v14z"/></svg></button>
   <div class="field"><label>Tempo (BPM)</label>
-    <div class="num"><button data-bpm="-10" title="−10 BPM" class="big">−10</button><button data-bpm="-1" title="−1 BPM">−</button><input id="bpm" type="number" min="30" max="300" value="120"><button data-bpm="1" title="+1 BPM">+</button><button data-bpm="10" title="+10 BPM" class="big">+10</button><button id="tap" title="Tap tempo">TAP</button></div>
+    <div class="num"><button data-bpm="-10" title="−10 BPM" class="big">−10</button><button data-bpm="-1" title="−1 BPM">−</button><input id="bpm" type="number" min="30" max="300" value="120"><button data-bpm="1" title="+1 BPM">+</button><button data-bpm="10" title="+10 BPM" class="big">+10</button><button id="tap" title="Tap tempo">TAP</button><button id="listenBpm" title="Listen: play music near your microphone for about 8 seconds and set the tempo to it" aria-label="Listen for the tempo">🎤</button></div>
   </div>
   <div class="hdr-break" aria-hidden="true"></div>
   <div class="field gen-field"><label for="genreSel">Genre <span class="hint">(for the next groove)</span></label>
@@ -528,19 +532,20 @@ body{padding-top:5px}
       <details class="faq-q"><summary>The metronome</summary><p>The bar above the pads shows the beat (yellow = beat 1). The small dots in each section show the beat and how many bars of that section have played; the green line under a part shows its progress. Pick a click volume (default 25%); the music drops to half volume while the click is on, and “click only” mutes the instruments.</p></details>
       <details class="faq-q"><summary>Can I edit the code?</summary><p>Yes — edit it and press ▶ Run code. Your hand-edited code plays until you go back to the sequencer.</p></details>
     </details>
+    <details id="chordsBox" class="faq chords-box" open><summary>🎸 Chords — guitar, ukulele, bass ukulele</summary>
+    <div id="chordsView" class="chords-view">
+      <div class="chords-head"><select id="chordInstr" class="ui"><option value="guitar">🎸 Guitar</option><option value="uke">🪕 Ukulele</option><option value="bassuke">🎻 Bass ukulele</option></select><span id="chordsInfo" class="hint"></span></div>
+      <div id="chordsList" class="chords-list"></div>
+      <div class="hint chords-foot">Shapes follow the section you're on (and the one playing). ● = finger, ◯ = open string, ✕ = don't play. On bass ukulele: ● root, ◯ fifth.</div>
+    </div>
+    </details>
     <div class="codehead">
       <button class="btn primary" id="run">▶ Run code</button>
       <button class="btn rew-btn" id="runStart" title="Rewind to the beginning" aria-label="Rewind to the beginning"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="5" width="2.6" height="14" rx="1"/><path d="M8 12l11-7v14z"/></svg></button>
       <button class="btn" id="copy" title="Copy the code">⧉ Copy</button>
-      <button class="tog" id="viewChords" aria-pressed="false" title="Show the chords of the section as guitar, ukulele or bass ukulele shapes (click again for the code)">🎸 Chords</button>
       <span class="spacer"></span>
       <button class="tog" id="wrapBtn" title="Wrap long lines">↩ line wrap</button>
       <button class="btn" id="hideCode" title="Hide the code panel to give the tracks more room">⇥</button>
-    </div>
-    <div id="chordsView" class="chords-view" hidden>
-      <div class="chords-head"><select id="chordInstr" class="ui"><option value="guitar">🎸 Guitar</option><option value="uke">🪕 Ukulele</option><option value="bassuke">🎻 Bass ukulele</option></select><span id="chordsInfo" class="hint"></span></div>
-      <div id="chordsList" class="chords-list"></div>
-      <div class="hint chords-foot">Shapes follow the section you're on (and the one playing). ● = finger, ◯ = open string, ✕ = don't play. On bass ukulele: ● root, ◯ fifth.</div>
     </div>
     <div class="srcline">Plays: <b id="src">the sequencer</b></div>
     <div id="banner" class="banner"><span>You're hearing <b>your hand-edited code</b>. Track changes are kept, but you won't hear them until you go back to the sequencer (your edits here will be replaced).</span> <button class="btn" id="resync">↩ Back to the sequencer</button></div>
@@ -630,7 +635,7 @@ const deepMerge=(a,b)=>{for(const[k,v]of Object.entries(b||{})){a[k]=v&&typeof v
 const settingsHooks=[];
 fetch('settings.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(j=>{if(!j)return;SETTINGS=deepMerge(JSON.parse(JSON.stringify(SETTINGS_DEFAULT)),j);settingsHooks.forEach(f=>{try{f();}catch(e){console.warn(e);}});}).catch(()=>{});
 // user preferences (kept separately from songs)
-const APP_VERSION='2026-11-23-05'; // date + build counter for that day; bump on every release
+const APP_VERSION='2026-11-23-06'; // date + build counter for that day; bump on every release
 const prefs=(()=>{try{return JSON.parse(localStorage.getItem('strudel-studio-prefs'))||{};}catch(e){return{};}})();
 const followOn=()=>playing&&songMode();
 prefs.metroVol=0;prefs.metroSolo=false;try{localStorage.setItem('strudel-studio-prefs',JSON.stringify(prefs));}catch(e){} // the click always starts off // the click starts off; turning it on starts at 25%
@@ -2090,19 +2095,75 @@ function chordTick(c){
   const ps=playingSection(c);if(ps.i!==state.cur)return;
   const k=Math.floor((((c%1)+1)%1)*cards.length);cards[k]?.classList.add('now');
 }
-{const setView=ch=>{chordsMode=ch;document.getElementById('codeCol').classList.toggle('chords',ch);document.getElementById('chordsView').hidden=!ch;
-  const vc=document.getElementById('viewChords');vc.classList.toggle('on',ch);vc.setAttribute('aria-pressed',ch);vc.textContent=ch?'⌨ Show code':'🎸 Chords';prefs.chordsView=ch;savePrefs();renderChords();};
- document.getElementById('viewChords').onclick=()=>setView(!chordsMode);
+{const box=document.getElementById('chordsBox');box.open=prefs.chordsOpen!==false;chordsMode=box.open;
+ box.addEventListener('toggle',()=>{chordsMode=box.open;prefs.chordsOpen=box.open;savePrefs();renderChords();});
  const ci=document.getElementById('chordInstr');ci.value=prefs.chordInstr||'guitar';ci.onchange=()=>{prefs.chordInstr=ci.value;savePrefs();renderChords();};
- setTimeout(()=>setView(!!prefs.chordsView),0);}
+ setTimeout(renderChords,0);}
+// 🎤 Listen: estimate the tempo of music the microphone hears (onset energy → autocorrelation)
+let listening=false;
+async function listenForTempo(){
+  const btn=document.getElementById('listenBpm');if(listening)return;
+  let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});}
+  catch(e){toast('🎤 No microphone access — allow it in the browser to listen for the tempo');return;}
+  listening=true;btn.classList.add('on');
+  const ac=new (window.AudioContext||window.webkitAudioContext)();const src=ac.createMediaStreamSource(stream);
+  const N=512,proc=ac.createScriptProcessor(N,1,1);const env=[];const fps=ac.sampleRate/N;const secs=8;
+  proc.onaudioprocess=e=>{const d=e.inputBuffer.getChannelData(0);let sum=0;for(let i=0;i<d.length;i++)sum+=d[i]*d[i];env.push(Math.log(1e-6+Math.sqrt(sum/d.length)));};
+  const mute=ac.createGain();mute.gain.value=0;src.connect(proc);proc.connect(mute);mute.connect(ac.destination);
+  const t0=Date.now();const tick=setInterval(()=>{const left=Math.max(0,secs-Math.round((Date.now()-t0)/1000));btn.textContent=left?'🎤 '+left:'🎤';},250);
+  await new Promise(r=>setTimeout(r,secs*1000));
+  clearInterval(tick);proc.disconnect();src.disconnect();stream.getTracks().forEach(t=>t.stop());ac.close();listening=false;btn.classList.remove('on');btn.textContent='🎤';
+  // onset strength: rises in loudness
+  const flux=env.map((v,i)=>i?Math.max(0,v-env[i-1]):0);const mean=flux.reduce((a,b)=>a+b,0)/flux.length;const f=flux.map(x=>x-mean);
+  const ac1=L=>{let s=0;for(let i=L;i<f.length;i++)s+=f[i]*f[i-L];return s;};
+  let best=null;
+  for(let bpm=70;bpm<=160;bpm+=.5){const L=60*fps/bpm;const l0=Math.floor(L),fr=L-l0;const v=ac1(l0)*(1-fr)+ac1(l0+1)*fr;const L2=2*L,m0=Math.floor(L2),fr2=L2-m0;const v2=ac1(m0)*(1-fr2)+ac1(m0+1)*fr2;const score=v+.5*v2;if(!best||score>best.score)best={bpm,score};}
+  if(!best||best.score<=0||!isFinite(best.score)){toast('🎤 Couldn’t hear a steady beat — try louder music with clear drums');return;}
+  pushUndo('tempo from the microphone');state.bpm=Math.round(best.bpm);bpmEl.value=state.bpm;changed(false);
+  toast(`🎤 Heard about ${state.bpm} BPM — tempo set`,undoAction);
+}
+document.getElementById('listenBpm').onclick=listenForTempo;
+/* ---------- stencil icons: emoji in the interface are swapped for flat one-colour stencil shapes ---------- */
+const STENCIL={"🎲": "<rect x=\"5\" y=\"2\" width=\"14\" height=\"3\"/><rect x=\"5\" y=\"19\" width=\"14\" height=\"3\"/><rect x=\"2\" y=\"5\" width=\"3\" height=\"14\"/><rect x=\"19\" y=\"5\" width=\"3\" height=\"14\"/><circle cx=\"8.5\" cy=\"8.5\" r=\"1.9\"/><circle cx=\"12\" cy=\"12\" r=\"1.9\"/><circle cx=\"15.5\" cy=\"15.5\" r=\"1.9\"/>", "🔁": "<path d=\"M3 12V9.5A3.5 3.5 0 0 1 6.5 6H16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.6\"/><path d=\"M15.5 2.5 21 6l-5.5 3.5z\"/><path d=\"M21 12v2.5a3.5 3.5 0 0 1-3.5 3.5H8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.6\"/><path d=\"M8.5 14.5 3 18l5.5 3.5z\"/>", "✨": "<path d=\"M10 2l1.8 6.2L18 10l-6.2 1.8L10 18l-1.8-6.2L2 10l6.2-1.8z\"/><path d=\"M18.5 14l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z\"/>", "🔊": "<rect x=\"2\" y=\"9\" width=\"3.6\" height=\"6\"/><path d=\"M7 9l5.5-4.5v15L7 15z\"/><path d=\"M15 9a4 4 0 0 1 0 6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\"/><path d=\"M17.5 6a8 8 0 0 1 0 12\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\"/>", "🔈": "<rect x=\"4\" y=\"9\" width=\"3.6\" height=\"6\"/><path d=\"M9 9l5.5-4.5v15L9 15z\"/>", "🔇": "<rect x=\"2\" y=\"9\" width=\"3.6\" height=\"6\"/><path d=\"M7 9l5.5-4.5v15L7 15z\"/><path d=\"M15 9l6 6M21 9l-6 6\" stroke=\"currentColor\" stroke-width=\"2.4\"/>", "💾": "<path d=\"M3 3h13l5 5v3h-3V9.2L15 6H6v12h12v-4h3v7H3z\"/><rect x=\"8\" y=\"3\" width=\"7\" height=\"5\"/><rect x=\"8\" y=\"12.5\" width=\"8\" height=\"3.5\"/>", "🎸": "<path d=\"M13 11.2l6.6-6.6 1.4 1.4-6.6 6.6z\"/><rect x=\"18.4\" y=\"1.5\" width=\"3.6\" height=\"3.6\" transform=\"rotate(45 20.2 3.3)\"/><path fill-rule=\"evenodd\" d=\"M11.6 12.4a4 4 0 0 1-1 4.1 4.4 4.4 0 0 1-2.4 1.2l-.5 2.8A3 3 0 0 1 2.8 21.2 3 3 0 0 1 3.5 16.5l2.8-.5a4.4 4.4 0 0 1 1.2-2.4 4 4 0 0 1 4.1-1.2zM7.2 17.4a1.4 1.4 0 1 0 2 2 1.4 1.4 0 0 0-2-2z\"/>", "🎻": "<rect x=\"11\" y=\"1\" width=\"2\" height=\"6\"/><path fill-rule=\"evenodd\" d=\"M8 7.5h8a2.6 2.6 0 0 1-1 2.5 3.4 3.4 0 0 1 2.6 3.3c0 1.3-.8 2.3-1.6 2.7 1.6.7 2.6 2.1 2.6 3.6 0 1.7-1.8 2.9-6.6 2.9s-6.6-1.2-6.6-2.9c0-1.5 1-2.9 2.6-3.6-.8-.4-1.6-1.4-1.6-2.7A3.4 3.4 0 0 1 9 10a2.6 2.6 0 0 1-1-2.5zM9.6 14.5h1.2v4.5H9.6zm3.6 0h1.2v4.5h-1.2z\"/>", "🧹": "<rect x=\"11\" y=\"1.5\" width=\"2.4\" height=\"10\" transform=\"rotate(20 12 6)\"/><path d=\"M6.5 13h10l1.5 2.2H5z\"/><path d=\"M5 16.5h3l-.5 6H4.3zM9.2 16.5h2.6v6H9.2zM13 16.5h2.6l.6 6h-2.8zM16.8 16.5H20l.7 6h-3z\"/>", "🥁": "<ellipse cx=\"12\" cy=\"9\" rx=\"9\" ry=\"3\"/><path d=\"M3 11.5c1.6 1.3 5 2 9 2s7.4-.7 9-2V18c0 1.8-4 3.5-9 3.5S3 19.8 3 18z\"/><path d=\"M4.8 2.2l5.4 4.4-1 1.1L3.8 3.4zM19.2 2.2l1 1.2-5.4 4.3-1-1.1z\"/>", "📚": "<rect x=\"2\" y=\"4\" width=\"4\" height=\"17\"/><rect x=\"7.5\" y=\"2\" width=\"4\" height=\"19\"/><rect x=\"13.4\" y=\"5.2\" width=\"4\" height=\"16\" transform=\"rotate(-14 15.4 13.2)\"/><rect x=\"2\" y=\"21.5\" width=\"20\" height=\"1.5\"/>", "📥": "<rect x=\"10.5\" y=\"2\" width=\"3\" height=\"8\"/><path d=\"M6.5 9.5h11L12 15.5z\"/><rect x=\"2\" y=\"13\" width=\"3\" height=\"9\"/><rect x=\"19\" y=\"13\" width=\"3\" height=\"9\"/><rect x=\"6\" y=\"19\" width=\"12\" height=\"3\"/>", "🗑": "<rect x=\"3\" y=\"4.5\" width=\"18\" height=\"2.6\"/><rect x=\"9\" y=\"1.5\" width=\"6\" height=\"2.2\"/><path d=\"M5 8.5h3.4l.6 13H6.3zM10.3 8.5h3.4v13h-3.4zM15.6 8.5H19l-1.3 13H15z\"/>", "🎛": "<rect x=\"5\" y=\"2\" width=\"2.4\" height=\"5\"/><rect x=\"5\" y=\"12\" width=\"2.4\" height=\"10\"/><rect x=\"3\" y=\"8\" width=\"6.4\" height=\"3\"/><rect x=\"10.8\" y=\"2\" width=\"2.4\" height=\"10\"/><rect x=\"10.8\" y=\"17\" width=\"2.4\" height=\"5\"/><rect x=\"8.8\" y=\"13\" width=\"6.4\" height=\"3\"/><rect x=\"16.6\" y=\"2\" width=\"2.4\" height=\"3\"/><rect x=\"16.6\" y=\"10\" width=\"2.4\" height=\"12\"/><rect x=\"14.6\" y=\"6\" width=\"6.4\" height=\"3\"/>", "🎵": "<rect x=\"8\" y=\"4\" width=\"2.6\" height=\"13\"/><rect x=\"18\" y=\"2\" width=\"2.6\" height=\"13\"/><path d=\"M8 4l12.6-2.6v3.4L8 7.4z\"/><ellipse cx=\"6.5\" cy=\"17.8\" rx=\"3.6\" ry=\"2.8\"/><ellipse cx=\"16.5\" cy=\"15.8\" rx=\"3.6\" ry=\"2.8\"/>", "❓": "<path d=\"M7 8a5 5 0 1 1 7.5 4.3c-1.4.8-1.5 1.5-1.5 2.7h-3c0-2.4.6-3.6 2.6-4.8A2 2 0 1 0 10 8z\"/><rect x=\"10\" y=\"17.5\" width=\"3\" height=\"3\"/>", "🪕": "<rect x=\"13.4\" y=\"1\" width=\"2.2\" height=\"11.5\"/><rect x=\"12.6\" y=\"1\" width=\"3.8\" height=\"2.6\"/><path fill-rule=\"evenodd\" d=\"M14.5 12a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zm0 3.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4z\" transform=\"translate(-2.5 -1)\"/>", "⏸": "<rect x=\"5.5\" y=\"4\" width=\"4.5\" height=\"16\"/><rect x=\"14\" y=\"4\" width=\"4.5\" height=\"16\"/>", "⏹": "<rect x=\"5\" y=\"5\" width=\"14\" height=\"14\"/>", "🎧": "<path d=\"M3.5 15v-3a8.5 8.5 0 0 1 17 0v3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\"/><rect x=\"2\" y=\"14\" width=\"5\" height=\"8\"/><rect x=\"17\" y=\"14\" width=\"5\" height=\"8\"/>", "✏": "<path d=\"M15.2 3.4l5.4 5.4L9.8 19.6l-5.4-5.4z\"/><path d=\"M3.4 15.6l5 5L2 22z\"/>", "🎼": "<rect x=\"2\" y=\"5\" width=\"20\" height=\"1.8\"/><rect x=\"2\" y=\"10\" width=\"20\" height=\"1.8\"/><rect x=\"2\" y=\"15\" width=\"20\" height=\"1.8\"/><rect x=\"13\" y=\"3\" width=\"2.4\" height=\"15\"/><ellipse cx=\"11.4\" cy=\"18.4\" rx=\"3.4\" ry=\"2.6\"/>", "⬜": "<rect x=\"5\" y=\"3\" width=\"14\" height=\"3\"/><rect x=\"5\" y=\"18\" width=\"14\" height=\"3\"/><rect x=\"3\" y=\"5\" width=\"3\" height=\"14\"/><rect x=\"18\" y=\"5\" width=\"3\" height=\"14\"/>", "🎤": "<path fill-rule=\"evenodd\" d=\"M12 1.5a4 4 0 0 1 4 4V11a4 4 0 0 1-8 0V5.5a4 4 0 0 1 4-4zm-1 3h2v2h-2zm0 4h2v2h-2z\"/><path d=\"M5 10h2.4a4.6 4.6 0 0 0 9.2 0H19a7 7 0 0 1-5.8 6.9V19H16v2.5H8V19h2.8v-2.1A7 7 0 0 1 5 10z\"/>"};
+const STENCIL_RE=new RegExp('('+Object.keys(STENCIL).map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')\uFE0F?','gu');
+function stencilize(root){
+  if(!root)return;
+  if(root.nodeType===3){stencilText(root);return;}
+  if(root.nodeType!==1)return;
+  if(root.matches?.('select,option')){for(const o of root.tagName==='OPTION'?[root]:root.querySelectorAll('option'))stripEmoji(o);return;}
+  if(root.closest?.('textarea,script,style,.ico,.ico-t,.editor,pre,code'))return;
+  const tw=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentElement?.closest('textarea,script,style,.ico,.ico-t,.editor,pre,code,select,option')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+  const nodes=[];while(tw.nextNode())nodes.push(tw.currentNode);nodes.forEach(stencilText);
+  root.querySelectorAll?.('option').forEach(stripEmoji);
+}
+function stripEmoji(o){STENCIL_RE.lastIndex=0;if(STENCIL_RE.test(o.textContent)){STENCIL_RE.lastIndex=0;o.textContent=o.textContent.replace(STENCIL_RE,'').replace(/^\s+/,'');}}
+function stencilText(n){
+  const t=n.nodeValue;STENCIL_RE.lastIndex=0;if(!t||!STENCIL_RE.test(t))return;
+  const p=n.parentElement;if(!p||p.closest('textarea,script,style,.ico,.ico-t,.editor,pre,code,select,option'))return;
+  const frag=document.createDocumentFragment();let last=0;STENCIL_RE.lastIndex=0;let m;
+  while((m=STENCIL_RE.exec(t))){
+    if(m.index>last)frag.append(t.slice(last,m.index));
+    const k=m[1];const ic=document.createElement('span');ic.className='ico';ic.setAttribute('aria-hidden','true');
+    ic.innerHTML=`<svg viewBox="0 0 24 24" fill="currentColor">${STENCIL[k]}</svg>`;
+    const tx=document.createElement('span');tx.className='ico-t';tx.textContent=m[0]; // keeps textContent the same for code that reads it
+    frag.append(ic,tx);last=m.index+m[0].length;
+  }
+  if(last<t.length)frag.append(t.slice(last));
+  n.replaceWith(frag);
+}
+new MutationObserver(ms=>{for(const m of ms){if(m.type==='characterData')stencilize(m.target);else m.addedNodes.forEach(stencilize);}}).observe(document.body,{childList:true,subtree:true,characterData:true});
+stencilize(document.body);
+document.title=document.title.replace(STENCIL_RE,'');
 function updateNowPlaying(c){
   const el=document.getElementById('nowPlaying');if(!el)return;
   el.onclick=()=>document.getElementById('arrangement')?.scrollIntoView({behavior:'smooth',block:'center'});
-  if(c==null||!playing){if(!el.querySelector('.np-idle')){el.classList.remove('on');el.style.removeProperty('--pc');el.innerHTML='<span class="np-idle">PAUSED</span>';}return;}
-  el.classList.add('on');
+  const sec0=state.sections?.[state.cur];const g0=secStyle(sec0)||(state.source?.kind==='example'?'Classical':'');
+  if(c==null||!playing){const key='idle|'+g0;if(el.dataset.k!==key){el.dataset.k=key;el.classList.remove('on');el.style.removeProperty('--pc');el.innerHTML='';el.append(h('span',{class:'np-idle'},'PAUSED'),g0?h('span',{class:'np-genre'},g0):'');}return;}
+  el.classList.add('on');el.dataset.k='';
   if(customCode){el.innerHTML='▶ <b>your code</b>';return;}
   const ps=playingSection(c);const sec=state.sections[ps.i];const pt=partOf(sec);const lab=secLabels(state.sections)[ps.i];
-  el.innerHTML='';el.append('▶ ',h('b',{},pt?pt.name:'Section'),` ${lab} `,h('span',{class:'np-bar'},`${ps.bar+1}/${ps.of}`));
+  const g=secStyle(sec)||(state.source?.kind==='example'?'Classical':'');
+  el.innerHTML='';el.append('▶ ',h('b',{},pt?pt.name:'Section'),` ${lab} `,h('span',{class:'np-bar'},`${ps.bar+1}/${ps.of}`),g?h('span',{class:'np-genre'},g):'');
 }
 // stop at the end of the song unless “repeat song” is ticked (single beats and “loop this section” keep looping)
 let songEndPrev=null;
